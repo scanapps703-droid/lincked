@@ -6,8 +6,397 @@
     <title>Apps Web Scan KED</title>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <style>
-        /* CSS tetap sama seperti sebelumnya */
-        /* ... (CSS dari kode asli) ... */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin: 0;
+        }
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #2c3e50;
+        }
+        .content-wrapper {
+            display: flex;
+            gap: 20px;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+        .main-content {
+            flex: 1;
+        }
+        .user-info {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .user-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 12px 15px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        .tab:hover {
+            background-color: #e9ecef;
+        }
+        .tab.active:hover {
+            background-color: #2980b9;
+        }
+        .tab-content {
+            display: none;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .container-info {
+            background-color: #e8f4fc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        .form-container {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .form-group > div {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 250px;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        input[type="text"], input[type="number"], input[type="date"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        input:read-only {
+            background-color: #f0f0f0;
+        }
+        input:disabled {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        .btn-info {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .btn-info:hover {
+            background-color: #27ae60;
+        }
+        .btn-warning {
+            background-color: #f39c12;
+            color: white;
+        }
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+        .btn-excel {
+            background-color: #27ae60;
+            color: white;
+        }
+        .btn-excel:hover {
+            background-color: #219653;
+        }
+        .btn-logout {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .btn-logout:hover {
+            background-color: #c0392b;
+        }
+        .export-controls {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .export-controls select, .export-controls input {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            min-width: 150px;
+        }
+        .summary {
+            background-color: #e8f4fc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-edit {
+            color: #3498db;
+            cursor: pointer;
+        }
+        .btn-delete {
+            color: #e74c3c;
+            cursor: pointer;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        .hidden {
+            display: none;
+        }
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #2ecc71;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+        }
+        
+        /* Tampilan awal untuk memilih user */
+        .user-selection {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .user-selection-box {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+        .user-selection-box h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .user-selection-input {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .user-selection-input input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .user-selection-input button {
+            padding: 12px 20px;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 992px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+            .mobile-menu-btn {
+                display: block;
+            }
+            .sidebar.collapsed {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-group {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .form-group > div {
+                width: 100%;
+            }
+            .button-group {
+                flex-direction: column;
+                align-items: flex-end;
+            }
+            .export-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .export-controls select, .export-controls input {
+                width: 100%;
+            }
+            .user-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .user-controls input,
+            .user-controls button {
+                width: 100%;
+            }
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+            .user-selection-input {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .user-selection-box {
+                padding: 20px;
+            }
+        }
+
+        .github-config {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #6e5494;
+        }
+        .github-config h3 {
+            margin-top: 0;
+            color: #6e5494;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -25,64 +414,291 @@
     </div>
 
     <div class="container" id="mainContainer" style="display: none;">
-        <!-- Konten utama tetap sama -->
-        <!-- ... (HTML dari kode asli) ... -->
+        <div class="header">
+            <h1><i class="fas fa-table"></i> Apps Web Scan KED</h1>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <div class="content-wrapper">
+            <div class="sidebar" id="sidebar">
+                <div class="tabs">
+                    <div class="tab active" data-tab="input"><i class="fas fa-keyboard"></i> Input Data</div>
+                    <div class="tab" data-tab="github"><i class="fab fa-github"></i> GitHub Config</div>
+                </div>
+                
+                <div class="user-info">
+                    <p><i class="fas fa-user"></i> User: <span id="currentUser">Guest</span> <span id="userTypeBadge" class="hidden"></span></p>
+                    <div class="user-controls">
+                        <button type="button" class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="main-content">
+                <div id="adminInterface">
+                    <div class="tab-content active" id="inputTab">
+                        <div class="container-info" id="containerInfo">
+                            <p><i class="fas fa-info-circle"></i> No. Pallet saat ini: <span id="currentPallet">Belum dipilih</span></p>
+                            <p><i class="fas fa-truck"></i> No. Container saat ini: <span id="currentContainer">Belum dipilih</span></p>
+                        </div>
+                        
+                        <div class="form-container">
+                            <form id="dataForm">
+                                <div class="form-group">
+                                    <div>
+                                        <label for="container"><i class="fas fa-truck"></i> No. Container</label>
+                                        <div style="display: flex; gap: 10px;">
+                                            <input type="text" id="container" required placeholder="Masukkan No. Container">
+                                            <button type="button" class="btn-info" id="saveContainerBtn"><i class="fas fa-save"></i> Simpan Container</button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label for="pallet"><i class="fas fa-pallet"></i> Pallet ID</label>
+                                        <div style="display: flex; gap: 10px;">
+                                            <input type="text" id="pallet" required placeholder="Masukkan Pallet ID">
+                                            <button type="button" class="btn-info" id="savePalletBtn"><i class="fas fa-save"></i> Simpan Pallet</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div>
+                                        <label for="ean"><i class="fas fa-barcode"></i> EAN</label>
+                                        <input type="text" id="ean" required placeholder="Masukkan atau scan kode EAN" disabled>
+                                        <small id="eanHelpText" style="color: #e74c3c; display: none;">
+                                            <i class="fas fa-exclamation-circle"></i> Harap set Container dan Pallet terlebih dahulu
+                                        </small>
+                                    </div>
+                                    <div>
+                                        <label for="qty"><i class="fas fa-cubes"></i> Qty (default: 1)</label>
+                                        <input type="number" id="qty" value="1" min="1" placeholder="Jumlah" disabled>
+                                    </div>
+                                </div>
+                                
+                                <div class="button-group">
+                                    <button type="button" class="btn-primary" id="finishBtn"><i class="fas fa-check"></i> Finish</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="export-controls" id="exportControls">
+                            <p><i class="fas fa-download"></i> Export Data by User & Container</p>
+                            <select id="userSelect">
+                                <option value="">Pilih User</option>
+                            </select>
+                            <select id="containerSelect">
+                                <option value="">Pilih Container</option>
+                            </select>
+                            <input type="date" id="dateFrom" placeholder="Dari Tanggal">
+                            <input type="date" id="dateTo" placeholder="Sampai Tanggal">
+                            <button type="button" class="btn-excel" id="exportSelectedBtn"><i class="fas fa-file-excel"></i> Export Selected</button>
+                        </div>
+                        
+                        <div class="summary">
+                            <i class="fas fa-calculator"></i> Total EAN yang telah discan: <span id="totalEan">0</span>
+                        </div>
+                        
+                        <table id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-truck"></i> No. Container</th>
+                                    <th><i class="fas fa-pallet"></i> Pallet ID</th>
+                                    <th><i class="fas fa-barcode"></i> EAN</th>
+                                    <th><i class="fas fa-cubes"></i> Qty</th>
+                                    <th><i class="fas fa-clock"></i> Timestamp</th>
+                                    <th><i class="fas fa-cog"></i> Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <!-- Data akan ditampilkan di sini -->
+                            </tbody>
+                        </table>
+                        
+                        <div id="emptyState" class="empty-state hidden">
+                            <i class="fas fa-inbox"></i>
+                            <h3>Belum ada data</h3>
+                            <p>Tambahkan data menggunakan form di atas</p>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="githubTab">
+                        <div class="github-config">
+                            <h3><i class="fab fa-github"></i> Konfigurasi GitHub</h3>
+                            <p>Konfigurasi penyimpanan data ke GitHub Repository</p>
+                        </div>
+                        
+                        <div class="form-container">
+                            <form id="githubConfigForm">
+                                <div class="form-group">
+                                    <div>
+                                        <label for="githubUsername"><i class="fab fa-github"></i> GitHub Username</label>
+                                        <input type="text" id="githubUsername" placeholder="Masukkan username GitHub">
+                                    </div>
+                                    <div>
+                                        <label for="githubRepo"><i class="fas fa-database"></i> Repository Name</label>
+                                        <input type="text" id="githubRepo" placeholder="Masukkan nama repository">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div>
+                                        <label for="githubToken"><i class="fas fa-key"></i> Personal Access Token</label>
+                                        <input type="password" id="githubToken" placeholder="Masukkan token akses GitHub">
+                                        <small>
+                                            <i class="fas fa-info-circle"></i> Token harus memiliki izin "repo"
+                                        </small>
+                                    </div>
+                                    <div>
+                                        <label for="dataFilePath"><i class="fas fa-file"></i> Data File Path</label>
+                                        <input type="text" id="dataFilePath" value="data/scannedData.json" placeholder="Path file data di repository">
+                                    </div>
+                                </div>
+                                
+                                <div class="button-group">
+                                    <button type="button" class="btn-info" id="saveGithubConfigBtn"><i class="fas fa-save"></i> Simpan Konfigurasi</button>
+                                    <button type="button" class="btn-primary" id="testGithubConnectionBtn"><i class="fas fa-plug"></i> Test Koneksi</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="summary">
+                            <i class="fas fa-info-circle"></i> Status Koneksi: <span id="githubStatus">Belum dikonfigurasi</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="notification" id="notification">Data berhasil diekspor ke Excel!</div>
 
     <script>
-        // URL Google Apps Script Web App (ganti dengan URL Anda)
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzohXPyo45-_WvfEdRpOad8mflAmdlOtwmhSslp8j9JkfcBoGjgzu97_FFWmAZBSlQNGw/exec';
-
         document.addEventListener('DOMContentLoaded', function() {
             // Variabel dan inisialisasi
-            // ... (variabel dari kode asli) ...
+            const form = document.getElementById('dataForm');
+            const palletInput = document.getElementById('pallet');
+            const containerInput = document.getElementById('container');
+            const eanInput = document.getElementById('ean');
+            const qtyInput = document.getElementById('qty');
+            const eanHelpText = document.getElementById('eanHelpText');
+            const tableBody = document.getElementById('tableBody');
+            const emptyState = document.getElementById('emptyState');
+            const totalEanSpan = document.getElementById('totalEan');
+            const currentPalletSpan = document.getElementById('currentPallet');
+            const currentContainerSpan = document.getElementById('currentContainer');
+            const savePalletBtn = document.getElementById('savePalletBtn');
+            const saveContainerBtn = document.getElementById('saveContainerBtn');
+            const finishBtn = document.getElementById('finishBtn');
+            const exportSelectedBtn = document.getElementById('exportSelectedBtn');
+            const userSelect = document.getElementById('userSelect');
+            const containerSelect = document.getElementById('containerSelect');
+            const dateFromInput = document.getElementById('dateFrom');
+            const dateToInput = document.getElementById('dateTo');
+            const currentUserSpan = document.getElementById('currentUser');
+            const notification = document.getElementById('notification');
+            const userTypeBadge = document.getElementById('userTypeBadge');
+            const adminInterface = document.getElementById('adminInterface');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const userSelection = document.getElementById('userSelection');
+            const mainContainer = document.getElementById('mainContainer');
+            const initialUsernameInput = document.getElementById('initialUsernameInput');
+            const initialSetUserBtn = document.getElementById('initialSetUserBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const githubConfigForm = document.getElementById('githubConfigForm');
+            const saveGithubConfigBtn = document.getElementById('saveGithubConfigBtn');
+            const testGithubConnectionBtn = document.getElementById('testGithubConnectionBtn');
+            const githubStatusSpan = document.getElementById('githubStatus');
             
-            // Fungsi untuk menyimpan data ke Google Sheets
-            async function saveToGoogleSheets(data) {
-                try {
-                    const response = await fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(data)
-                    });
-                    
-                    const result = await response.json();
-                    return result.success;
-                } catch (error) {
-                    console.error('Error saving data:', error);
-                    return false;
+            let currentPallet = '';
+            let currentContainer = '';
+            let scannedData = [];
+            let currentUser = 'Guest';
+            let isAdmin = false;
+            let eanInputTimer = null;
+            
+            // Konfigurasi GitHub
+            let githubConfig = {
+                username: '',
+                repo: '',
+                token: '',
+                dataFilePath: 'data/scannedData.json'
+            };
+            
+            // Fungsi untuk menampilkan/menyembunyikan konten utama
+            function toggleMainContent(show) {
+                if (show) {
+                    userSelection.style.display = 'none';
+                    mainContainer.style.display = 'flex';
+                } else {
+                    userSelection.style.display = 'flex';
+                    mainContainer.style.display = 'none';
                 }
             }
             
-            // Fungsi untuk membaca data dari Google Sheets
-            async function loadFromGoogleSheets(filters = {}) {
-                try {
-                    let url = SCRIPT_URL + '?';
-                    const params = new URLSearchParams();
+            // Fungsi untuk toggle menu pada perangkat mobile
+            function setupMobileMenu() {
+                mobileMenuBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                });
+            }
+            
+            // Fungsi untuk mengecek apakah user adalah admin
+            function checkIfAdmin(username) {
+                return username.toLowerCase() === 'admin';
+            }
+            
+            // Fungsi untuk mengatur tampilan berdasarkan jenis user
+            function setUserView() {
+                if (isAdmin) {
+                    userTypeBadge.textContent = '(Admin)';
+                    userTypeBadge.classList.remove('hidden');
+                    userTypeBadge.style.backgroundColor = '#e74c3c';
+                    userTypeBadge.style.color = 'white';
+                    userTypeBadge.style.padding = '3px 8px';
+                    userTypeBadge.style.borderRadius = '4px';
+                    userTypeBadge.style.fontSize = '12px';
+                    userTypeBadge.style.marginLeft = '5px';
                     
-                    if (filters.user) params.append('user', filters.user);
-                    if (filters.container) params.append('container', filters.container);
-                    if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
-                    if (filters.dateTo) params.append('dateTo', filters.dateTo);
+                    adminInterface.classList.remove('hidden');
                     
-                    url += params.toString();
+                    // Tampilkan export controls untuk admin
+                    document.getElementById('exportControls').classList.remove('hidden');
+                } else {
+                    userTypeBadge.textContent = '(User)';
+                    userTypeBadge.classList.remove('hidden');
+                    userTypeBadge.style.backgroundColor = '#3498db';
+                    userTypeBadge.style.color = 'white';
+                    userTypeBadge.style.padding = '3px 8px';
+                    userTypeBadge.style.borderRadius = '4px';
+                    userTypeBadge.style.fontSize = '12px';
+                    userTypeBadge.style.marginLeft = '5px';
                     
-                    const response = await fetch(url);
-                    const data = await response.json();
+                    adminInterface.classList.remove('hidden');
                     
-                    // Pastikan data adalah array
-                    return Array.isArray(data) ? data : [];
-                } catch (error) {
-                    console.error('Error loading data:', error);
-                    return [];
+                    // Sembunyikan export controls untuk user biasa
+                    document.getElementById('exportControls').classList.add('hidden');
                 }
             }
             
-            // Fungsi untuk menyimpan data (dimodifikasi)
+            // Fungsi untuk mengaktifkan/menonaktifkan input EAN
+            function toggleEanInput() {
+                if (currentPallet && currentContainer) {
+                    eanInput.disabled = false;
+                    qtyInput.disabled = false;
+                    eanHelpText.style.display = 'none';
+                } else {
+                    eanInput.disabled = true;
+                    qtyInput.disabled = true;
+                    eanHelpText.style.display = 'block';
+                }
+            }
+            
+            // Fungsi untuk menyimpan data
             async function saveData() {
                 const ean = eanInput.value.trim();
                 const qty = qtyInput.value;
@@ -103,74 +719,140 @@
                 }
                 
                 const newData = {
-                    container: currentContainer,
                     pallet: currentPallet,
+                    container: currentContainer,
                     ean,
                     qty,
                     timestamp: new Date().toLocaleString(),
                     user: currentUser,
-                    date: new Date().toISOString().split('T')[0]
+                    date: new Date().toISOString().split('T')[0] // Menyimpan tanggal dalam format YYYY-MM-DD
                 };
                 
-                // Simpan ke Google Sheets
-                const success = await saveToGoogleSheets(newData);
+                scannedData.push(newData);
+                await saveToGitHub();
+                renderTable();
+                updateTotalEan();
                 
-                if (success) {
-                    // Tambahkan ke array lokal untuk tampilan langsung
-                    scannedData.push(newData);
-                    renderTable();
-                    updateTotalEan();
+                // Reset hanya input EAN dan Qty, biarkan pallet dan container tetap
+                eanInput.value = '';
+                qtyInput.value = 1;
+                
+                showNotification('Data berhasil disimpan!');
+            }
+            
+            // Fungsi untuk logout
+            function logout() {
+                currentUser = 'Guest';
+                currentUserSpan.textContent = 'Guest';
+                isAdmin = false;
+                setUserView();
+                
+                showNotification('Anda telah logout');
+                
+                // Reset form
+                form.reset();
+                qtyInput.value = 1;
+                currentPallet = '';
+                currentPalletSpan.textContent = 'Belum dipilih';
+                currentContainer = '';
+                currentContainerSpan.textContent = 'Belum dipilih';
+                toggleEanInput();
+                
+                // Muat data dari GitHub
+                loadFromGitHub();
+                
+                // Tampilkan kembali form pemilihan user
+                toggleMainContent(false);
+            }
+            
+            // Fungsi untuk mengisi dropdown filter
+            function populateFilterDropdowns() {
+                // Kosongkan dropdown
+                userSelect.innerHTML = '<option value="">Pilih User</option>';
+                containerSelect.innerHTML = '<option value="">Pilih Container</option>';
+                
+                // Dapatkan nilai unik untuk setiap filter
+                const users = [...new Set(scannedData.map(item => item.user))];
+                
+                // Isi dropdown user
+                users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user;
+                    option.textContent = user;
+                    userSelect.appendChild(option);
+                });
+                
+                // Update container dropdown berdasarkan user yang dipilih
+                updateContainerDropdown();
+            }
+            
+            // Fungsi untuk memperbarui dropdown container berdasarkan user yang dipilih
+            function updateContainerDropdown() {
+                const selectedUser = userSelect.value;
+                
+                // Kosongkan dropdown container
+                containerSelect.innerHTML = '<option value="">Pilih Container</option>';
+                
+                // Jika user dipilih, filter container berdasarkan user tersebut
+                if (selectedUser) {
+                    const userContainers = [...new Set(scannedData
+                        .filter(item => item.user === selectedUser && item.container) // Hanya ambil yang memiliki container
+                        .map(item => item.container))];
                     
-                    // Reset hanya input EAN dan Qty, biarkan pallet dan container tetap
-                    eanInput.value = '';
-                    qtyInput.value = 1;
-                    
-                    showNotification('Data berhasil disimpan!');
-                } else {
-                    showNotification('Gagal menyimpan data!', 'error');
+                    // Isi dropdown container
+                    userContainers.forEach(container => {
+                        const option = document.createElement('option');
+                        option.value = container;
+                        option.textContent = container;
+                        containerSelect.appendChild(option);
+                    });
                 }
             }
             
-            // Fungsi untuk memuat data (dimodifikasi)
-            async function loadData() {
-                scannedData = await loadFromGoogleSheets();
-                renderTable();
-                updateTotalEan();
-                populateFilterDropdowns();
-            }
-            
-            // Fungsi untuk export data ke Excel (dimodifikasi)
-            async function exportToExcel() {
+            // Fungsi untuk export data ke Excel
+            function exportToExcel() {
                 const selectedUser = userSelect.value;
                 const selectedContainer = containerSelect.value;
                 const dateFrom = dateFromInput.value;
                 const dateTo = dateToInput.value;
                 
-                // Ambil data dari Google Sheets dengan filter
-                const filteredData = await loadFromGoogleSheets({
-                    user: selectedUser,
-                    container: selectedContainer,
-                    dateFrom: dateFrom,
-                    dateTo: dateTo
-                });
+                // Filter data berdasarkan pilihan
+                let filteredData = scannedData;
                 
-                // Filter data yang memiliki container
-                const dataWithContainer = filteredData.filter(item => item.Container && item.Container.trim() !== '');
+                if (selectedUser) {
+                    filteredData = filteredData.filter(item => item.user === selectedUser);
+                }
                 
-                if (dataWithContainer.length === 0) {
+                if (selectedContainer) {
+                    filteredData = filteredData.filter(item => item.container === selectedContainer);
+                }
+                
+                // Filter berdasarkan tanggal
+                if (dateFrom) {
+                    filteredData = filteredData.filter(item => item.date >= dateFrom);
+                }
+                
+                if (dateTo) {
+                    filteredData = filteredData.filter(item => item.date <= dateTo);
+                }
+                
+                // Hanya tampilkan data yang memiliki No. Container
+                filteredData = filteredData.filter(item => item.container && item.container.trim() !== '');
+                
+                if (filteredData.length === 0) {
                     showNotification('Tidak ada data untuk diekspor!', 'error');
                     return;
                 }
                 
                 // Siapkan data untuk Excel
-                const excelData = dataWithContainer.map(item => ({
-                    'No. Container': item.Container,
-                    'Pallet ID': item.Pallet,
-                    'EAN': item.EAN,
-                    'Qty': item.Qty,
-                    'Timestamp': item.Timestamp,
-                    'User': item.User,
-                    'Date': item.Date
+                const excelData = filteredData.map(item => ({
+                    'No. Container': item.container,
+                    'Pallet ID': item.pallet,
+                    'EAN': item.ean,
+                    'Qty': item.qty,
+                    'Timestamp': item.timestamp,
+                    'User': item.user,
+                    'Date': item.date
                 }));
                 
                 // Buat worksheet
@@ -189,16 +871,283 @@
                 showNotification('Data berhasil diekspor ke Excel!');
             }
             
+            // Fungsi untuk menyimpan data ke GitHub
+            async function saveToGitHub() {
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    console.warn('Konfigurasi GitHub belum lengkap, data disimpan di local storage');
+                    localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                    populateFilterDropdowns();
+                    return false;
+                }
+                
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: 'Update scanned data',
+                            content: btoa(JSON.stringify(scannedData)), // Encode data ke base64
+                            sha: await getFileSHA() // Diperlukan untuk update file yang sudah ada
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        console.log('Data berhasil disimpan ke GitHub');
+                        populateFilterDropdowns();
+                        return true;
+                    } else {
+                        console.error('Gagal menyimpan data ke GitHub:', await response.text());
+                        // Fallback ke local storage jika gagal
+                        localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Error menyimpan data ke GitHub:', error);
+                    // Fallback ke local storage jika gagal
+                    localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                    return false;
+                }
+            }
+            
+            // Fungsi untuk mendapatkan SHA file (diperlukan untuk update)
+            async function getFileSHA() {
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    return null;
+                }
+                
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.sha;
+                    }
+                    return null; // File belum ada
+                } catch (error) {
+                    console.error('Error mendapatkan SHA file:', error);
+                    return null;
+                }
+            }
+            
+            // Fungsi untuk memuat data dari GitHub
+            async function loadFromGitHub() {
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    console.warn('Konfigurasi GitHub belum lengkap, muat data dari local storage');
+                    const savedData = localStorage.getItem('scannedData');
+                    if (savedData) {
+                        scannedData = JSON.parse(savedData);
+                    } else {
+                        scannedData = [];
+                    }
+                    populateFilterDropdowns();
+                    return false;
+                }
+                
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        // Decode dari base64
+                        const decodedData = atob(data.content);
+                        scannedData = JSON.parse(decodedData);
+                        populateFilterDropdowns();
+                        return true;
+                    } else if (response.status === 404) {
+                        // File belum ada, inisialisasi dengan array kosong
+                        scannedData = [];
+                        return true;
+                    } else {
+                        console.error('Gagal memuat data dari GitHub:', await response.text());
+                        // Fallback ke local storage jika gagal
+                        const savedData = localStorage.getItem('scannedData');
+                        if (savedData) {
+                            scannedData = JSON.parse(savedData);
+                        }
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Error memuat data dari GitHub:', error);
+                    // Fallback ke local storage jika gagal
+                    const savedData = localStorage.getItem('scannedData');
+                    if (savedData) {
+                        scannedData = JSON.parse(savedData);
+                    }
+                    return false;
+                }
+            }
+            
+            // Fungsi untuk menguji koneksi GitHub
+            async function testGitHubConnection() {
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    showNotification('Harap isi semua field konfigurasi GitHub!', 'error');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}`, {
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        showNotification('Koneksi GitHub berhasil!', 'success');
+                        githubStatusSpan.textContent = 'Terkoneksi';
+                        githubStatusSpan.style.color = '#27ae60';
+                        return true;
+                    } else {
+                        showNotification('Gagal terhubung ke GitHub: ' + await response.text(), 'error');
+                        githubStatusSpan.textContent = 'Gagal terkoneksi';
+                        githubStatusSpan.style.color = '#e74c3c';
+                        return false;
+                    }
+                } catch (error) {
+                    showNotification('Error testing koneksi GitHub: ' + error.message, 'error');
+                    githubStatusSpan.textContent = 'Error';
+                    githubStatusSpan.style.color = '#e74c3c';
+                    return false;
+                }
+            }
+            
+            // Fungsi untuk menyimpan konfigurasi GitHub
+            function saveGithubConfig() {
+                githubConfig = {
+                    username: document.getElementById('githubUsername').value.trim(),
+                    repo: document.getElementById('githubRepo').value.trim(),
+                    token: document.getElementById('githubToken').value.trim(),
+                    dataFilePath: document.getElementById('dataFilePath').value.trim() || 'data/scannedData.json'
+                };
+                
+                localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
+                showNotification('Konfigurasi GitHub berhasil disimpan!');
+                
+                // Muat ulang data dari GitHub setelah konfigurasi disimpan
+                loadFromGitHub();
+            }
+            
+            // Fungsi untuk memuat konfigurasi GitHub dari local storage
+            function loadGithubConfig() {
+                const savedConfig = localStorage.getItem('githubConfig');
+                if (savedConfig) {
+                    githubConfig = JSON.parse(savedConfig);
+                    
+                    // Isi form dengan nilai yang disimpan
+                    document.getElementById('githubUsername').value = githubConfig.username;
+                    document.getElementById('githubRepo').value = githubConfig.repo;
+                    document.getElementById('githubToken').value = githubConfig.token;
+                    document.getElementById('dataFilePath').value = githubConfig.dataFilePath;
+                    
+                    // Perbarui status
+                    if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                        githubStatusSpan.textContent = 'Terkonfigurasi';
+                        githubStatusSpan.style.color = '#27ae60';
+                    } else {
+                        githubStatusSpan.textContent = 'Belum dikonfigurasi';
+                        githubStatusSpan.style.color = '#7f8c8d';
+                    }
+                }
+            }
+            
             // Event listeners
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
                 saveData();
             });
             
-            // ... (event listeners lainnya tetap sama) ...
+            // Event listener untuk auto save pada input EAN dengan delay 1 detik
+            eanInput.addEventListener('input', function() {
+                // Clear timer sebelumnya jika ada
+                clearTimeout(eanInputTimer);
+                
+                // Set timer baru untuk 1 detik
+                eanInputTimer = setTimeout(function() {
+                    if (eanInput.value.trim() !== '') {
+                        saveData();
+                    }
+                }, 1000);
+            });
             
-            // Event listener untuk pemilihan user awal (dimodifikasi)
-            initialSetUserBtn.addEventListener('click', async function() {
+            // Event listener untuk tombol Finish
+            finishBtn.addEventListener('click', function() {
+                if (!currentPallet) {
+                    showNotification('Harap set pallet terlebih dahulu!', 'error');
+                    return;
+                }
+                
+                if (!currentContainer) {
+                    showNotification('Harap set container terlebih dahulu!', 'error');
+                    return;
+                }
+                
+                if (scannedData.filter(item => item.pallet === currentPallet && item.user === currentUser).length === 0) {
+                    showNotification('Tidak ada data untuk pallet ini!', 'error');
+                    return;
+                }
+                
+                showNotification(`Data untuk pallet ${currentPallet} telah diselesaikan!`);
+                
+                // Reset pallet dan container setelah finish
+                currentPallet = '';
+                currentContainer = '';
+                currentPalletSpan.textContent = 'Belum dipilih';
+                currentContainerSpan.textContent = 'Belum dipilih';
+                palletInput.value = '';
+                containerInput.value = '';
+                toggleEanInput();
+            });
+            
+            savePalletBtn.addEventListener('click', function() {
+                const pallet = palletInput.value.trim();
+                if (!pallet) {
+                    showNotification('Harap masukkan Pallet ID!', 'error');
+                    return;
+                }
+                
+                currentPallet = pallet;
+                currentPalletSpan.textContent = pallet;
+                showNotification(`Pallet ID diatur menjadi: ${pallet}`);
+                updateTotalEan();
+                toggleEanInput();
+            });
+            
+            saveContainerBtn.addEventListener('click', function() {
+                const container = containerInput.value.trim();
+                if (!container) {
+                    showNotification('Harap masukkan No. Container!', 'error');
+                    return;
+                }
+                
+                currentContainer = container;
+                currentContainerSpan.textContent = container;
+                showNotification(`No. Container diatur menjadi: ${container}`);
+                updateTotalEan();
+                toggleEanInput();
+            });
+            
+            // Event listener untuk tombol export
+            exportSelectedBtn.addEventListener('click', exportToExcel);
+            
+            // Event listener untuk perubahan dropdown user
+            userSelect.addEventListener('change', function() {
+                updateContainerDropdown();
+            });
+            
+            logoutBtn.addEventListener('click', logout);
+            
+            // Event listener untuk pemilihan user awal
+            initialSetUserBtn.addEventListener('click', function() {
                 const username = initialUsernameInput.value.trim();
                 if (!username) {
                     showNotification('Harap masukkan username!', 'error');
@@ -215,8 +1164,11 @@
                 // Sembunyikan form pemilihan user dan tampilkan konten utama
                 toggleMainContent(true);
                 
-                // Muat data dari Google Sheets
-                await loadData();
+                // Muat data dari GitHub
+                loadFromGitHub();
+                renderTable();
+                updateTotalEan();
+                populateFilterDropdowns();
                 toggleEanInput();
                 
                 // Fokuskan ke input EAN jika sudah diaktifkan
@@ -225,11 +1177,148 @@
                 }
             });
             
-            // ... (kode lainnya tetap sama) ...
+            // Event listener untuk tekan Enter pada input username awal
+            initialUsernameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    initialSetUserBtn.click();
+                }
+            });
+            
+            // Event listener untuk tab
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Hapus kelas active dari semua tab dan konten
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Tambahkan kelas active ke tab yang diklik
+                    this.classList.add('active');
+                    
+                    // Tampilkan konten yang sesuai
+                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                });
+            });
+            
+            // Event listener untuk tombol simpan konfigurasi GitHub
+            saveGithubConfigBtn.addEventListener('click', saveGithubConfig);
+            
+            // Event listener untuk tombol test koneksi GitHub
+            testGithubConnectionBtn.addEventListener('click', testGitHubConnection);
+            
+            // Fungsi untuk menampilkan notifikasi
+            function showNotification(message, type = 'success') {
+                notification.textContent = message;
+                notification.style.backgroundColor = type === 'success' ? '#2ecc71' : '#e74c3c';
+                notification.style.display = 'block';
+                
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            }
+            
+            // Fungsi untuk merender tabel
+            function renderTable() {
+                // Kosongkan tabel
+                tableBody.innerHTML = '';
+                
+                if (scannedData.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+                
+                emptyState.classList.add('hidden');
+                
+                // Filter data berdasarkan user jika bukan admin
+                let dataToShow = scannedData;
+                if (!isAdmin) {
+                    dataToShow = scannedData.filter(item => item.user === currentUser);
+                }
+                
+                // Hanya tampilkan data yang memiliki No. Container
+                dataToShow = dataToShow.filter(item => item.container && item.container.trim() !== '');
+                
+                if (dataToShow.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+                
+                // Tambahkan data ke tabel
+                dataToShow.forEach((data, index) => {
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${data.container}</td>
+                        <td>${data.pallet}</td>
+                        <td>${data.ean}</td>
+                        <td>${data.qty}</td>
+                        <td>${data.timestamp}</td>
+                        <td class="actions">
+                            ${isAdmin ? `<i class="fas fa-edit btn-edit" data-index="${index}"></i>
+                            <i class="fas fa-trash btn-delete" data-index="${index}"></i>` : ''}
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+                
+                // Tambahkan event listener untuk tombol edit dan hapus
+                if (isAdmin) {
+                    document.querySelectorAll('.btn-edit').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const index = parseInt(this.getAttribute('data-index'));
+                            editData(index);
+                        });
+                    });
+                    
+                    document.querySelectorAll('.btn-delete').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const index = parseInt(this.getAttribute('data-index'));
+                            deleteData(index);
+                        });
+                    });
+                }
+            }
+            
+            // Fungsi untuk mengedit data (placeholder)
+            function editData(index) {
+                showNotification('Fitur edit belum diimplementasikan', 'error');
+            }
+            
+            // Fungsi untuk menghapus data
+            async function deleteData(index) {
+                if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                    scannedData.splice(index, 1);
+                    await saveToGitHub();
+                    renderTable();
+                    updateTotalEan();
+                    showNotification('Data berhasil dihapus');
+                }
+            }
+            
+            // Fungsi untuk mengupdate total EAN
+            function updateTotalEan() {
+                let total = 0;
+                
+                // Hitung total berdasarkan Container dan Pallet ID yang sama
+                if (currentContainer && currentPallet) {
+                    total = scannedData
+                        .filter(item => item.container === currentContainer && item.pallet === currentPallet)
+                        .reduce((sum, item) => sum + parseInt(item.qty), 0);
+                }
+                
+                totalEanSpan.textContent = total;
+            }
             
             // Inisialisasi
-            setupMobileMenu();
+            loadGithubConfig(); // Muat konfigurasi GitHub
+            loadFromGitHub(); // Muat data dari GitHub
+            setupMobileMenu(); // Setup mobile menu
             setUserView();
+            renderTable();
+            updateTotalEan();
             toggleEanInput();
             
             // Tampilkan form pemilihan user pertama kali
