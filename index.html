@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apps Web Scan KED</title>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        /* CSS tetap sama seperti sebelumnya */
+        /* ... (CSS dari kode asli) ... */
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Tampilan awal untuk memilih user -->
+    <div class="user-selection" id="userSelection">
+        <div class="user-selection-box">
+            <h2><i class="fas fa-user"></i> Masukkan Username</h2>
+            <p>Silakan masukkan username Anda untuk melanjutkan</p>
+            <div class="user-selection-input">
+                <input type="text" id="initialUsernameInput" placeholder="Masukkan username">
+                <button type="button" class="btn-info" id="initialSetUserBtn"><i class="fas fa-check"></i> Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="mainContainer" style="display: none;">
+        <!-- Konten utama tetap sama -->
+        <!-- ... (HTML dari kode asli) ... -->
+    </div>
+
+    <div class="notification" id="notification">Data berhasil diekspor ke Excel!</div>
+
+    <script>
+        // URL Google Apps Script Web App (ganti dengan URL Anda)
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzohXPyo45-_WvfEdRpOad8mflAmdlOtwmhSslp8j9JkfcBoGjgzu97_FFWmAZBSlQNGw/exec';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Variabel dan inisialisasi
+            // ... (variabel dari kode asli) ...
+            
+            // Fungsi untuk menyimpan data ke Google Sheets
+            async function saveToGoogleSheets(data) {
+                try {
+                    const response = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    return result.success;
+                } catch (error) {
+                    console.error('Error saving data:', error);
+                    return false;
+                }
+            }
+            
+            // Fungsi untuk membaca data dari Google Sheets
+            async function loadFromGoogleSheets(filters = {}) {
+                try {
+                    let url = SCRIPT_URL + '?';
+                    const params = new URLSearchParams();
+                    
+                    if (filters.user) params.append('user', filters.user);
+                    if (filters.container) params.append('container', filters.container);
+                    if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
+                    if (filters.dateTo) params.append('dateTo', filters.dateTo);
+                    
+                    url += params.toString();
+                    
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    // Pastikan data adalah array
+                    return Array.isArray(data) ? data : [];
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    return [];
+                }
+            }
+            
+            // Fungsi untuk menyimpan data (dimodifikasi)
+            async function saveData() {
+                const ean = eanInput.value.trim();
+                const qty = qtyInput.value;
+                
+                if (!currentPallet) {
+                    showNotification('Harap set pallet terlebih dahulu!', 'error');
+                    return;
+                }
+                
+                if (!currentContainer) {
+                    showNotification('Harap set container terlebih dahulu!', 'error');
+                    return;
+                }
+                
+                if (!ean) {
+                    showNotification('Harap isi kode EAN!', 'error');
+                    return;
+                }
+                
+                const newData = {
+                    container: currentContainer,
+                    pallet: currentPallet,
+                    ean,
+                    qty,
+                    timestamp: new Date().toLocaleString(),
+                    user: currentUser,
+                    date: new Date().toISOString().split('T')[0]
+                };
+                
+                // Simpan ke Google Sheets
+                const success = await saveToGoogleSheets(newData);
+                
+                if (success) {
+                    // Tambahkan ke array lokal untuk tampilan langsung
+                    scannedData.push(newData);
+                    renderTable();
+                    updateTotalEan();
+                    
+                    // Reset hanya input EAN dan Qty, biarkan pallet dan container tetap
+                    eanInput.value = '';
+                    qtyInput.value = 1;
+                    
+                    showNotification('Data berhasil disimpan!');
+                } else {
+                    showNotification('Gagal menyimpan data!', 'error');
+                }
+            }
+            
+            // Fungsi untuk memuat data (dimodifikasi)
+            async function loadData() {
+                scannedData = await loadFromGoogleSheets();
+                renderTable();
+                updateTotalEan();
+                populateFilterDropdowns();
+            }
+            
+            // Fungsi untuk export data ke Excel (dimodifikasi)
+            async function exportToExcel() {
+                const selectedUser = userSelect.value;
+                const selectedContainer = containerSelect.value;
+                const dateFrom = dateFromInput.value;
+                const dateTo = dateToInput.value;
+                
+                // Ambil data dari Google Sheets dengan filter
+                const filteredData = await loadFromGoogleSheets({
+                    user: selectedUser,
+                    container: selectedContainer,
+                    dateFrom: dateFrom,
+                    dateTo: dateTo
+                });
+                
+                // Filter data yang memiliki container
+                const dataWithContainer = filteredData.filter(item => item.Container && item.Container.trim() !== '');
+                
+                if (dataWithContainer.length === 0) {
+                    showNotification('Tidak ada data untuk diekspor!', 'error');
+                    return;
+                }
+                
+                // Siapkan data untuk Excel
+                const excelData = dataWithContainer.map(item => ({
+                    'No. Container': item.Container,
+                    'Pallet ID': item.Pallet,
+                    'EAN': item.EAN,
+                    'Qty': item.Qty,
+                    'Timestamp': item.Timestamp,
+                    'User': item.User,
+                    'Date': item.Date
+                }));
+                
+                // Buat worksheet
+                const ws = XLSX.utils.json_to_sheet(excelData);
+                
+                // Buat workbook
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Data Scan');
+                
+                // Buat nama file
+                const fileName = `Data_Scan_${selectedUser || 'All'}_${selectedContainer || 'All'}_${new Date().getTime()}.xlsx`;
+                
+                // Export ke file Excel
+                XLSX.writeFile(wb, fileName);
+                
+                showNotification('Data berhasil diekspor ke Excel!');
+            }
+            
+            // Event listeners
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveData();
+            });
+            
+            // ... (event listeners lainnya tetap sama) ...
+            
+            // Event listener untuk pemilihan user awal (dimodifikasi)
+            initialSetUserBtn.addEventListener('click', async function() {
+                const username = initialUsernameInput.value.trim();
+                if (!username) {
+                    showNotification('Harap masukkan username!', 'error');
+                    return;
+                }
+                
+                currentUser = username;
+                currentUserSpan.textContent = username;
+                isAdmin = checkIfAdmin(username);
+                setUserView();
+                
+                showNotification(`Selamat datang, ${username}!`);
+                
+                // Sembunyikan form pemilihan user dan tampilkan konten utama
+                toggleMainContent(true);
+                
+                // Muat data dari Google Sheets
+                await loadData();
+                toggleEanInput();
+                
+                // Fokuskan ke input EAN jika sudah diaktifkan
+                if (!eanInput.disabled) {
+                    eanInput.focus();
+                }
+            });
+            
+            // ... (kode lainnya tetap sama) ...
+            
+            // Inisialisasi
+            setupMobileMenu();
+            setUserView();
+            toggleEanInput();
+            
+            // Tampilkan form pemilihan user pertama kali
+            toggleMainContent(false);
+            
+            // Fokuskan ke input username pada form pemilihan user
+            initialUsernameInput.focus();
+        });
+    </script>
+</body>
+</html>
