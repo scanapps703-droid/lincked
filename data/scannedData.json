@@ -43,5 +43,14 @@
     "timestamp": "8/29/2025, 1:04:49 PM",
     "user": "Checker",
     "date": "2025-08-29"
+  },
+  {
+    "pallet": "00001",
+    "container": "B2021",
+    "ean": "8994151880340",
+    "qty": "1",
+    "timestamp": "8/29/2025, 1:05:08 PM",
+    "user": "Checker",
+    "date": "2025-08-29"
   }
 ]
