@@ -240,18 +240,6 @@
         tr:hover {
             background-color: #f5f5f5;
         }
-        .actions {
-            display: flex;
-            gap: 10px;
-        }
-        .btn-edit {
-            color: #3498db;
-            cursor: pointer;
-        }
-        .btn-delete {
-            color: #e74c3c;
-            cursor: pointer;
-        }
         .empty-state {
             text-align: center;
             padding: 40px;
@@ -386,16 +374,11 @@
             }
         }
 
-        .github-config {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #6e5494;
-        }
-        .github-config h3 {
-            margin-top: 0;
-            color: #6e5494;
+        /* Gaya untuk input container dan pallet */
+        .container-input-group, .pallet-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -425,7 +408,6 @@
             <div class="sidebar" id="sidebar">
                 <div class="tabs">
                     <div class="tab active" data-tab="input"><i class="fas fa-keyboard"></i> Input Data</div>
-                    <div class="tab" data-tab="github"><i class="fab fa-github"></i> GitHub Config</div>
                 </div>
                 
                 <div class="user-info">
@@ -449,14 +431,14 @@
                                 <div class="form-group">
                                     <div>
                                         <label for="container"><i class="fas fa-truck"></i> No. Container</label>
-                                        <div style="display: flex; gap: 10px;">
+                                        <div class="container-input-group">
                                             <input type="text" id="container" required placeholder="Masukkan No. Container">
                                             <button type="button" class="btn-info" id="saveContainerBtn"><i class="fas fa-save"></i> Simpan Container</button>
                                         </div>
                                     </div>
                                     <div>
                                         <label for="pallet"><i class="fas fa-pallet"></i> Pallet ID</label>
-                                        <div style="display: flex; gap: 10px;">
+                                        <div class="pallet-input-group">
                                             <input type="text" id="pallet" required placeholder="Masukkan Pallet ID">
                                             <button type="button" class="btn-info" id="savePalletBtn"><i class="fas fa-save"></i> Simpan Pallet</button>
                                         </div>
@@ -522,51 +504,6 @@
                             <p>Tambahkan data menggunakan form di atas</p>
                         </div>
                     </div>
-
-                    <div class="tab-content" id="githubTab">
-                        <div class="github-config">
-                            <h3><i class="fab fa-github"></i> Konfigurasi GitHub</h3>
-                            <p>Konfigurasi penyimpanan data ke GitHub Repository</p>
-                        </div>
-                        
-                        <div class="form-container">
-                            <form id="githubConfigForm">
-                                <div class="form-group">
-                                    <div>
-                                        <label for="githubUsername"><i class="fab fa-github"></i> GitHub Username</label>
-                                        <input type="text" id="githubUsername" placeholder="Masukkan username GitHub">
-                                    </div>
-                                    <div>
-                                        <label for="githubRepo"><i class="fas fa-database"></i> Repository Name</label>
-                                        <input type="text" id="githubRepo" placeholder="Masukkan nama repository">
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <div>
-                                        <label for="githubToken"><i class="fas fa-key"></i> Personal Access Token</label>
-                                        <input type="password" id="githubToken" placeholder="Masukkan token akses GitHub">
-                                        <small>
-                                            <i class="fas fa-info-circle"></i> Token harus memiliki izin "repo"
-                                        </small>
-                                    </div>
-                                    <div>
-                                        <label for="dataFilePath"><i class="fas fa-file"></i> Data File Path</label>
-                                        <input type="text" id="dataFilePath" value="data/scannedData.json" placeholder="Path file data di repository">
-                                    </div>
-                                </div>
-                                
-                                <div class="button-group">
-                                    <button type="button" class="btn-info" id="saveGithubConfigBtn"><i class="fas fa-save"></i> Simpan Konfigurasi</button>
-                                    <button type="button" class="btn-primary" id="testGithubConnectionBtn"><i class="fas fa-plug"></i> Test Koneksi</button>
-                                </div>
-                            </form>
-                        </div>
-                        
-                        <div class="summary">
-                            <i class="fas fa-info-circle"></i> Status Koneksi: <span id="githubStatus">Belum dikonfigurasi</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -607,12 +544,6 @@
             const initialUsernameInput = document.getElementById('initialUsernameInput');
             const initialSetUserBtn = document.getElementById('initialSetUserBtn');
             const logoutBtn = document.getElementById('logoutBtn');
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-            const githubConfigForm = document.getElementById('githubConfigForm');
-            const saveGithubConfigBtn = document.getElementById('saveGithubConfigBtn');
-            const testGithubConnectionBtn = document.getElementById('testGithubConnectionBtn');
-            const githubStatusSpan = document.getElementById('githubStatus');
             
             let currentPallet = '';
             let currentContainer = '';
@@ -620,14 +551,6 @@
             let currentUser = 'Guest';
             let isAdmin = false;
             let eanInputTimer = null;
-            
-            // Konfigurasi GitHub
-            let githubConfig = {
-                username: '',
-                repo: '',
-                token: '',
-                dataFilePath: 'data/scannedData.json'
-            };
             
             // Fungsi untuk menampilkan/menyembunyikan konten utama
             function toggleMainContent(show) {
@@ -699,7 +622,7 @@
             }
             
             // Fungsi untuk menyimpan data
-            async function saveData() {
+            function saveData() {
                 const ean = eanInput.value.trim();
                 const qty = qtyInput.value;
                 
@@ -729,7 +652,7 @@
                 };
                 
                 scannedData.push(newData);
-                await saveToGitHub();
+                localStorage.setItem('scannedData', JSON.stringify(scannedData));
                 renderTable();
                 updateTotalEan();
                 
@@ -758,8 +681,8 @@
                 currentContainerSpan.textContent = 'Belum dipilih';
                 toggleEanInput();
                 
-                // Muat data dari GitHub
-                loadFromGitHub();
+                // Muat data dari localStorage
+                loadFromStorage();
                 
                 // Tampilkan kembali form pemilihan user
                 toggleMainContent(false);
@@ -871,193 +794,15 @@
                 showNotification('Data berhasil diekspor ke Excel!');
             }
             
-            // Fungsi untuk menyimpan data ke GitHub
-            async function saveToGitHub() {
-                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    console.warn('Konfigurasi GitHub belum lengkap, data disimpan di local storage');
-                    localStorage.setItem('scannedData', JSON.stringify(scannedData));
-                    populateFilterDropdowns();
-                    return false;
+            // Fungsi untuk memuat data dari localStorage
+            function loadFromStorage() {
+                const savedData = localStorage.getItem('scannedData');
+                if (savedData) {
+                    scannedData = JSON.parse(savedData);
+                } else {
+                    scannedData = [];
                 }
-                
-                try {
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            message: 'Update scanned data',
-                            content: btoa(JSON.stringify(scannedData)), // Encode data ke base64
-                            sha: await getFileSHA() // Diperlukan untuk update file yang sudah ada
-                        })
-                    });
-                    
-                    if (response.ok) {
-                        console.log('Data berhasil disimpan ke GitHub');
-                        populateFilterDropdowns();
-                        return true;
-                    } else {
-                        console.error('Gagal menyimpan data ke GitHub:', await response.text());
-                        // Fallback ke local storage jika gagal
-                        localStorage.setItem('scannedData', JSON.stringify(scannedData));
-                        return false;
-                    }
-                } catch (error) {
-                    console.error('Error menyimpan data ke GitHub:', error);
-                    // Fallback ke local storage jika gagal
-                    localStorage.setItem('scannedData', JSON.stringify(scannedData));
-                    return false;
-                }
-            }
-            
-            // Fungsi untuk mendapatkan SHA file (diperlukan untuk update)
-            async function getFileSHA() {
-                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    return null;
-                }
-                
-                try {
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        return data.sha;
-                    }
-                    return null; // File belum ada
-                } catch (error) {
-                    console.error('Error mendapatkan SHA file:', error);
-                    return null;
-                }
-            }
-            
-            // Fungsi untuk memuat data dari GitHub
-            async function loadFromGitHub() {
-                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    console.warn('Konfigurasi GitHub belum lengkap, muat data dari local storage');
-                    const savedData = localStorage.getItem('scannedData');
-                    if (savedData) {
-                        scannedData = JSON.parse(savedData);
-                    } else {
-                        scannedData = [];
-                    }
-                    populateFilterDropdowns();
-                    return false;
-                }
-                
-                try {
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        // Decode dari base64
-                        const decodedData = atob(data.content);
-                        scannedData = JSON.parse(decodedData);
-                        populateFilterDropdowns();
-                        return true;
-                    } else if (response.status === 404) {
-                        // File belum ada, inisialisasi dengan array kosong
-                        scannedData = [];
-                        return true;
-                    } else {
-                        console.error('Gagal memuat data dari GitHub:', await response.text());
-                        // Fallback ke local storage jika gagal
-                        const savedData = localStorage.getItem('scannedData');
-                        if (savedData) {
-                            scannedData = JSON.parse(savedData);
-                        }
-                        return false;
-                    }
-                } catch (error) {
-                    console.error('Error memuat data dari GitHub:', error);
-                    // Fallback ke local storage jika gagal
-                    const savedData = localStorage.getItem('scannedData');
-                    if (savedData) {
-                        scannedData = JSON.parse(savedData);
-                    }
-                    return false;
-                }
-            }
-            
-            // Fungsi untuk menguji koneksi GitHub
-            async function testGitHubConnection() {
-                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    showNotification('Harap isi semua field konfigurasi GitHub!', 'error');
-                    return;
-                }
-                
-                try {
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}`, {
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        showNotification('Koneksi GitHub berhasil!', 'success');
-                        githubStatusSpan.textContent = 'Terkoneksi';
-                        githubStatusSpan.style.color = '#27ae60';
-                        return true;
-                    } else {
-                        showNotification('Gagal terhubung ke GitHub: ' + await response.text(), 'error');
-                        githubStatusSpan.textContent = 'Gagal terkoneksi';
-                        githubStatusSpan.style.color = '#e74c3c';
-                        return false;
-                    }
-                } catch (error) {
-                    showNotification('Error testing koneksi GitHub: ' + error.message, 'error');
-                    githubStatusSpan.textContent = 'Error';
-                    githubStatusSpan.style.color = '#e74c3c';
-                    return false;
-                }
-            }
-            
-            // Fungsi untuk menyimpan konfigurasi GitHub
-            function saveGithubConfig() {
-                githubConfig = {
-                    username: document.getElementById('githubUsername').value.trim(),
-                    repo: document.getElementById('githubRepo').value.trim(),
-                    token: document.getElementById('githubToken').value.trim(),
-                    dataFilePath: document.getElementById('dataFilePath').value.trim() || 'data/scannedData.json'
-                };
-                
-                localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
-                showNotification('Konfigurasi GitHub berhasil disimpan!');
-                
-                // Muat ulang data dari GitHub setelah konfigurasi disimpan
-                loadFromGitHub();
-            }
-            
-            // Fungsi untuk memuat konfigurasi GitHub dari local storage
-            function loadGithubConfig() {
-                const savedConfig = localStorage.getItem('githubConfig');
-                if (savedConfig) {
-                    githubConfig = JSON.parse(savedConfig);
-                    
-                    // Isi form dengan nilai yang disimpan
-                    document.getElementById('githubUsername').value = githubConfig.username;
-                    document.getElementById('githubRepo').value = githubConfig.repo;
-                    document.getElementById('githubToken').value = githubConfig.token;
-                    document.getElementById('dataFilePath').value = githubConfig.dataFilePath;
-                    
-                    // Perbarui status
-                    if (githubConfig.username && githubConfig.repo && githubConfig.token) {
-                        githubStatusSpan.textContent = 'Terkonfigurasi';
-                        githubStatusSpan.style.color = '#27ae60';
-                    } else {
-                        githubStatusSpan.textContent = 'Belum dikonfigurasi';
-                        githubStatusSpan.style.color = '#7f8c8d';
-                    }
-                }
+                populateFilterDropdowns();
             }
             
             // Event listeners
@@ -1164,8 +909,8 @@
                 // Sembunyikan form pemilihan user dan tampilkan konten utama
                 toggleMainContent(true);
                 
-                // Muat data dari GitHub
-                loadFromGitHub();
+                // Muat data dari localStorage
+                loadFromStorage();
                 renderTable();
                 updateTotalEan();
                 populateFilterDropdowns();
@@ -1184,29 +929,6 @@
                     initialSetUserBtn.click();
                 }
             });
-            
-            // Event listener untuk tab
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-tab');
-                    
-                    // Hapus kelas active dari semua tab dan konten
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(c => c.classList.remove('active'));
-                    
-                    // Tambahkan kelas active ke tab yang diklik
-                    this.classList.add('active');
-                    
-                    // Tampilkan konten yang sesuai
-                    document.getElementById(`${tabId}Tab`).classList.add('active');
-                });
-            });
-            
-            // Event listener untuk tombol simpan konfigurasi GitHub
-            saveGithubConfigBtn.addEventListener('click', saveGithubConfig);
-            
-            // Event listener untuk tombol test koneksi GitHub
-            testGithubConnectionBtn.addEventListener('click', testGitHubConnection);
             
             // Fungsi untuk menampilkan notifikasi
             function showNotification(message, type = 'success') {
@@ -1288,10 +1010,10 @@
             }
             
             // Fungsi untuk menghapus data
-            async function deleteData(index) {
+            function deleteData(index) {
                 if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
                     scannedData.splice(index, 1);
-                    await saveToGitHub();
+                    localStorage.setItem('scannedData', JSON.stringify(scannedData));
                     renderTable();
                     updateTotalEan();
                     showNotification('Data berhasil dihapus');
@@ -1313,8 +1035,7 @@
             }
             
             // Inisialisasi
-            loadGithubConfig(); // Muat konfigurasi GitHub
-            loadFromGitHub(); // Muat data dari GitHub
+            loadFromStorage(); // Muat data dari localStorage
             setupMobileMenu(); // Setup mobile menu
             setUserView();
             renderTable();
