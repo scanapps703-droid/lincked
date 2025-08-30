@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pilih Brand - Apps Web Scan KED</title>
+    <title>Pilih Customer ID - Apps Web Scan KED</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -68,17 +68,17 @@
             opacity: 0.9;
         }
 
-        .login-brand-selector {
+        .login-Customer ID-selector {
             padding: 30px;
         }
 
-        .brand-options {
+        .Customer ID-options {
             display: flex;
             gap: 20px;
             flex-direction: column;
         }
 
-        .brand-option {
+        .Customer ID-option {
             text-align: center;
             padding: 25px;
             border: 2px solid var(--border);
@@ -88,42 +88,42 @@
             background: white;
         }
 
-        .brand-option:hover {
+        .Customer ID-option:hover {
             transform: translateY(-5px);
             box-shadow: var(--shadow);
         }
 
-        .brand-option.tumi.active, .brand-option.tumi:hover {
+        .Customer ID-option.tumi.active, .Customer ID-option.tumi:hover {
             border-color: var(--tumi-color);
             background-color: #f4eef8;
         }
 
-        .brand-option.samsonite.active, .brand-option.samsonite:hover {
+        .Customer ID-option.samsonite.active, .Customer ID-option.samsonite:hover {
             border-color: var(--samsonite-color);
             background-color: #fdf2e9;
         }
 
-        .brand-option i {
+        .Customer ID-option i {
             font-size: 36px;
             margin-bottom: 15px;
             color: var(--gray);
         }
 
-        .brand-option.tumi.active i, .brand-option.tumi:hover i {
+        .Customer ID-option.tumi.active i, .Customer ID-option.tumi:hover i {
             color: var(--tumi-color);
         }
 
-        .brand-option.samsonite.active i, .brand-option.samsonite:hover i {
+        .Customer ID-option.samsonite.active i, .Customer ID-option.samsonite:hover i {
             color: var(--samsonite-color);
         }
 
-        .brand-name {
+        .Customer ID-name {
             font-size: 1.2rem;
             font-weight: bold;
             margin-bottom: 8px;
         }
 
-        .brand-desc {
+        .Customer ID-desc {
             font-size: 0.9rem;
             color: var(--gray);
         }
@@ -142,7 +142,7 @@
             }
         }
 
-        .brand-logo {
+        .Customer ID-logo {
             width: 50px;
             height: 50px;
             display: flex;
@@ -165,57 +165,57 @@
     <div class="login-container">
         <div class="login-header">
             <h1><i class="fas fa-barcode"></i> Apps Web Scan KED</h1>
-            <p>Silakan pilih brand untuk melanjutkan</p>
+            <p>Silakan pilih Customer ID untuk melanjutkan</p>
         </div>
         
-        <div class="login-brand-selector">
-            <p class="instructions">Klik pada brand yang ingin Anda akses:</p>
-            <div class="brand-options">
-                <div class="brand-option tumi active" data-brand="tumi">
-                    <div class="brand-logo">
+        <div class="login-Customer ID-selector">
+            <p class="instructions">Klik pada Customer ID yang ingin Anda akses:</p>
+            <div class="Customer ID-options">
+                <div class="Customer ID-option tumi active" data-Customer ID="tumi">
+                    <div class="Customer ID-logo">
                         <i class="fas fa-suitcase"></i>
                     </div>
-                    <div class="brand-name">Tumi</div>
-                    <div class="brand-desc">Akses sistem inventory Tumi</div>
+                    <div class="Customer ID-name">Tumi</div>
+                    <div class="Customer ID-desc">Akses sistem inventory Tumi</div>
                 </div>
-                <div class="brand-option samsonite" data-brand="samsonite">
-                    <div class="brand-logo">
+                <div class="Customer ID-option samsonite" data-Customer ID="samsonite">
+                    <div class="Customer ID-logo">
                         <i class="fas fa-briefcase"></i>
                     </div>
-                    <div class="brand-name">Samsonite</div>
-                    <div class="brand-desc">Akses sistem inventory Samsonite</div>
+                    <div class="Customer ID-name">Samsonite</div>
+                    <div class="Customer ID-desc">Akses sistem inventory Samsonite</div>
                 </div>
             </div>
         </div>
         
         <div class="login-footer">
-            <p>&copy; 2023 Apps Web Scan KED | Powered by GitHub Pages</p>
+            <p>&copy; 2025 Apps Web Scan KED | Powered by Riyan Pratama P</p>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const brandOptions = document.querySelectorAll('.brand-option');
-            let selectedBrand = 'tumi'; // Default brand
+            const Customer IDOptions = document.querySelectorAll('.Customer ID-option');
+            let selectedCustomer ID = 'tumi'; // Default Customer ID
             
-            // Handle brand selection and auto-redirect
-            brandOptions.forEach(option => {
+            // Handle Customer ID selection and auto-redirect
+            Customer IDOptions.forEach(option => {
                 option.addEventListener('click', function() {
                     // Remove active class from all options
-                    brandOptions.forEach(opt => opt.classList.remove('active'));
+                    Customer IDOptions.forEach(opt => opt.classList.remove('active'));
                     
                     // Add active class to clicked option
                     this.classList.add('active');
                     
-                    // Update selected brand
-                    selectedBrand = this.getAttribute('data-brand');
+                    // Update selected Customer ID
+                    selectedCustomer ID = this.getAttribute('data-Customer ID');
                     
-                    // Save brand preference to localStorage
-                    localStorage.setItem('brand', selectedBrand);
+                    // Save Customer ID preference to localStorage
+                    localStorage.setItem('Customer ID', selectedCustomer ID);
                     
                     // Redirect to the appropriate page after a brief delay
                     setTimeout(() => {
-                        if (selectedBrand === 'tumi') {
+                        if (selectedCustomer ID === 'tumi') {
                             window.location.href = 'Tumi.html';
                         } else {
                             window.location.href = 'Samsonite.html';
@@ -224,13 +224,13 @@
                 });
             });
             
-            // Check if there's a saved brand preference
-            const savedBrand = localStorage.getItem('brand');
-            if (savedBrand) {
-                selectedBrand = savedBrand;
-                brandOptions.forEach(option => {
+            // Check if there's a saved Customer ID preference
+            const savedCustomer ID = localStorage.getItem('Customer ID');
+            if (savedCustomer ID) {
+                selectedCustomer ID = savedCustomer ID;
+                Customer IDOptions.forEach(option => {
                     option.classList.remove('active');
-                    if (option.getAttribute('data-brand') === savedBrand) {
+                    if (option.getAttribute('data-Customer ID') === savedCustomer ID) {
                         option.classList.add('active');
                     }
                 });
