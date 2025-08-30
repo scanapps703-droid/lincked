@@ -9,5 +9,16 @@
     "timestamp": "31/8/2025, 00.31.03",
     "user": "anden",
     "date": "2025-08-30"
+  },
+  {
+    "pallet": "000001",
+    "container": "B9201XYT",
+    "ean": "742315455815",
+    "sku": "111682-1596",
+    "description": "MEDIUM KIT",
+    "qty": "1",
+    "timestamp": "31/8/2025, 00.31.07",
+    "user": "anden",
+    "date": "2025-08-30"
   }
 ]
