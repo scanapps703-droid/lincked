@@ -9,5 +9,16 @@
     "timestamp": "31/8/2025, 01.03.05",
     "user": "Riyan",
     "date": "2025-08-30"
+  },
+  {
+    "pallet": "B01",
+    "container": "A01",
+    "ean": "883509135929",
+    "sku": "148794-1041",
+    "description": "GOLF 2WHL TRAVEL CASE",
+    "qty": "1",
+    "timestamp": "31/8/2025, 01.03.20",
+    "user": "Riyan",
+    "date": "2025-08-30"
   }
 ]
