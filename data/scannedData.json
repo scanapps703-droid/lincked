@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "pallet": "A0001",
+    "container": "B0001",
+    "ean": "883509169795",
+    "sku": "152365-1041",
+    "description": "PACKING CUBE MEDIUM",
+    "qty": "1",
+    "timestamp": "30/8/2025, 23.28.07",
+    "user": "Riyan",
+    "date": "2025-08-30"
+  }
+]
