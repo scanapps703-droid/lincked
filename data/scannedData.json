@@ -9,5 +9,16 @@
     "timestamp": "30/8/2025, 22.06.19",
     "user": "Riyan",
     "date": "2025-08-30"
+  },
+  {
+    "pallet": "A00001",
+    "container": "B10001",
+    "ean": "742315455815",
+    "sku": "",
+    "description": "",
+    "qty": "1",
+    "timestamp": "30/8/2025, 22.06.24",
+    "user": "Riyan",
+    "date": "2025-08-30"
   }
 ]
