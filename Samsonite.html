@@ -576,6 +576,30 @@
                 display: none;
             }
         }
+
+        /* Styling untuk checkbox */
+        .checkbox-cell {
+            width: 40px;
+            text-align: center;
+        }
+
+        .select-all-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .data-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .delete-selected-container {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: flex-end;
+        }
     </style>
 </head>
 <body>
@@ -721,15 +745,24 @@
                             <input type="date" id="dateTo" placeholder="Sampai Tanggal">
                             <button type="button" class="btn-excel" id="exportSelectedBtn"><i class="fas fa-file-excel"></i> Export Selected</button>
                         </div>
+
+                        <!-- Container untuk tombol Delete Selected -->
+                        <div class="delete-selected-container" id="deleteSelectedContainer">
+                            <button type="button" class="btn-logout" id="deleteSelectedBtn"><i class="fas fa-trash"></i> Delete Selected</button>
+                        </div>
                         
                         <table id="dataTable">
                             <thead>
                                 <tr>
+                                    <th class="checkbox-cell">
+                                        <input type="checkbox" id="selectAllCheckbox" class="select-all-checkbox">
+                                    </th>
                                     <th><i class="fas fa-truck"></i> No. Container</th>
                                     <th><i class="fas fa-pallet"></i> Pallet ID</th>
                                     <th><i class="fas fa-barcode"></i> EAN</th>
                                     <th><i class="fas fa-cubes"></i> Qty</th>
                                     <th><i class="fas fa-clock"></i> Timestamp</th>
+                                    <th><i class="fas fa-user"></i> User</th>
                                     <th><i class="fas fa-cog"></i> Actions</th>
                                 </tr>
                             </thead>
@@ -850,6 +883,11 @@
             const editEanInput = document.getElementById('editEan');
             const editQtyInput = document.getElementById('editQty');
             
+            // Elements untuk fitur delete dengan checklist
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+            const deleteSelectedContainer = document.getElementById('deleteSelectedContainer');
+            
             let currentPallet = '';
             let currentContainer = '';
             let scannedData = [];
@@ -905,6 +943,9 @@
                     
                     // Tampilkan export controls untuk admin
                     document.getElementById('exportControls').classList.remove('hidden');
+                    
+                    // Tampilkan container tombol delete selected
+                    deleteSelectedContainer.classList.remove('hidden');
                 } else {
                     userTypeBadge.textContent = '(User)';
                     userTypeBadge.classList.remove('hidden');
@@ -919,6 +960,9 @@
                     
                     // Sembunyikan export controls untuk user biasa
                     document.getElementById('exportControls').classList.add('hidden');
+                    
+                    // Sembunyikan container tombol delete selected
+                    deleteSelectedContainer.classList.add('hidden');
                 }
             }
             
@@ -1341,6 +1385,40 @@
                 showNotification('Data berhasil diupdate!');
             }
             
+            // Fungsi untuk menghapus data yang dipilih
+            async function deleteSelectedData() {
+                const checkboxes = document.querySelectorAll('.data-checkbox:checked');
+                
+                if (checkboxes.length === 0) {
+                    showNotification('Tidak ada data yang dipilih untuk dihapus!', 'error');
+                    return;
+                }
+                
+                if (!confirm(`Apakah Anda yakin ingin menghapus ${checkboxes.length} data terpilih?`)) {
+                    return;
+                }
+                
+                // Dapatkan indeks data yang dipilih (dalam urutan terbalik untuk menghindari masalah indeks saat menghapus)
+                const indexesToDelete = Array.from(checkboxes)
+                    .map(checkbox => parseInt(checkbox.dataset.index))
+                    .sort((a, b) => b - a); // Urutkan dari yang terbesar ke terkecil
+                
+                // Hapus data dari array
+                for (const index of indexesToDelete) {
+                    scannedData.splice(index, 1);
+                }
+                
+                await saveToGitHub();
+                renderTable();
+                updateTotalEan();
+                updateTotalContainer();
+                
+                // Reset select all checkbox
+                selectAllCheckbox.checked = false;
+                
+                showNotification(`${indexesToDelete.length} data berhasil dihapus!`);
+            }
+            
             // Event listeners
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -1353,7 +1431,7 @@
                 handleLogin();
             });
             
-            // Event listener untuk auto save pada input EAN dengan delay 0.2 detik
+            // Event listener untuk auto save pada input EAN dengan delay 0.1 detik (100ms)
             eanInput.addEventListener('input', function() {
                 clearTimeout(eanInputTimer);
                 
@@ -1361,7 +1439,7 @@
                     if (eanInput.value.trim() !== '') {
                         saveData();
                     }
-                }, 200);
+                }, 100); // Delay 0.1 detik
             });
             
             // Event listener untuk tombol Finish
@@ -1516,6 +1594,17 @@
                 }
             });
             
+            // Event listener untuk select all checkbox
+            selectAllCheckbox.addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('.data-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = selectAllCheckbox.checked;
+                });
+            });
+            
+            // Event listener untuk tombol delete selected
+            deleteSelectedBtn.addEventListener('click', deleteSelectedData);
+            
             // Fungsi untuk menampilkan notifikasi
             function showNotification(message, type = 'success') {
                 notification.textContent = message;
@@ -1558,11 +1647,15 @@
                     const row = document.createElement('tr');
                     
                     row.innerHTML = `
+                        <td class="checkbox-cell">
+                            <input type="checkbox" class="data-checkbox" data-index="${index}">
+                        </td>
                         <td>${data.container}</td>
                         <td>${data.pallet}</td>
                         <td>${data.ean}</td>
                         <td>${data.qty}</td>
                         <td>${data.timestamp}</td>
+                        <td>${data.user}</td>
                         <td class="actions">
                             ${isAdmin ? `<i class="fas fa-edit btn-edit" data-index="${index}"></i>
                             <i class="fas fa-trash btn-delete" data-index="${index}"></i>` : ''}
