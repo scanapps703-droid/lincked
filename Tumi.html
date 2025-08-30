@@ -7,6 +7,7 @@
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* CSS yang ada sebelumnya (tidak berubah) */
         :root {
             --primary: #3498db;
             --primary-dark: #2980b9;
@@ -585,6 +586,40 @@
                 display: none;
             }
         }
+
+        /* Gaya untuk checkbox dan kontrol select all */
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .select-all-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bulk-delete-btn {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .bulk-delete-btn:hover {
+            background-color: var(--danger-dark);
+        }
+
+        .bulk-delete-btn:disabled {
+            background-color: var(--gray);
+            cursor: not-allowed;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -751,9 +786,21 @@
                             <button type="button" class="btn-excel" id="exportSelectedBtn"><i class="fas fa-file-excel"></i> Export Selected</button>
                         </div>
                         
+                        <!-- Kontrol untuk select all dan delete bulk -->
+                        <div class="table-controls" id="inputTableControls">
+                            <div class="select-all-container">
+                                <input type="checkbox" id="selectAllInputData">
+                                <label for="selectAllInputData">Pilih Semua</label>
+                            </div>
+                            <button type="button" class="bulk-delete-btn" id="deleteSelectedInputBtn" disabled>
+                                <i class="fas fa-trash"></i> Hapus Data Terpilih
+                            </button>
+                        </div>
+                        
                         <table id="dataTable">
                             <thead>
                                 <tr>
+                                    <th width="50px"></th>
                                     <th><i class="fas fa-truck"></i> No. Container</th>
                                     <th><i class="fas fa-pallet"></i> Pallet ID</th>
                                     <th><i class="fas fa-barcode"></i> EAN</th>
@@ -849,9 +896,21 @@
                             <i class="fas fa-info-circle"></i> Total Master Data: <span id="totalMasterData">0</span> records
                         </div>
                         
+                        <!-- Kontrol untuk select all dan delete bulk pada master data -->
+                        <div class="table-controls" id="masterTableControls">
+                            <div class="select-all-container">
+                                <input type="checkbox" id="selectAllMasterData">
+                                <label for="selectAllMasterData">Pilih Semua</label>
+                            </div>
+                            <button type="button" class="bulk-delete-btn" id="deleteSelectedMasterBtn" disabled>
+                                <i class="fas fa-trash"></i> Hapus Data Terpilih
+                            </button>
+                        </div>
+                        
                         <table id="masterDataTable">
                             <thead>
                                 <tr>
+                                    <th width="50px"></th>
                                     <th>EAN</th>
                                     <th>SKU</th>
                                     <th>Description</th>
@@ -933,6 +992,12 @@
             const editDescriptionInput = document.getElementById('editDescription');
             const editQtyInput = document.getElementById('editQty');
             
+            // Elements untuk fitur delete dengan checkbox
+            const selectAllInputData = document.getElementById('selectAllInputData');
+            const deleteSelectedInputBtn = document.getElementById('deleteSelectedInputBtn');
+            const selectAllMasterData = document.getElementById('selectAllMasterData');
+            const deleteSelectedMasterBtn = document.getElementById('deleteSelectedMasterBtn');
+            
             let currentPallet = '';
             let currentContainer = '';
             let scannedData = [];
@@ -944,9 +1009,9 @@
             
             // Konfigurasi GitHub
             let githubConfig = {
-                username: '',
-                repo: '',
-                token: '',
+                username: 'scanapps703-droid',
+                repo: 'lincked',
+                token: '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',
                 dataFilePath: 'data/scannedData.json'
             };
             
@@ -992,6 +1057,10 @@
                     
                     // Tampilkan tab Master Data untuk admin
                     masterTabBtn.classList.remove('hidden');
+                    
+                    // Tampilkan kontrol select all dan delete untuk admin
+                    document.getElementById('inputTableControls').classList.remove('hidden');
+                    document.getElementById('masterTableControls').classList.remove('hidden');
                 } else {
                     userTypeBadge.textContent = '(User)';
                     userTypeBadge.classList.remove('hidden');
@@ -1009,6 +1078,10 @@
                     
                     // Sembunyikan tab Master Data untuk user biasa
                     masterTabBtn.classList.add('hidden');
+                    
+                    // Sembunyikan kontrol select all dan delete untuk user biasa
+                    document.getElementById('inputTableControls').classList.add('hidden');
+                    document.getElementById('masterTableControls').classList.add('hidden');
                 }
             }
             
@@ -1473,7 +1546,7 @@
                 masterTableBody.innerHTML = '';
                 
                 if (masterData.length === 0) {
-                    masterTableBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Tidak ada data master</td></tr>';
+                    masterTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Tidak ada data master</td></tr>';
                     totalMasterDataSpan.textContent = '0';
                     return;
                 }
@@ -1481,6 +1554,7 @@
                 masterData.forEach((item, index) => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
+                        <td><input type="checkbox" class="master-checkbox" data-index="${index}"></td>
                         <td>${item.EAN}</td>
                         <td>${item.SKU}</td>
                         <td>${item.Description}</td>
@@ -1489,6 +1563,13 @@
                 });
                 
                 totalMasterDataSpan.textContent = masterData.length;
+                
+                // Tambahkan event listener untuk checkbox master data
+                document.querySelectorAll('.master-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        updateDeleteMasterButtonState();
+                    });
+                });
             }
             
             // Fungsi untuk mendownload template master data
@@ -1555,7 +1636,7 @@
                 handleLogin();
             });
             
-            // Event listener untuk input EAN - cari data master
+            // Event listener untuk input EAN - cari data master (delay 0.1 detik)
             eanInput.addEventListener('input', function() {
                 const ean = eanInput.value.trim();
                 
@@ -1569,14 +1650,14 @@
                     descriptionInput.value = '';
                 }
                 
-                // Auto save setelah 0.2 detik
+                // Auto save setelah 0.1 detik (sesuai permintaan)
                 clearTimeout(eanInputTimer);
                 
                 eanInputTimer = setTimeout(function() {
                     if (eanInput.value.trim() !== '') {
                         saveData();
                     }
-                }, 200);
+                }, 100);
             });
             
             // Event listener untuk tombol Finish
@@ -1740,6 +1821,30 @@
             downloadTemplateBtn.addEventListener('click', downloadTemplate);
             uploadMasterForm.addEventListener('submit', uploadMasterData);
             
+            // Event listener untuk select all input data
+            selectAllInputData.addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('.input-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = selectAllInputData.checked;
+                });
+                updateDeleteInputButtonState();
+            });
+            
+            // Event listener untuk delete selected input data
+            deleteSelectedInputBtn.addEventListener('click', deleteSelectedInputData);
+            
+            // Event listener untuk select all master data
+            selectAllMasterData.addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('.master-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = selectAllMasterData.checked;
+                });
+                updateDeleteMasterButtonState();
+            });
+            
+            // Event listener untuk delete selected master data
+            deleteSelectedMasterBtn.addEventListener('click', deleteSelectedMasterData);
+            
             // Fungsi untuk menampilkan notifikasi
             function showNotification(message, type = 'success') {
                 notification.textContent = message;
@@ -1782,6 +1887,7 @@
                     const row = document.createElement('tr');
                     
                     row.innerHTML = `
+                        <td><input type="checkbox" class="input-checkbox" data-index="${index}"></td>
                         <td>${data.container}</td>
                         <td>${data.pallet}</td>
                         <td>${data.ean}</td>
@@ -1796,6 +1902,13 @@
                     `;
                     
                     tableBody.appendChild(row);
+                });
+                
+                // Tambahkan event listener untuk checkbox input data
+                document.querySelectorAll('.input-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        updateDeleteInputButtonState();
+                    });
                 });
                 
                 // Tambahkan event listener untuk tombol edit dan hapus
@@ -1826,6 +1939,79 @@
                     updateTotalContainer();
                     showNotification('Data berhasil dihapus');
                 }
+            }
+            
+            // Fungsi untuk mengupdate status tombol delete input data
+            function updateDeleteInputButtonState() {
+                const checkedBoxes = document.querySelectorAll('.input-checkbox:checked');
+                deleteSelectedInputBtn.disabled = checkedBoxes.length === 0;
+            }
+            
+            // Fungsi untuk mengupdate status tombol delete master data
+            function updateDeleteMasterButtonState() {
+                const checkedBoxes = document.querySelectorAll('.master-checkbox:checked');
+                deleteSelectedMasterBtn.disabled = checkedBoxes.length === 0;
+            }
+            
+            // Fungsi untuk menghapus data input terpilih
+            async function deleteSelectedInputData() {
+                const checkedBoxes = document.querySelectorAll('.input-checkbox:checked');
+                if (checkedBoxes.length === 0) {
+                    showNotification('Pilih data yang akan dihapus terlebih dahulu!', 'error');
+                    return;
+                }
+                
+                if (!confirm(`Apakah Anda yakin ingin menghapus ${checkedBoxes.length} data terpilih?`)) {
+                    return;
+                }
+                
+                // Dapatkan indeks data yang akan dihapus (dari yang tertinggi ke terendah untuk menghindari masalah indeks)
+                const indicesToDelete = Array.from(checkedBoxes)
+                    .map(checkbox => parseInt(checkbox.getAttribute('data-index')))
+                    .sort((a, b) => b - a);
+                
+                // Hapus data dari array scannedData
+                indicesToDelete.forEach(index => {
+                    scannedData.splice(index, 1);
+                });
+                
+                await saveToGitHub();
+                renderTable();
+                updateTotalEan();
+                updateTotalContainer();
+                selectAllInputData.checked = false;
+                updateDeleteInputButtonState();
+                
+                showNotification(`${indicesToDelete.length} data berhasil dihapus`);
+            }
+            
+            // Fungsi untuk menghapus data master terpilih
+            function deleteSelectedMasterData() {
+                const checkedBoxes = document.querySelectorAll('.master-checkbox:checked');
+                if (checkedBoxes.length === 0) {
+                    showNotification('Pilih data yang akan dihapus terlebih dahulu!', 'error');
+                    return;
+                }
+                
+                if (!confirm(`Apakah Anda yakin ingin menghapus ${checkedBoxes.length} data master terpilih?`)) {
+                    return;
+                }
+                
+                // Dapatkan indeks data yang akan dihapus (dari yang tertinggi ke terendah untuk menghindari masalah indeks)
+                const indicesToDelete = Array.from(checkedBoxes)
+                    .map(checkbox => parseInt(checkbox.getAttribute('data-index')))
+                    .sort((a, b) => b - a);
+                
+                // Hapus data dari array masterData
+                indicesToDelete.forEach(index => {
+                    masterData.splice(index, 1);
+                });
+                
+                saveMasterData();
+                selectAllMasterData.checked = false;
+                updateDeleteMasterButtonState();
+                
+                showNotification(`${indicesToDelete.length} data master berhasil dihapus`);
             }
             
             // Fungsi untuk mengupdate total EAN
