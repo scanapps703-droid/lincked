@@ -3,1617 +3,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apps Web Scan KED</title>
-    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <title>Login - Apps Web Scan KED</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* CSS tetap sama seperti sebelumnya */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --tumi-color: #9b59b6;
+            --samsonite-color: #e67e22;
+            --light: #f8f9fa;
+            --dark: #2c3e50;
+            --gray: #7f8c8d;
+            --border: #ddd;
+            --shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             color: #333;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        h1 {
-            color: #2c3e50;
-            margin: 0;
-        }
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #2c3e50;
-        }
-        .content-wrapper {
-            display: flex;
-            gap: 20px;
-        }
-        .sidebar {
-            width: 250px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 15px;
-            transition: all 0.3s ease;
-        }
-        .main-content {
-            flex: 1;
-        }
-        .user-info {
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .user-controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .tabs {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            margin-bottom: 20px;
-        }
-        .tab {
-            padding: 12px 15px;
-            cursor: pointer;
-            background-color: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            transition: all 0.3s;
-        }
-        .tab.active {
-            background-color: #3498db;
-            color: white;
-            font-weight: bold;
-        }
-        .tab:hover {
-            background-color: #e9ecef;
-        }
-        .tab.active:hover {
-            background-color: #2980b9;
-        }
-        .tab-content {
-            display: none;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .tab-content.active {
-            display: block;
-        }
-        .container-info {
-            background-color: #e8f4fc;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #3498db;
-        }
-        .form-container {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-        .form-group > div {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-width: 250px;
-        }
-        label {
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        input[type="text"], input[type="number"], input[type="date"] {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        input:read-only {
-            background-color: #f0f0f0;
-        }
-        input:disabled {
-            background-color: #f5f5f5;
-            cursor: not-allowed;
-        }
-        .button-group {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: background-color 0.3s;
-        }
-        .btn-primary {
-            background-color: #3498db;
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #2980b9;
-        }
-        .btn-info {
-            background-color: #2ecc71;
-            color: white;
-        }
-        .btn-info:hover {
-            background-color: #27ae60;
-        }
-        .btn-warning {
-            background-color: #f39c12;
-            color: white;
-        }
-        .btn-warning:hover {
-            background-color: #e67e22;
-        }
-        .btn-excel {
-            background-color: #27ae60;
-            color: white;
-        }
-        .btn-excel:hover {
-            background-color: #219653;
-        }
-        .btn-logout {
-            background-color: #e74c3c;
-            color: white;
-        }
-        .btn-logout:hover {
-            background-color: #c0392b;
-        }
-        .export-controls {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .export-controls select, .export-controls input {
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-            min-width: 150px;
-        }
-        .summary {
-            background-color: #e8f4fc;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: bold;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-        .actions {
-            display: flex;
-            gap: 10px;
-        }
-        .btn-edit {
-            color: #3498db;
-            cursor: pointer;
-        }
-        .btn-delete {
-            color: #e74c3c;
-            cursor: pointer;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #7f8c8d;
-        }
-        .empty-state i {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
-        .hidden {
-            display: none;
-        }
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #2ecc71;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 4px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            display: none;
-            z-index: 1000;
-        }
-        
-        /* Tampilan awal untuk memilih user */
-        .user-selection {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
+            line-height: 1.6;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 2000;
+            padding: 20px;
         }
-        .user-selection-box {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            max-width: 500px;
+
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 30px 20px;
             text-align: center;
         }
-        .user-selection-box h2 {
-            margin-top: 0;
-            color: #2c3e50;
+
+        .login-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        .user-selection-input {
+
+        .login-header p {
+            opacity: 0.9;
+        }
+
+        .login-brand-selector {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand-options {
             display: flex;
             gap: 10px;
-            margin: 20px 0;
         }
-        .user-selection-input input {
+
+        .brand-option {
             flex: 1;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            text-align: center;
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .brand-option.active {
+            border-color: var(--primary);
+            background-color: #e8f4fc;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .brand-option.tumi.active {
+            border-color: var(--tumi-color);
+            background-color: #f4eef8;
+        }
+
+        .brand-option.samsonite.active {
+            border-color: var(--samsonite-color);
+            background-color: #fdf2e9;
+        }
+
+        .brand-option i {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--gray);
+        }
+
+        .brand-option.active i {
+            color: var(--primary);
+        }
+
+        .brand-option.tumi.active i {
+            color: var(--tumi-color);
+        }
+
+        .brand-option.samsonite.active i {
+            color: var(--samsonite-color);
+        }
+
+        .login-form {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
             font-size: 16px;
-        }
-        .user-selection-input button {
-            padding: 12px 20px;
+            transition: var(--transition);
         }
 
-        /* Responsive styles */
-        @media (max-width: 992px) {
-            .content-wrapper {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-                margin-bottom: 20px;
-            }
-            .mobile-menu-btn {
-                display: block;
-            }
-            .sidebar.collapsed {
-                display: none;
-            }
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
 
-        @media (max-width: 768px) {
-            .form-group {
-                flex-direction: column;
-                gap: 15px;
-            }
-            .form-group > div {
-                width: 100%;
-            }
-            .button-group {
-                flex-direction: column;
-                align-items: flex-end;
-            }
-            .export-controls {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .export-controls select, .export-controls input {
-                width: 100%;
-            }
-            .user-controls {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .user-controls input,
-            .user-controls button {
-                width: 100%;
-            }
-            table {
-                display: block;
-                overflow-x: auto;
-            }
-            .user-selection-input {
-                flex-direction: column;
-            }
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-login:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-login.tumi {
+            background-color: var(--tumi-color);
+        }
+
+        .btn-login.tumi:hover {
+            background-color: #8e44ad;
+        }
+
+        .btn-login.samsonite {
+            background-color: var(--samsonite-color);
+        }
+
+        .btn-login.samsonite:hover {
+            background-color: #d35400;
+        }
+
+        .login-footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--gray);
+            font-size: 14px;
+            border-top: 1px solid var(--border);
         }
 
         @media (max-width: 480px) {
-            .container {
-                padding: 10px;
+            .login-container {
+                max-width: 100%;
             }
-            .header {
+            
+            .brand-options {
                 flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            .user-selection-box {
-                padding: 20px;
             }
         }
 
-        .github-config {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #6e5494;
-        }
-        .github-config h3 {
-            margin-top: 0;
-            color: #6e5494;
-        }
-
-        /* Tombol di bawah input */
-        .input-with-button {
+        .brand-logo {
+            width: 40px;
+            height: 40px;
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        /* Preview data export */
-        .preview-container {
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 15px;
-            margin-top: 15px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .preview-header {
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #2c3e50;
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-        }
-        .preview-item {
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-        }
-        .preview-item:last-child {
-            border-bottom: none;
-        }
-
-        /* Modal untuk edit data */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 3000;
             justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .modal-header h2 {
-            margin: 0;
-        }
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-        }
-        .modal-form-group {
-            margin-bottom: 15px;
-        }
-        .modal-form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .modal-form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        .modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 0 auto 10px;
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Tampilan awal untuk memilih user -->
-    <div class="user-selection" id="userSelection">
-        <div class="user-selection-box">
-            <h2><i class="fas fa-user"></i> Masukkan Username</h2>
-            <p>Silakan masukkan username Anda untuk melanjutkan</p>
-            <div class="user-selection-input">
-                <input type="text" id="initialUsernameInput" placeholder="Masukkan username">
-                <button type="button" class="btn-info" id="initialSetUserBtn"><i class="fas fa-check"></i> Lanjutkan</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal untuk edit data -->
-    <div class="modal" id="editModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-edit"></i> Edit Data</h2>
-                <button class="close-modal" id="closeModal">&times;</button>
-            </div>
-            <form id="editForm">
-                <input type="hidden" id="editIndex">
-                <div class="modal-form-group">
-                    <label for="editContainer">No. Container</label>
-                    <input type="text" id="editContainer" required>
-                </div>
-                <div class="modal-form-group">
-                    <label for="editPallet">Pallet ID</label>
-                    <input type="text" id="editPallet" required>
-                </div>
-                <div class="modal-form-group">
-                    <label for="editEan">EAN</label>
-                    <input type="text" id="editEan" required>
-                </div>
-                <div class="modal-form-group">
-                    <label for="editQty">Qty</label>
-                    <input type="number" id="editQty" min="1" required>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-warning" id="cancelEditBtn">Batal</button>
-                    <button type="submit" class="btn-info">Simpan Perubahan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="container" id="mainContainer" style="display: none;">
-        <div class="header">
-            <h1><i class="fas fa-table"></i> Apps Web Scan KED</h1>
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
-                <i class="fas fa-bars"></i>
-            </button>
+    <div class="login-container">
+        <div class="login-header">
+            <h1><i class="fas fa-barcode"></i> Apps Web Scan KED</h1>
+            <p>Silakan pilih brand dan masukkan username untuk melanjutkan</p>
         </div>
         
-        <div class="content-wrapper">
-            <div class="sidebar" id="sidebar">
-                <div class="tabs">
-                    <div class="tab active" data-tab="input"><i class="fas fa-keyboard"></i> Input Data</div>
-                    <div class="tab" data-tab="github" id="githubTabBtn"><i class="fab fa-github"></i> GitHub Config</div>
+        <div class="login-brand-selector">
+            <div class="brand-options">
+                <div class="brand-option tumi active" data-brand="tumi">
+                    <div class="brand-logo">
+                        <i class="fas fa-suitcase"></i>
+                    </div>
+                    <span>Tumi</span>
                 </div>
-                
-                <div class="user-info">
-                    <p><i class="fas fa-user"></i> User: <span id="currentUser">Guest</span> <span id="userTypeBadge" class="hidden"></span></p>
-                    <div class="user-controls">
-                        <button type="button" class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                <div class="brand-option samsonite" data-brand="samsonite">
+                    <div class="brand-logo">
+                        <i class="fas fa-briefcase"></i>
                     </div>
-                </div>
-            </div>
-            
-            <div class="main-content">
-                <div id="adminInterface">
-                    <div class="tab-content active" id="inputTab">
-                        <div class="container-info" id="containerInfo">
-                            <p><i class="fas fa-info-circle"></i> No. Pallet saat ini: <span id="currentPallet">Belum dipilih</span></p>
-                            <p><i class="fas fa-truck"></i> No. Container saat ini: <span id="currentContainer">Belum dipilih</span></p>
-                        </div>
-                        
-                        <div class="form-container">
-                            <form id="dataForm">
-                                <div class="form-group">
-                                    <div>
-                                        <label for="container"><i class="fas fa-truck"></i> No. Container</label>
-                                        <div class="input-with-button">
-                                            <input type="text" id="container" required placeholder="Masukkan No. Container">
-                                            <button type="button" class="btn-info" id="saveContainerBtn"><i class="fas fa-save"></i> Simpan Container</button>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label for="pallet"><i class="fas fa-pallet"></i> Pallet ID</label>
-                                        <div class="input-with-button">
-                                            <input type="text" id="pallet" required placeholder="Masukkan Pallet ID">
-                                            <button type="button" class="btn-info" id="savePalletBtn"><i class="fas fa-save"></i> Simpan Pallet</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <div>
-                                        <label for="ean"><i class="fas fa-barcode"></i> EAN</label>
-                                        <input type="text" id="ean" required placeholder="Masukkan atau scan kode EAN" disabled>
-                                        <small id="eanHelpText" style="color: #e74c3c; display: none;">
-                                            <i class="fas fa-exclamation-circle"></i> Harap set Container dan Pallet terlebih dahulu
-                                        </small>
-                                    </div>
-                                    <div>
-                                        <label for="qty"><i class="fas fa-cubes"></i> Qty (default: 1)</label>
-                                        <input type="number" id="qty" value="1" min="1" placeholder="Jumlah" disabled>
-                                    </div>
-                                </div>
-                                
-                                <div class="button-group">
-                                    <button type="button" class="btn-primary" id="finishBtn"><i class="fas fa-check"></i> Finish</button>
-                                </div>
-                            </form>
-                        </div>
-                        
-                        <div class="export-controls" id="exportControls">
-                            <p><i class="fas fa-download"></i> Export Data by User & Container</p>
-                            <select id="userSelect">
-                                <option value="">Pilih User</option>
-                            </select>
-                            <select id="containerSelect">
-                                <option value="">Pilih Container</option>
-                            </select>
-                            <input type="date" id="dateFrom" placeholder="Dari Tanggal">
-                            <input type="date" id="dateTo" placeholder="Sampai Tanggal">
-                            <button type="button" class="btn-excel" id="exportSelectedBtn"><i class="fas fa-file-excel"></i> Export Selected</button>
-                            
-                            <!-- Preview Data -->
-                            <div class="preview-container hidden" id="exportPreview">
-                                <div class="preview-header">
-                                    <span>Preview Data (5 data teratas)</span>
-                                    <span id="previewCount">0 items</span>
-                                </div>
-                                <div id="previewData">
-                                    <!-- Data preview akan ditampilkan di sini -->
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="summary">
-                            <i class="fas fa-calculator"></i> Total EAN yang telah discan: <span id="totalEan">0</span>
-                        </div>
-                        
-                        <table id="dataTable">
-                            <thead>
-                                <tr>
-                                    <th><i class="fas fa-truck"></i> No. Container</th>
-                                    <th><i class="fas fa-pallet"></i> Pallet ID</th>
-                                    <th><i class="fas fa-barcode"></i> EAN</th>
-                                    <th><i class="fas fa-cubes"></i> Qty</th>
-                                    <th><i class="fas fa-clock"></i> Timestamp</th>
-                                    <th><i class="fas fa-cog"></i> Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableBody">
-                                <!-- Data akan ditampilkan di sini -->
-                            </tbody>
-                        </table>
-                        
-                        <div id="emptyState" class="empty-state hidden">
-                            <i class="fas fa-inbox"></i>
-                            <h3>Belum ada data</h3>
-                            <p>Tambahkan data menggunakan form di atas</p>
-                        </div>
-                    </div>
-
-                    <div class="tab-content" id="githubTab">
-                        <div class="github-config">
-                            <h3><i class="fab fa-github"></i> Konfigurasi GitHub</h3>
-                            <p>Konfigurasi penyimpanan data ke GitHub Repository</p>
-                        </div>
-                        
-                        <div class="form-container">
-                            <form id="githubConfigForm">
-                                <div class="form-group">
-                                    <div>
-                                        <label for="githubUsername"><i class="fab fa-github"></i> GitHub Username</label>
-                                        <input type="text" id="githubUsername" placeholder="Masukkan username GitHub">
-                                    </div>
-                                    <div>
-                                        <label for="githubRepo"><i class="fas fa-database"></i> Repository Name</label>
-                                        <input type="text" id="githubRepo" placeholder="Masukkan nama repository">
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <div>
-                                        <label for="githubToken"><i class="fas fa-key"></i> Personal Access Token</label>
-                                        <input type="password" id="githubToken" placeholder="Masukkan token akses GitHub">
-                                        <small>
-                                            <i class="fas fa-info-circle"></i> Token harus memiliki izin "repo"
-                                        </small>
-                                    </div>
-                                    <div>
-                                        <label for="dataFilePath"><i class="fas fa-file"></i> Data File Path</label>
-                                        <input type="text" id="dataFilePath" value="data/scannedData.json" placeholder="Path file data di repository">
-                                    </div>
-                                </div>
-                                
-                                <div class="button-group">
-                                    <button type="button" class="btn-info" id="saveGithubConfigBtn"><i class="fas fa-save"></i> Simpan Konfigurasi</button>
-                                    <button type="button" class="btn-primary" id="testGithubConnectionBtn"><i class="fas fa-plug"></i> Test Koneksi</button>
-                                </div>
-                            </form>
-                        </div>
-                        
-                        <div class="summary">
-                            <i class="fas fa-info-circle"></i> Status Koneksi: <span id="githubStatus">Belum dikonfigurasi</span>
-                        </div>
-                    </div>
+                    <span>Samsonite</span>
                 </div>
             </div>
         </div>
+        
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <label for="username"><i class="fas fa-user"></i> Username</label>
+                <input type="text" id="username" placeholder="Masukkan username Anda" required>
+            </div>
+            
+            <button type="submit" class="btn-login tumi" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Login ke Tumi
+            </button>
+        </form>
+        
+        <div class="login-footer">
+            <p>&copy; 2023 Apps Web Scan KED | Powered by GitHub Pages</p>
+        </div>
     </div>
-
-    <div class="notification" id="notification">Data berhasil diekspor ke Excel!</div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Variabel dan inisialisasi
-            const form = document.getElementById('dataForm');
-            const palletInput = document.getElementById('pallet');
-            const containerInput = document.getElementById('container');
-            const eanInput = document.getElementById('ean');
-            const qtyInput = document.getElementById('qty');
-            const eanHelpText = document.getElementById('eanHelpText');
-            const tableBody = document.getElementById('tableBody');
-            const emptyState = document.getElementById('emptyState');
-            const totalEanSpan = document.getElementById('totalEan');
-            const currentPalletSpan = document.getElementById('currentPallet');
-            const currentContainerSpan = document.getElementById('currentContainer');
-            const savePalletBtn = document.getElementById('savePalletBtn');
-            const saveContainerBtn = document.getElementById('saveContainerBtn');
-            const finishBtn = document.getElementById('finishBtn');
-            const exportSelectedBtn = document.getElementById('exportSelectedBtn');
-            const userSelect = document.getElementById('userSelect');
-            const containerSelect = document.getElementById('containerSelect');
-            const dateFromInput = document.getElementById('dateFrom');
-            const dateToInput = document.getElementById('dateTo');
-            const currentUserSpan = document.getElementById('currentUser');
-            const notification = document.getElementById('notification');
-            const userTypeBadge = document.getElementById('userTypeBadge');
-            const adminInterface = document.getElementById('adminInterface');
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const sidebar = document.getElementById('sidebar');
-            const userSelection = document.getElementById('userSelection');
-            const mainContainer = document.getElementById('mainContainer');
-            const initialUsernameInput = document.getElementById('initialUsernameInput');
-            const initialSetUserBtn = document.getElementById('initialSetUserBtn');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-            const githubConfigForm = document.getElementById('githubConfigForm');
-            const saveGithubConfigBtn = document.getElementById('saveGithubConfigBtn');
-            const testGithubConnectionBtn = document.getElementById('testGithubConnectionBtn');
-            const githubStatusSpan = document.getElementById('githubStatus');
-            const githubTabBtn = document.getElementById('githubTabBtn');
-            const exportPreview = document.getElementById('exportPreview');
-            const previewData = document.getElementById('previewData');
-            const previewCount = document.getElementById('previewCount');
+            const brandOptions = document.querySelectorAll('.brand-option');
+            const loginBtn = document.getElementById('loginBtn');
+            const loginForm = document.getElementById('loginForm');
             
-            // Modal elements
-            const editModal = document.getElementById('editModal');
-            const closeModalBtn = document.getElementById('closeModal');
-            const cancelEditBtn = document.getElementById('cancelEditBtn');
-            const editForm = document.getElementById('editForm');
-            const editIndexInput = document.getElementById('editIndex');
-            const editContainerInput = document.getElementById('editContainer');
-            const editPalletInput = document.getElementById('editPallet');
-            const editEanInput = document.getElementById('editEan');
-            const editQtyInput = document.getElementById('editQty');
+            let selectedBrand = 'tumi'; // Default brand
             
-            let currentPallet = '';
-            let currentContainer = '';
-            let scannedData = [];
-            let currentUser = 'Guest';
-            let isAdmin = false;
-            let eanInputTimer = null;
-            let currentEditingIndex = -1;
-            
-            // Konfigurasi GitHub
-            let githubConfig = {
-                username: '',
-                repo: '',
-                token: '',
-                dataFilePath: 'data/scannedData.json'
-            };
-            
-            // Fungsi untuk menampilkan/menyembunyikan konten utama
-            function toggleMainContent(show) {
-                if (show) {
-                    userSelection.style.display = 'none';
-                    mainContainer.style.display = 'flex';
-                } else {
-                    userSelection.style.display = 'flex';
-                    mainContainer.style.display = 'none';
-                }
-            }
-            
-            // Fungsi untuk toggle menu pada perangkat mobile
-            function setupMobileMenu() {
-                mobileMenuBtn.addEventListener('click', function() {
-                    sidebar.classList.toggle('collapsed');
-                });
-            }
-            
-            // Fungsi untuk mengecek apakah user adalah admin
-            function checkIfAdmin(username) {
-                return username.toLowerCase() === 'admin';
-            }
-            
-            // Fungsi untuk mengatur tampilan berdasarkan jenis user
-            function setUserView() {
-                if (isAdmin) {
-                    userTypeBadge.textContent = '(Admin)';
-                    userTypeBadge.classList.remove('hidden');
-                    userTypeBadge.style.backgroundColor = '#e74c3c';
-                    userTypeBadge.style.color = 'white';
-                    userTypeBadge.style.padding = '3px 8px';
-                    userTypeBadge.style.borderRadius = '4px';
-                    userTypeBadge.style.fontSize = '12px';
-                    userTypeBadge.style.marginLeft = '5px';
+            // Handle brand selection
+            brandOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove active class from all options
+                    brandOptions.forEach(opt => opt.classList.remove('active'));
                     
-                    adminInterface.classList.remove('hidden');
-                    
-                    // Tampilkan export controls untuk admin
-                    document.getElementById('exportControls').classList.remove('hidden');
-                } else {
-                    userTypeBadge.textContent = '(User)';
-                    userTypeBadge.classList.remove('hidden');
-                    userTypeBadge.style.backgroundColor = '#3498db';
-                    userTypeBadge.style.color = 'white';
-                    userTypeBadge.style.padding = '3px 8px';
-                    userTypeBadge.style.borderRadius = '4px';
-                    userTypeBadge.style.fontSize = '12px';
-                    userTypeBadge.style.marginLeft = '5px';
-                    
-                    adminInterface.classList.remove('hidden');
-                    
-                    // Sembunyikan export controls untuk user biasa
-                    document.getElementById('exportControls').classList.add('hidden');
-                }
-            }
-            
-            // Fungsi untuk mengaktifkan/menonaktifkan input EAN
-            function toggleEanInput() {
-                if (currentPallet && currentContainer) {
-                    eanInput.disabled = false;
-                    qtyInput.disabled = false;
-                    eanHelpText.style.display = 'none';
-                    eanInput.focus();
-                } else {
-                    eanInput.disabled = true;
-                    qtyInput.disabled = true;
-                    eanHelpText.style.display = 'block';
-                }
-            }
-            
-            // Fungsi untuk menyimpan data
-            async function saveData() {
-                const ean = eanInput.value.trim();
-                const qty = qtyInput.value;
-                
-                if (!currentPallet) {
-                    showNotification('Harap set pallet terlebih dahulu!', 'error');
-                    return;
-                }
-                
-                if (!currentContainer) {
-                    showNotification('Harap set container terlebih dahulu!', 'error');
-                    return;
-                }
-                
-                if (!ean) {
-                    showNotification('Harap isi kode EAN!', 'error');
-                    return;
-                }
-                
-                const newData = {
-                    pallet: currentPallet,
-                    container: currentContainer,
-                    ean,
-                    qty,
-                    timestamp: new Date().toLocaleString(),
-                    user: currentUser,
-                    date: new Date().toISOString().split('T')[0] // Menyimpan tanggal dalam format YYYY-MM-DD
-                };
-                
-                scannedData.push(newData);
-                await saveToGitHub();
-                renderTable();
-                updateTotalEan();
-                
-                // Reset hanya input EAN dan Qty, biarkan pallet dan container tetap
-                eanInput.value = '';
-                qtyInput.value = 1;
-                
-                showNotification('Data berhasil disimpan!');
-            }
-            
-            // Fungsi untuk logout
-            function logout() {
-                currentUser = 'Guest';
-                currentUserSpan.textContent = 'Guest';
-                isAdmin = false;
-                setUserView();
-                
-                showNotification('Anda telah logout');
-                
-                // Reset form
-                form.reset();
-                qtyInput.value = 1;
-                currentPallet = '';
-                currentPalletSpan.textContent = 'Belum dipilih';
-                currentContainer = '';
-                currentContainerSpan.textContent = 'Belum dipilih';
-                toggleEanInput();
-                
-                // Muat data dari GitHub
-                loadFromGitHub();
-                
-                // Tampilkan kembali form pemilihan user
-                toggleMainContent(false);
-            }
-            
-            // Fungsi untuk mengisi dropdown filter
-            function populateFilterDropdowns() {
-                // Kosongkan dropdown
-                userSelect.innerHTML = '<option value="">Pilih User</option>';
-                containerSelect.innerHTML = '<option value="">Pilih Container</option>';
-                
-                // Dapatkan nilai unik untuk setiap filter
-                const users = [...new Set(scannedData.map(item => item.user))];
-                
-                // Isi dropdown user
-                users.forEach(user => {
-                    const option = document.createElement('option');
-                    option.value = user;
-                    option.textContent = user;
-                    userSelect.appendChild(option);
-                });
-                
-                // Update container dropdown berdasarkan user yang dipilih
-                updateContainerDropdown();
-            }
-            
-            // Fungsi untuk memperbarui dropdown container berdasarkan user yang dipilih
-            function updateContainerDropdown() {
-                const selectedUser = userSelect.value;
-                
-                // Kosongkan dropdown container
-                containerSelect.innerHTML = '<option value="">Pilih Container</option>';
-                
-                // Jika user dipilih, filter container berdasarkan user tersebut
-                if (selectedUser) {
-                    const userContainers = [...new Set(scannedData
-                        .filter(item => item.user === selectedUser && item.container) // Hanya ambil yang memiliki container
-                        .map(item => item.container))];
-                    
-                    // Isi dropdown container
-                    userContainers.forEach(container => {
-                        const option = document.createElement('option');
-                        option.value = container;
-                        option.textContent = container;
-                        containerSelect.appendChild(option);
-                    });
-                }
-                
-                // Update preview
-                updateExportPreview();
-            }
-            
-            // Fungsi untuk update preview data export
-            function updateExportPreview() {
-                const selectedUser = userSelect.value;
-                const selectedContainer = containerSelect.value;
-                const dateFrom = dateFromInput.value;
-                const dateTo = dateToInput.value;
-                
-                // Filter data berdasarkan pilihan
-                let filteredData = scannedData;
-                
-                if (selectedUser) {
-                    filteredData = filteredData.filter(item => item.user === selectedUser);
-                }
-                
-                if (selectedContainer) {
-                    filteredData = filteredData.filter(item => item.container === selectedContainer);
-                }
-                
-                // Filter berdasarkan tanggal
-                if (dateFrom) {
-                    filteredData = filteredData.filter(item => item.date >= dateFrom);
-                }
-                
-                if (dateTo) {
-                    filteredData = filteredData.filter(item => item.date <= dateTo);
-                }
-                
-                // Hanya tampilkan data yang memiliki No. Container
-                filteredData = filteredData.filter(item => item.container && item.container.trim() !== '');
-                
-                // Update preview count
-                previewCount.textContent = `${filteredData.length} items`;
-                
-                // Tampilkan atau sembunyikan preview
-                if (filteredData.length > 0) {
-                    exportPreview.classList.remove('hidden');
-                    
-                    // Tampilkan 5 data teratas
-                    const previewItems = filteredData.slice(0, 5);
-                    let previewHTML = '';
-                    
-                    previewItems.forEach(item => {
-                        previewHTML += `
-                            <div class="preview-item">
-                                <div><strong>Container:</strong> ${item.container} | <strong>Pallet:</strong> ${item.pallet}</div>
-                                <div><strong>EAN:</strong> ${item.ean} | <strong>Qty:</strong> ${item.qty}</div>
-                                <div><strong>Timestamp:</strong> ${item.timestamp}</div>
-                            </div>
-                        `;
-                    });
-                    
-                    if (filteredData.length > 5) {
-                        previewHTML += `<div class="preview-item">... dan ${filteredData.length - 5} data lainnya</div>`;
-                    }
-                    
-                    previewData.innerHTML = previewHTML;
-                } else {
-                    exportPreview.classList.add('hidden');
-                    previewData.innerHTML = '';
-                }
-            }
-            
-            // Fungsi untuk export data ke Excel
-            function exportToExcel() {
-                const selectedUser = userSelect.value;
-                const selectedContainer = containerSelect.value;
-                const dateFrom = dateFromInput.value;
-                const dateTo = dateToInput.value;
-                
-                // Filter data berdasarkan pilihan
-                let filteredData = scannedData;
-                
-                if (selectedUser) {
-                    filteredData = filteredData.filter(item => item.user === selectedUser);
-                }
-                
-                if (selectedContainer) {
-                    filteredData = filteredData.filter(item => item.container === selectedContainer);
-                }
-                
-                // Filter berdasarkan tanggal
-                if (dateFrom) {
-                    filteredData = filteredData.filter(item => item.date >= dateFrom);
-                }
-                
-                if (dateTo) {
-                    filteredData = filteredData.filter(item => item.date <= dateTo);
-                }
-                
-                // Hanya tampilkan data yang memiliki No. Container
-                filteredData = filteredData.filter(item => item.container && item.container.trim() !== '');
-                
-                if (filteredData.length === 0) {
-                    showNotification('Tidak ada data untuk diekspor!', 'error');
-                    return;
-                }
-                
-                // Siapkan data untuk Excel
-                const excelData = filteredData.map(item => ({
-                    'No. Container': item.container,
-                    'Pallet ID': item.pallet,
-                    'EAN': item.ean,
-                    'Qty': item.qty,
-                    'Timestamp': item.timestamp,
-                    'User': item.user,
-                    'Date': item.date
-                }));
-                
-                // Buat worksheet
-                const ws = XLSX.utils.json_to_sheet(excelData);
-                
-                // Buat workbook
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, 'Data Scan');
-                
-                // Buat nama file
-                const fileName = `Data_Scan_${selectedUser || 'All'}_${selectedContainer || 'All'}_${new Date().getTime()}.xlsx`;
-                
-                // Export ke file Excel
-                XLSX.writeFile(wb, fileName);
-                
-                showNotification('Data berhasil diekspor ke Excel!');
-            }
-            
-            // Fungsi untuk menyimpan data ke GitHub
-            async function saveToGitHub() {
-                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    console.warn('Konfigurasi GitHub belum lengkap, data disimpan di local storage');
-                    localStorage.setItem('scannedData', JSON.stringify(scannedData));
-                    populateFilterDropdowns();
-                    updateExportPreview();
-                    return false;
-                }
-                
-                try {
-                    // Cek apakah file sudah ada
-                    const fileSHA = await getFileSHA();
-                    
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            message: 'Update scanned data',
-                            content: btoa(unescape(encodeURIComponent(JSON.stringify(scannedData, null, 2)))), // Encode data ke base64
-                            sha: fileSHA // Diperlukan untuk update file yang sudah ada
-                        })
-                    });
-                    
-                    if (response.ok) {
-                        console.log('Data berhasil disimpan ke GitHub');
-                        populateFilterDropdowns();
-                        updateExportPreview();
-                        return true;
-                    } else {
-                        const errorText = await response.text();
-                        console.error('Gagal menyimpan data ke GitHub:', errorText);
-                        // Fallback ke local storage jika gagal
-                        localStorage.setItem('scannedData', JSON.stringify(scannedData));
-                        showNotification('Gagal menyimpan ke GitHub, data disimpan lokal', 'error');
-                        return false;
-                    }
-                } catch (error) {
-                    console.error('Error menyimpan data ke GitHub:', error);
-                    // Fallback ke local storage jika gagal
-                    localStorage.setItem('scannedData', JSON.stringify(scannedData));
-                    showNotification('Error menyimpan ke GitHub, data disimpan lokal', 'error');
-                    return false;
-                }
-            }
-            
-            // Fungsi untuk mendapatkan SHA file (diperlukan untuk update)
-            async function getFileSHA() {
-                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    return null;
-                }
-                
-                try {
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        return data.sha;
-                    }
-                    return null; // File belum ada
-                } catch (error) {
-                    console.error('Error mendapatkan SHA file:', error);
-                    return null;
-                }
-            }
-            
-            // Fungsi untuk memuat data dari GitHub
-            async function loadFromGitHub() {
-                // Coba muat dari local storage terlebih dahulu
-                const savedData = localStorage.getItem('scannedData');
-                if (savedData) {
-                    scannedData = JSON.parse(savedData);
-                    populateFilterDropdowns();
-                    updateExportPreview();
-                }
-                
-                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    console.warn('Konfigurasi GitHub belum lengkap, muat data dari local storage');
-                    return false;
-                }
-                
-                try {
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        // Decode dari base64
-                        const decodedData = atob(data.content);
-                        scannedData = JSON.parse(decodedData);
-                        populateFilterDropdowns();
-                        updateExportPreview();
-                        
-                        // Simpan juga ke local storage sebagai backup
-                        localStorage.setItem('scannedData', JSON.stringify(scannedData));
-                        
-                        return true;
-                    } else if (response.status === 404) {
-                        // File belum ada, inisialisasi dengan array kosong
-                        scannedData = [];
-                        return true;
-                    } else {
-                        console.error('Gagal memuat data dari GitHub:', await response.text());
-                        return false;
-                    }
-                } catch (error) {
-                    console.error('Error memuat data dari GitHub:', error);
-                    return false;
-                }
-            }
-            
-            // Fungsi untuk menguji koneksi GitHub
-            async function testGitHubConnection() {
-                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    showNotification('Harap isi semua field konfigurasi GitHub!', 'error');
-                    return;
-                }
-                
-                try {
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}`, {
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        showNotification('Koneksi GitHub berhasil!', 'success');
-                        githubStatusSpan.textContent = 'Terkoneksi';
-                        githubStatusSpan.style.color = '#27ae60';
-                        return true;
-                    } else {
-                        const errorText = await response.text();
-                        showNotification('Gagal terhubung ke GitHub: ' + errorText, 'error');
-                        githubStatusSpan.textContent = 'Gagal terkoneksi';
-                        githubStatusSpan.style.color = '#e74c3c';
-                        return false;
-                    }
-                } catch (error) {
-                    showNotification('Error testing koneksi GitHub: ' + error.message, 'error');
-                    githubStatusSpan.textContent = 'Error';
-                    githubStatusSpan.style.color = '#e74c3c';
-                    return false;
-                }
-            }
-            
-            // Fungsi untuk menyimpan konfigurasi GitHub
-            function saveGithubConfig() {
-                githubConfig = {
-                    username: document.getElementById('githubUsername').value.trim(),
-                    repo: document.getElementById('githubRepo').value.trim(),
-                    token: document.getElementById('githubToken').value.trim(),
-                    dataFilePath: document.getElementById('dataFilePath').value.trim() || 'data/scannedData.json'
-                };
-                
-                localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
-                showNotification('Konfigurasi GitHub berhasil disimpan!');
-                
-                // Muat ulang data dari GitHub setelah konfigurasi disimpan
-                loadFromGitHub();
-            }
-            
-            // Fungsi untuk memuat konfigurasi GitHub dari local storage
-            function loadGithubConfig() {
-                const savedConfig = localStorage.getItem('githubConfig');
-                if (savedConfig) {
-                    githubConfig = JSON.parse(savedConfig);
-                    
-                    // Isi form dengan nilai yang disimpan
-                    document.getElementById('githubUsername').value = githubConfig.username;
-                    document.getElementById('githubRepo').value = githubConfig.repo;
-                    document.getElementById('githubToken').value = githubConfig.token;
-                    document.getElementById('dataFilePath').value = githubConfig.dataFilePath;
-                    
-                    // Perbarui status
-                    if (githubConfig.username && githubConfig.repo && githubConfig.token) {
-                        githubStatusSpan.textContent = 'Terkonfigurasi';
-                        githubStatusSpan.style.color = '#27ae60';
-                    } else {
-                        githubStatusSpan.textContent = 'Belum dikonfigurasi';
-                        githubStatusSpan.style.color = '#7f8c8d';
-                    }
-                }
-            }
-            
-            // Fungsi untuk menampilkan modal edit data
-            function showEditModal(index) {
-                const data = scannedData[index];
-                currentEditingIndex = index;
-                
-                editIndexInput.value = index;
-                editContainerInput.value = data.container;
-                editPalletInput.value = data.pallet;
-                editEanInput.value = data.ean;
-                editQtyInput.value = data.qty;
-                
-                editModal.style.display = 'flex';
-            }
-            
-            // Fungsi untuk menyembunyikan modal edit data
-            function hideEditModal() {
-                editModal.style.display = 'none';
-                currentEditingIndex = -1;
-                editForm.reset();
-            }
-            
-            // Fungsi untuk menyimpan perubahan data
-            async function saveEditedData(e) {
-                e.preventDefault();
-                
-                if (currentEditingIndex === -1) return;
-                
-                scannedData[currentEditingIndex] = {
-                    ...scannedData[currentEditingIndex],
-                    container: editContainerInput.value,
-                    pallet: editPalletInput.value,
-                    ean: editEanInput.value,
-                    qty: editQtyInput.value,
-                    timestamp: new Date().toLocaleString() // Update timestamp
-                };
-                
-                await saveToGitHub();
-                renderTable();
-                updateTotalEan();
-                updateExportPreview();
-                
-                hideEditModal();
-                showNotification('Data berhasil diupdate!');
-            }
-            
-            // Event listeners
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                saveData();
-            });
-            
-            // Event listener untuk auto save pada input EAN dengan delay 1 detik
-            eanInput.addEventListener('input', function() {
-                // Clear timer sebelumnya jika ada
-                clearTimeout(eanInputTimer);
-                
-                // Set timer baru untuk 1 detik
-                eanInputTimer = setTimeout(function() {
-                    if (eanInput.value.trim() !== '') {
-                        saveData();
-                    }
-                }, 100);
-            });
-            
-            // Event listener untuk tombol Finish
-            finishBtn.addEventListener('click', function() {
-                if (!currentPallet) {
-                    showNotification('Harap set pallet terlebih dahulu!', 'error');
-                    return;
-                }
-                
-                if (!currentContainer) {
-                    showNotification('Harap set container terlebih dahulu!', 'error');
-                    return;
-                }
-                
-                if (scannedData.filter(item => item.pallet === currentPallet && item.user === currentUser).length === 0) {
-                    showNotification('Tidak ada data untuk pallet ini!', 'error');
-                    return;
-                }
-                
-                showNotification(`Data untuk pallet ${currentPallet} telah diselesaikan!`);
-                
-                // Reset pallet dan container setelah finish
-                currentPallet = '';
-                currentContainer = '';
-                currentPalletSpan.textContent = 'Belum dipilih';
-                currentContainerSpan.textContent = 'Belum dipilih';
-                palletInput.value = '';
-                containerInput.value = '';
-                toggleEanInput();
-            });
-            
-            savePalletBtn.addEventListener('click', function() {
-                const pallet = palletInput.value.trim();
-                if (!pallet) {
-                    showNotification('Harap masukkan Pallet ID!', 'error');
-                    return;
-                }
-                
-                currentPallet = pallet;
-                currentPalletSpan.textContent = pallet;
-                showNotification(`Pallet ID diatur menjadi: ${pallet}`);
-                updateTotalEan();
-                toggleEanInput();
-            });
-            
-            saveContainerBtn.addEventListener('click', function() {
-                const container = containerInput.value.trim();
-                if (!container) {
-                    showNotification('Harap masukkan No. Container!', 'error');
-                    return;
-                }
-                
-                currentContainer = container;
-                currentContainerSpan.textContent = container;
-                showNotification(`No. Container diatur menjadi: ${container}`);
-                updateTotalEan();
-                toggleEanInput();
-            });
-            
-            // Event listener untuk tombol export
-            exportSelectedBtn.addEventListener('click', exportToExcel);
-            
-            // Event listener untuk perubahan dropdown user
-            userSelect.addEventListener('change', function() {
-                updateContainerDropdown();
-            });
-            
-            // Event listener untuk perubahan filter
-            containerSelect.addEventListener('change', updateExportPreview);
-            dateFromInput.addEventListener('change', updateExportPreview);
-            dateToInput.addEventListener('change', updateExportPreview);
-            
-            logoutBtn.addEventListener('click', logout);
-            
-            // Event listener untuk pemilihan user awal
-            initialSetUserBtn.addEventListener('click', function() {
-                const username = initialUsernameInput.value.trim();
-                if (!username) {
-                    showNotification('Harap masukkan username!', 'error');
-                    return;
-                }
-                
-                currentUser = username;
-                currentUserSpan.textContent = username;
-                isAdmin = checkIfAdmin(username);
-                setUserView();
-                
-                showNotification(`Selamat datang, ${username}!`);
-                
-                // Sembunyikan form pemilihan user dan tampilkan konten utama
-                toggleMainContent(true);
-                
-                // Muat data dari GitHub
-                loadFromGitHub();
-                renderTable();
-                updateTotalEan();
-                populateFilterDropdowns();
-                updateExportPreview();
-                toggleEanInput();
-                
-                // Fokuskan ke input EAN jika sudah diaktifkan
-                if (!eanInput.disabled) {
-                    eanInput.focus();
-                }
-            });
-            
-            // Event listener untuk tekan Enter pada input username awal
-            initialUsernameInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    initialSetUserBtn.click();
-                }
-            });
-            
-            // Event listener untuk tab
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-tab');
-                    
-                    // Jika tab GitHub diklik dan user bukan admin
-                    if (tabId === 'github' && !isAdmin) {
-                        showNotification('Hanya admin yang dapat mengakses menu GitHub Config!', 'error');
-                        return;
-                    }
-                    
-                    // Hapus kelas active dari semua tab dan konten
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(c => c.classList.remove('active'));
-                    
-                    // Tambahkan kelas active ke tab yang diklik
+                    // Add active class to clicked option
                     this.classList.add('active');
                     
-                    // Tampilkan konten yang sesuai
-                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                    // Update selected brand
+                    selectedBrand = this.getAttribute('data-brand');
+                    
+                    // Update login button text and style
+                    if (selectedBrand === 'tumi') {
+                        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login ke Tumi';
+                        loginBtn.className = 'btn-login tumi';
+                    } else {
+                        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login ke Samsonite';
+                        loginBtn.className = 'btn-login samsonite';
+                    }
                 });
             });
             
-            // Event listener untuk tombol simpan konfigurasi GitHub
-            saveGithubConfigBtn.addEventListener('click', saveGithubConfig);
-            
-            // Event listener untuk tombol test koneksi GitHub
-            testGithubConnectionBtn.addEventListener('click', testGitHubConnection);
-            
-            // Event listener untuk modal edit
-            closeModalBtn.addEventListener('click', hideEditModal);
-            cancelEditBtn.addEventListener('click', hideEditModal);
-            editForm.addEventListener('submit', saveEditedData);
-            
-            // Tutup modal ketika klik di luar konten modal
-            editModal.addEventListener('click', function(e) {
-                if (e.target === editModal) {
-                    hideEditModal();
+            // Handle form submission
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value.trim();
+                
+                if (!username) {
+                    alert('Harap masukkan username!');
+                    return;
+                }
+                
+                // Save username to localStorage
+                localStorage.setItem('username', username);
+                localStorage.setItem('brand', selectedBrand);
+                
+                // Redirect to the appropriate page
+                if (selectedBrand === 'tumi') {
+                    window.location.href = 'Tumi.html';
+                } else {
+                    window.location.href = 'Samsonite.html';
                 }
             });
             
-            // Fungsi untuk menampilkan notifikasi
-            function showNotification(message, type = 'success') {
-                notification.textContent = message;
-                notification.style.backgroundColor = type === 'success' ? '#2ecc71' : '#e74c3c';
-                notification.style.display = 'block';
-                
-                setTimeout(() => {
-                    notification.style.display = 'none';
-                }, 3000);
+            // Check if there's a saved username
+            const savedUsername = localStorage.getItem('username');
+            if (savedUsername) {
+                document.getElementById('username').value = savedUsername;
             }
             
-            // Fungsi untuk merender tabel
-            function renderTable() {
-                // Kosongkan tabel
-                tableBody.innerHTML = '';
-                
-                if (scannedData.length === 0) {
-                    emptyState.classList.remove('hidden');
-                    return;
-                }
-                
-                emptyState.classList.add('hidden');
-                
-                // Filter data berdasarkan user jika bukan admin
-                let dataToShow = scannedData;
-                if (!isAdmin) {
-                    dataToShow = scannedData.filter(item => item.user === currentUser);
-                }
-                
-                // Hanya tampilkan data yang memiliki No. Container
-                dataToShow = dataToShow.filter(item => item.container && item.container.trim() !== '');
-                
-                if (dataToShow.length === 0) {
-                    emptyState.classList.remove('hidden');
-                    return;
-                }
-                
-                // Tambahkan data ke tabel
-                dataToShow.forEach((data, index) => {
-                    const row = document.createElement('tr');
-                    
-                    row.innerHTML = `
-                        <td>${data.container}</td>
-                        <td>${data.pallet}</td>
-                        <td>${data.ean}</td>
-                        <td>${data.qty}</td>
-                        <td>${data.timestamp}</td>
-                        <td class="actions">
-                            ${isAdmin ? `<i class="fas fa-edit btn-edit" data-index="${index}"></i>
-                            <i class="fas fa-trash btn-delete" data-index="${index}"></i>` : ''}
-                        </td>
-                    `;
-                    
-                    tableBody.appendChild(row);
+            // Check if there's a saved brand preference
+            const savedBrand = localStorage.getItem('brand');
+            if (savedBrand) {
+                selectedBrand = savedBrand;
+                brandOptions.forEach(option => {
+                    option.classList.remove('active');
+                    if (option.getAttribute('data-brand') === savedBrand) {
+                        option.classList.add('active');
+                        
+                        if (savedBrand === 'tumi') {
+                            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login ke Tumi';
+                            loginBtn.className = 'btn-login tumi';
+                        } else {
+                            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login ke Samsonite';
+                            loginBtn.className = 'btn-login samsonite';
+                        }
+                    }
                 });
-                
-                // Tambahkan event listener untuk tombol edit dan hapus
-                if (isAdmin) {
-                    document.querySelectorAll('.btn-edit').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const index = parseInt(this.getAttribute('data-index'));
-                            showEditModal(index);
-                        });
-                    });
-                    
-                    document.querySelectorAll('.btn-delete').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const index = parseInt(this.getAttribute('data-index'));
-                            deleteData(index);
-                        });
-                    });
-                }
             }
-            
-            // Fungsi untuk menghapus data
-            async function deleteData(index) {
-                if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                    scannedData.splice(index, 1);
-                    await saveToGitHub();
-                    renderTable();
-                    updateTotalEan();
-                    updateExportPreview();
-                    showNotification('Data berhasil dihapus');
-                }
-            }
-            
-            // Fungsi untuk mengupdate total EAN
-            function updateTotalEan() {
-                let total = 0;
-                
-                // Hitung total berdasarkan Container dan Pallet ID yang sama
-                if (currentContainer && currentPallet) {
-                    total = scannedData
-                        .filter(item => item.container === currentContainer && item.pallet === currentPallet)
-                        .reduce((sum, item) => sum + parseInt(item.qty), 0);
-                }
-                
-                totalEanSpan.textContent = total;
-            }
-            
-            // Inisialisasi
-            loadGithubConfig(); // Muat konfigurasi GitHub
-            loadFromGitHub(); // Muat data dari GitHub
-            setupMobileMenu(); // Setup mobile menu
-            setUserView();
-            renderTable();
-            updateTotalEan();
-            toggleEanInput();
-            
-            // Tampilkan form pemilihan user pertama kali
-            toggleMainContent(false);
-            
-            // Fokuskan ke input username pada form pemilihan user
-            initialUsernameInput.focus();
         });
     </script>
 </body>
