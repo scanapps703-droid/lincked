@@ -9,5 +9,82 @@
     "timestamp": "30/8/2025, 22.20.03",
     "user": "Riyan",
     "date": "2025-08-30"
+  },
+  {
+    "pallet": "A00001",
+    "container": "B20003",
+    "ean": "00",
+    "sku": "",
+    "description": "",
+    "qty": "1",
+    "timestamp": "30/8/2025, 22.20.03",
+    "user": "Riyan",
+    "date": "2025-08-30"
+  },
+  {
+    "pallet": "A00001",
+    "container": "B20003",
+    "ean": "000",
+    "sku": "",
+    "description": "",
+    "qty": "1",
+    "timestamp": "30/8/2025, 22.20.03",
+    "user": "Riyan",
+    "date": "2025-08-30"
+  },
+  {
+    "pallet": "A00001",
+    "container": "B20003",
+    "ean": "0000",
+    "sku": "",
+    "description": "",
+    "qty": "1",
+    "timestamp": "30/8/2025, 22.20.04",
+    "user": "Riyan",
+    "date": "2025-08-30"
+  },
+  {
+    "pallet": "A00001",
+    "container": "B20003",
+    "ean": "00000",
+    "sku": "",
+    "description": "",
+    "qty": "1",
+    "timestamp": "30/8/2025, 22.20.04",
+    "user": "Riyan",
+    "date": "2025-08-30"
+  },
+  {
+    "pallet": "A00001",
+    "container": "B20003",
+    "ean": "0",
+    "sku": "",
+    "description": "",
+    "qty": "1",
+    "timestamp": "30/8/2025, 22.20.05",
+    "user": "Riyan",
+    "date": "2025-08-30"
+  },
+  {
+    "pallet": "A00001",
+    "container": "B20003",
+    "ean": "00",
+    "sku": "",
+    "description": "",
+    "qty": "1",
+    "timestamp": "30/8/2025, 22.20.05",
+    "user": "Riyan",
+    "date": "2025-08-30"
+  },
+  {
+    "pallet": "A00001",
+    "container": "B20003",
+    "ean": "000",
+    "sku": "",
+    "description": "",
+    "qty": "1",
+    "timestamp": "30/8/2025, 22.20.05",
+    "user": "Riyan",
+    "date": "2025-08-30"
   }
 ]
