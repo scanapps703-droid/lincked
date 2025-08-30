@@ -49,5 +49,14 @@
     "timestamp": "31/8/2025, 00.37.21",
     "user": "Maman",
     "date": "2025-08-30"
+  },
+  {
+    "pallet": "A01",
+    "container": "Test01",
+    "ean": "0",
+    "qty": "1",
+    "timestamp": "31/8/2025, 00.37.23",
+    "user": "Maman",
+    "date": "2025-08-30"
   }
 ]
