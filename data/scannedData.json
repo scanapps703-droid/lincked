@@ -1,14 +1,5 @@
 [
   {
-    "pallet": "Test001",
-    "container": "T4575",
-    "ean": "Test01",
-    "qty": "1",
-    "timestamp": "29/8/2025, 17.42.36",
-    "user": "Mama",
-    "date": "2025-08-29"
-  },
-  {
     "pallet": "Test002",
     "container": "T4575",
     "ean": "Test",
