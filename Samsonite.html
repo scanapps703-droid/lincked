@@ -470,6 +470,50 @@
             background-color: var(--danger);
         }
 
+        /* Styling untuk status koneksi GitHub */
+        .github-connection-status {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 10px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .github-connected {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .github-disconnected {
+            background-color: var(--gray);
+            color: white;
+        }
+
+        .github-error {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .sync-button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            margin-left: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .sync-button:hover {
+            background-color: var(--primary-dark);
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -531,6 +575,12 @@
             table {
                 display: block;
                 overflow-x: auto;
+            }
+
+            .github-connection-status {
+                margin-left: 0;
+                margin-top: 5px;
+                display: block;
             }
         }
 
@@ -666,9 +716,18 @@
                 </div>
                 
                 <div class="user-info">
-                    <p><i class="fas fa-user"></i> User: <span id="currentUser">Guest</span> <span id="userTypeBadge" class="hidden"></span></p>
+                    <p>
+                        <i class="fas fa-user"></i> User: <span id="currentUser">Guest</span> 
+                        <span id="userTypeBadge" class="hidden"></span>
+                        <span id="githubStatusIndicator" class="github-connection-status github-disconnected">
+                            <i class="fab fa-github"></i> <span id="githubStatusText">Tidak Terkoneksi</span>
+                        </span>
+                    </p>
                     <div class="user-controls">
                         <button type="button" class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                        <button type="button" class="sync-button" id="syncButton" title="Sinkronisasi Data">
+                            <i class="fas fa-sync"></i> Sync
+                        </button>
                     </div>
                 </div>
             </div>
@@ -888,6 +947,11 @@
             const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
             const deleteSelectedContainer = document.getElementById('deleteSelectedContainer');
             
+            // Elements untuk fitur baru: status GitHub dan sinkronisasi
+            const githubStatusIndicator = document.getElementById('githubStatusIndicator');
+            const githubStatusText = document.getElementById('githubStatusText');
+            const syncButton = document.getElementById('syncButton');
+            
             let currentPallet = '';
             let currentContainer = '';
             let scannedData = [];
@@ -895,13 +959,15 @@
             let isAdmin = false;
             let eanInputTimer = null;
             let currentEditingIndex = -1;
+            let githubSyncInterval = null;
             
             // Konfigurasi GitHub
             let githubConfig = {
                 username: '',
                 repo: '',
                 token: '',
-                dataFilePath: 'data/scannedData.json'
+                dataFilePath: 'data/scannedData.json',
+                lastSync: null
             };
             
             // Fungsi untuk menampilkan/menyembunyikan konten utama
@@ -1040,6 +1106,15 @@
                 currentContainer = '';
                 currentContainerSpan.textContent = 'Belum dipilih';
                 toggleEanInput();
+                
+                // Hentikan interval sinkronisasi
+                if (githubSyncInterval) {
+                    clearInterval(githubSyncInterval);
+                    githubSyncInterval = null;
+                }
+                
+                // Update status GitHub
+                updateGitHubStatus(false, 'Tidak terkoneksi');
                 
                 // Muat data dari GitHub
                 loadFromGitHub();
@@ -1183,19 +1258,24 @@
                     
                     if (response.ok) {
                         console.log('Data berhasil disimpan ke GitHub');
+                        githubConfig.lastSync = new Date();
+                        localStorage.setItem('githubLastSync', githubConfig.lastSync.toISOString());
                         populateFilterDropdowns();
                         updateTotalContainer();
+                        updateGitHubStatus(true, 'Terkoneksi');
                         return true;
                     } else {
                         const errorText = await response.text();
                         console.error('Gagal menyimpan data ke GitHub:', errorText);
                         localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                        updateGitHubStatus(false, 'Error menyimpan');
                         showNotification('Gagal menyimpan ke GitHub, data disimpan lokal', 'error');
                         return false;
                     }
                 } catch (error) {
                     console.error('Error menyimpan data ke GitHub:', error);
                     localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                    updateGitHubStatus(false, 'Error koneksi');
                     showNotification('Error menyimpan ke GitHub, data disimpan lokal', 'error');
                     return false;
                 }
@@ -1237,6 +1317,7 @@
                 
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
                     console.warn('Konfigurasi GitHub belum lengkap, muat data dari local storage');
+                    updateGitHubStatus(false, 'Tidak terkoneksi');
                     return false;
                 }
                 
@@ -1255,17 +1336,25 @@
                         updateTotalContainer();
                         
                         localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                        githubConfig.lastSync = new Date();
+                        localStorage.setItem('githubLastSync', githubConfig.lastSync.toISOString());
                         
+                        updateGitHubStatus(true, 'Terkoneksi');
+                        showNotification('Data berhasil disinkronisasi dari GitHub');
                         return true;
                     } else if (response.status === 404) {
                         scannedData = [];
+                        updateGitHubStatus(true, 'Terkoneksi (file baru)');
                         return true;
                     } else {
-                        console.error('Gagal memuat data dari GitHub:', await response.text());
+                        const errorText = await response.text();
+                        console.error('Gagal memuat data dari GitHub:', errorText);
+                        updateGitHubStatus(false, 'Error memuat data');
                         return false;
                     }
                 } catch (error) {
                     console.error('Error memuat data dari GitHub:', error);
+                    updateGitHubStatus(false, 'Error koneksi');
                     return false;
                 }
             }
@@ -1274,6 +1363,7 @@
             async function testGitHubConnection() {
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
                     showNotification('Harap isi semua field konfigurasi GitHub!', 'error');
+                    updateGitHubStatus(false, 'Konfigurasi tidak lengkap');
                     return;
                 }
                 
@@ -1288,18 +1378,21 @@
                         showNotification('Koneksi GitHub berhasil!', 'success');
                         githubStatusSpan.textContent = 'Terkoneksi';
                         githubStatusSpan.style.color = '#27ae60';
+                        updateGitHubStatus(true, 'Terkoneksi');
                         return true;
                     } else {
                         const errorText = await response.text();
                         showNotification('Gagal terhubung ke GitHub: ' + errorText, 'error');
                         githubStatusSpan.textContent = 'Gagal terkoneksi';
                         githubStatusSpan.style.color = '#e74c3c';
+                        updateGitHubStatus(false, 'Gagal terkoneksi');
                         return false;
                     }
                 } catch (error) {
                     showNotification('Error testing koneksi GitHub: ' + error.message, 'error');
                     githubStatusSpan.textContent = 'Error';
                     githubStatusSpan.style.color = '#e74c3c';
+                    updateGitHubStatus(false, 'Error koneksi');
                     return false;
                 }
             }
@@ -1310,13 +1403,21 @@
                     username: document.getElementById('githubUsername').value.trim(),
                     repo: document.getElementById('githubRepo').value.trim(),
                     token: document.getElementById('githubToken').value.trim(),
-                    dataFilePath: document.getElementById('dataFilePath').value.trim() || 'data/scannedData.json'
+                    dataFilePath: document.getElementById('dataFilePath').value.trim() || 'data/scannedData.json',
+                    lastSync: githubConfig.lastSync
                 };
                 
                 localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
                 showNotification('Konfigurasi GitHub berhasil disimpan!');
                 
+                // Test koneksi setelah menyimpan konfigurasi
+                testGitHubConnection();
                 loadFromGitHub();
+                
+                // Mulai interval sinkronisasi jika belum ada
+                if (!githubSyncInterval) {
+                    startGitHubSyncInterval();
+                }
             }
             
             // Fungsi untuk memuat konfigurasi GitHub dari local storage
@@ -1330,12 +1431,20 @@
                     document.getElementById('githubToken').value = githubConfig.token;
                     document.getElementById('dataFilePath').value = githubConfig.dataFilePath;
                     
+                    // Load last sync time
+                    const lastSync = localStorage.getItem('githubLastSync');
+                    if (lastSync) {
+                        githubConfig.lastSync = new Date(lastSync);
+                    }
+                    
                     if (githubConfig.username && githubConfig.repo && githubConfig.token) {
                         githubStatusSpan.textContent = 'Terkonfigurasi';
                         githubStatusSpan.style.color = '#27ae60';
+                        updateGitHubStatus(true, 'Terkoneksi');
                     } else {
                         githubStatusSpan.textContent = 'Belum dikonfigurasi';
                         githubStatusSpan.style.color = '#7f8c8d';
+                        updateGitHubStatus(false, 'Tidak terkoneksi');
                     }
                 }
             }
@@ -1419,6 +1528,59 @@
                 showNotification(`${indexesToDelete.length} data berhasil dihapus!`);
             }
             
+            // Fungsi untuk memperbarui status indikator koneksi GitHub
+            function updateGitHubStatus(isConnected, message) {
+                if (isConnected) {
+                    githubStatusIndicator.className = 'github-connection-status github-connected';
+                    githubStatusText.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+                } else {
+                    githubStatusIndicator.className = 'github-connection-status github-disconnected';
+                    githubStatusText.innerHTML = `<i class="fas fa-times-circle"></i> ${message}`;
+                }
+                
+                // Sembunyikan indikator jika tidak ada konfigurasi GitHub
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    githubStatusIndicator.style.display = 'none';
+                } else {
+                    githubStatusIndicator.style.display = 'inline-flex';
+                }
+            }
+            
+            // Fungsi untuk memulai interval sinkronisasi GitHub
+            function startGitHubSyncInterval() {
+                // Hentikan interval yang sudah ada jika ada
+                if (githubSyncInterval) {
+                    clearInterval(githubSyncInterval);
+                }
+                
+                // Set interval sinkronisasi setiap 30 detik
+                githubSyncInterval = setInterval(async () => {
+                    if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                        console.log('Melakukan sinkronisasi otomatis dengan GitHub...');
+                        await loadFromGitHub();
+                        renderTable();
+                        updateTotalEan();
+                        updateTotalContainer();
+                    }
+                }, 30000); // 30 detik
+            }
+            
+            // Fungsi untuk sinkronisasi manual
+            async function manualSync() {
+                showNotification('Memulai sinkronisasi dengan GitHub...');
+                syncButton.innerHTML = '<i class="fas fa-sync fa-spin"></i> Syncing...';
+                syncButton.disabled = true;
+                
+                await loadFromGitHub();
+                renderTable();
+                updateTotalEan();
+                updateTotalContainer();
+                
+                syncButton.innerHTML = '<i class="fas fa-sync"></i> Sync';
+                syncButton.disabled = false;
+                showNotification('Sinkronisasi selesai');
+            }
+
             // Event listeners
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -1539,6 +1701,11 @@
                 populateFilterDropdowns();
                 toggleEanInput();
                 
+                // Mulai interval sinkronisasi jika konfigurasi GitHub ada
+                if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                    startGitHubSyncInterval();
+                }
+                
                 // Fokuskan ke input EAN jika sudah diaktifkan
                 if (!eanInput.disabled) {
                     eanInput.focus();
@@ -1604,6 +1771,9 @@
             
             // Event listener untuk tombol delete selected
             deleteSelectedBtn.addEventListener('click', deleteSelectedData);
+            
+            // Event listener untuk tombol sinkronisasi manual
+            syncButton.addEventListener('click', manualSync);
             
             // Fungsi untuk menampilkan notifikasi
             function showNotification(message, type = 'success') {
