@@ -1569,14 +1569,14 @@
                     descriptionInput.value = '';
                 }
                 
-                // Auto save setelah 1 detik
+                // Auto save setelah 0.2 detik
                 clearTimeout(eanInputTimer);
                 
                 eanInputTimer = setTimeout(function() {
                     if (eanInput.value.trim() !== '') {
                         saveData();
                     }
-                }, 1000);
+                }, 200);
             });
             
             // Event listener untuk tombol Finish
