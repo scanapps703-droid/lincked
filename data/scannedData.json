@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "pallet": "A00001",
+    "container": "B20003",
+    "ean": "0",
+    "sku": "",
+    "description": "",
+    "qty": "1",
+    "timestamp": "30/8/2025, 22.20.03",
+    "user": "Riyan",
+    "date": "2025-08-30"
+  }
+]
