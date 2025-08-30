@@ -31,5 +31,14 @@
     "timestamp": "31/8/2025, 00.00.36",
     "user": "Riyan",
     "date": "2025-08-30"
+  },
+  {
+    "pallet": "B02",
+    "container": "A01",
+    "ean": "0",
+    "qty": "1",
+    "timestamp": "31/8/2025, 00.29.47",
+    "user": "Riyan",
+    "date": "2025-08-30"
   }
 ]
