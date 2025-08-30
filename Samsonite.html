@@ -838,6 +838,20 @@
             const testGithubConnectionBtn = document.getElementById('testGithubConnectionBtn');
             const githubStatusSpan = document.getElementById('githubStatus');
             const githubTabBtn = document.getElementById('githubTabBtn');
+            // Check if user is logged in
+const username = localStorage.getItem('username');
+const brand = localStorage.getItem('brand');
+
+if (!username) {
+    // Redirect to login if not logged in
+    window.location.href = 'index.html';
+}
+
+// Set the current user
+currentUser = username;
+currentUserSpan.textContent = username;
+isAdmin = checkIfAdmin(username);
+setUserView();
             
             // Modal elements
             const editModal = document.getElementById('editModal');
