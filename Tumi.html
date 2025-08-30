@@ -620,6 +620,63 @@
             height: 18px;
             cursor: pointer;
         }
+
+        /* Gaya untuk modal notifikasi EAN */
+        .modal-notification {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 4000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-notification-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .modal-notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .modal-notification-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .github-status {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            background-color: #f1f1f1;
+        }
+
+        .github-status.connected {
+            background-color: #e8f5e8;
+            color: #2ecc71;
+        }
+
+        .github-status.disconnected {
+            background-color: #ffe6e6;
+            color: #e74c3c;
+        }
     </style>
 </head>
 <body>
@@ -678,6 +735,20 @@
         </div>
     </div>
 
+    <!-- Modal untuk notifikasi EAN tidak ditemukan -->
+    <div class="modal-notification" id="eanNotificationModal">
+        <div class="modal-notification-content">
+            <div class="modal-notification-header">
+                <h2><i class="fas fa-exclamation-triangle"></i> EAN Tidak Ditemukan</h2>
+                <button class="close-modal" id="closeEanNotificationModal">&times;</button>
+            </div>
+            <p>EAN <span id="invalidEan"></span> tidak ditemukan dalam master data. Data tidak akan disimpan.</p>
+            <div class="modal-notification-actions">
+                <button type="button" class="btn-info" id="confirmEanNotificationModal">Mengerti</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container" id="mainContainer" style="display: none;">
         <div class="header">
             <h1><i class="fas fa-barcode"></i> TUMI</h1>
@@ -695,7 +766,7 @@
                 </div>
                 
                 <div class="user-info">
-                    <p><i class="fas fa-user"></i> User: <span id="currentUser">Guest</span> <span id="userTypeBadge" class="hidden"></span></p>
+                    <p><i class="fas fa-user"></i> User: <span id="currentUser">Guest</span> <span id="userTypeBadge" class="hidden"></span> <span id="githubConnectionStatus" class="github-status disconnected">Terkoneksi GitHub</span></p>
                     <div class="user-controls">
                         <button type="button" class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
                     </div>
@@ -834,30 +905,32 @@
                                 <div class="form-group">
                                     <div>
                                         <label for="githubUsername"><i class="fab fa-github"></i> GitHub Username</label>
-                                        <input type="text" id="githubUsername" placeholder="Masukkan username GitHub">
+                                        <input type="text" id="githubUsername" placeholder="Masukkan username GitHub" <?php echo !isAdmin ? 'disabled' : ''; ?>>
                                     </div>
                                     <div>
                                         <label for="githubRepo"><i class="fas fa-database"></i> Repository Name</label>
-                                        <input type="text" id="githubRepo" placeholder="Masukkan nama repository">
+                                        <input type="text" id="githubRepo" placeholder="Masukkan nama repository" <?php echo !isAdmin ? 'disabled' : ''; ?>>
                                     </div>
                                 </div>
                                 
                                 <div class="form-group">
                                     <div>
                                         <label for="githubToken"><i class="fas fa-key"></i> Personal Access Token</label>
-                                        <input type="password" id="githubToken" placeholder="Masukkan token akses GitHub">
+                                        <input type="password" id="githubToken" placeholder="Masukkan token akses GitHub" <?php echo !isAdmin ? 'disabled' : ''; ?>>
                                         <small>
                                             <i class="fas fa-info-circle"></i> Token harus memiliki izin "repo"
                                         </small>
                                     </div>
                                     <div>
                                         <label for="dataFilePath"><i class="fas fa-file"></i> Data File Path</label>
-                                        <input type="text" id="dataFilePath" value="data/scannedData.json" placeholder="Path file data di repository">
+                                        <input type="text" id="dataFilePath" value="data/scannedData.json" placeholder="Path file data di repository" <?php echo !isAdmin ? 'disabled' : ''; ?>>
                                     </div>
                                 </div>
                                 
                                 <div class="button-group">
+                                    <?php if (isAdmin): ?>
                                     <button type="button" class="btn-info" id="saveGithubConfigBtn"><i class="fas fa-save"></i> Simpan Konfigurasi</button>
+                                    <?php endif; ?>
                                     <button type="button" class="btn-primary" id="testGithubConnectionBtn"><i class="fas fa-plug"></i> Test Koneksi</button>
                                 </div>
                             </form>
@@ -978,6 +1051,7 @@
             const masterFileInput = document.getElementById('masterFile');
             const totalMasterDataSpan = document.getElementById('totalMasterData');
             const masterTableBody = document.getElementById('masterTableBody');
+            const githubConnectionStatus = document.getElementById('githubConnectionStatus');
             
             // Modal elements
             const editModal = document.getElementById('editModal');
@@ -991,6 +1065,12 @@
             const editSkuInput = document.getElementById('editSku');
             const editDescriptionInput = document.getElementById('editDescription');
             const editQtyInput = document.getElementById('editQty');
+            
+            // Modal notifikasi EAN
+            const eanNotificationModal = document.getElementById('eanNotificationModal');
+            const closeEanNotificationModalBtn = document.getElementById('closeEanNotificationModal');
+            const confirmEanNotificationModalBtn = document.getElementById('confirmEanNotificationModal');
+            const invalidEanSpan = document.getElementById('invalidEan');
             
             // Elements untuk fitur delete dengan checkbox
             const selectAllInputData = document.getElementById('selectAllInputData');
@@ -1012,7 +1092,8 @@
                 username: '',
                 repo: '',
                 token: '',
-                dataFilePath: 'data/scannedData.json'
+                dataFilePath: 'data/scannedData.json',
+                masterDataFilePath: 'data/masterData.json'
             };
             
             // Fungsi untuk menampilkan/menyembunyikan konten utama
@@ -1061,6 +1142,12 @@
                     // Tampilkan kontrol select all dan delete untuk admin
                     document.getElementById('inputTableControls').classList.remove('hidden');
                     document.getElementById('masterTableControls').classList.remove('hidden');
+                    
+                    // Enable input fields di GitHub config untuk admin
+                    document.getElementById('githubUsername').disabled = false;
+                    document.getElementById('githubRepo').disabled = false;
+                    document.getElementById('githubToken').disabled = false;
+                    document.getElementById('dataFilePath').disabled = false;
                 } else {
                     userTypeBadge.textContent = '(User)';
                     userTypeBadge.classList.remove('hidden');
@@ -1082,6 +1169,12 @@
                     // Sembunyikan kontrol select all dan delete untuk user biasa
                     document.getElementById('inputTableControls').classList.add('hidden');
                     document.getElementById('masterTableControls').classList.add('hidden');
+                    
+                    // Disable input fields di GitHub config untuk user biasa
+                    document.getElementById('githubUsername').disabled = true;
+                    document.getElementById('githubRepo').disabled = true;
+                    document.getElementById('githubToken').disabled = true;
+                    document.getElementById('dataFilePath').disabled = true;
                 }
             }
             
@@ -1102,6 +1195,12 @@
             // Fungsi untuk mencari data master berdasarkan EAN
             function findMasterDataByEan(ean) {
                 return masterData.find(item => item.EAN === ean) || null;
+            }
+            
+            // Fungsi untuk menampilkan modal notifikasi EAN tidak ditemukan
+            function showEanNotFoundNotification(ean) {
+                invalidEanSpan.textContent = ean;
+                eanNotificationModal.style.display = 'flex';
             }
             
             // Fungsi untuk menyimpan data
@@ -1126,8 +1225,15 @@
                 
                 // Cari data master berdasarkan EAN
                 const masterItem = findMasterDataByEan(ean);
-                const sku = masterItem ? masterItem.SKU : '';
-                const description = masterItem ? masterItem.Description : '';
+                
+                // Jika EAN tidak ditemukan di master data
+                if (!masterItem) {
+                    showEanNotFoundNotification(ean);
+                    return;
+                }
+                
+                const sku = masterItem.SKU;
+                const description = masterItem.Description;
                 
                 const newData = {
                     pallet: currentPallet,
@@ -1142,18 +1248,21 @@
                 };
                 
                 scannedData.push(newData);
-                await saveToGitHub();
-                renderTable();
-                updateTotalEan();
-                updateTotalContainer();
+                const saveSuccess = await saveToGitHub();
                 
-                // Reset hanya input EAN dan Qty, biarkan pallet dan container tetap
-                eanInput.value = '';
-                qtyInput.value = 1;
-                skuInput.value = '';
-                descriptionInput.value = '';
-                
-                showNotification('Data berhasil disimpan!');
+                if (saveSuccess) {
+                    renderTable();
+                    updateTotalEan();
+                    updateTotalContainer();
+                    
+                    // Reset hanya input EAN dan Qty, biarkan pallet dan container tetap
+                    eanInput.value = '';
+                    qtyInput.value = 1;
+                    skuInput.value = '';
+                    descriptionInput.value = '';
+                    
+                    showNotification('Data berhasil disimpan!');
+                }
             }
             
             // Fungsi untuk logout
@@ -1294,16 +1403,15 @@
             // Fungsi untuk menyimpan data ke GitHub
             async function saveToGitHub() {
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    console.warn('Konfigurasi GitHub belum lengkap, data disimpan di local storage');
-                    localStorage.setItem('scannedData', JSON.stringify(scannedData));
-                    populateFilterDropdowns();
-                    updateTotalContainer();
+                    console.warn('Konfigurasi GitHub belum lengkap');
+                    showNotification('Konfigurasi GitHub belum lengkap!', 'error');
+                    updateGitHubConnectionStatus(false);
                     return false;
                 }
                 
                 try {
                     // Cek apakah file sudah ada
-                    const fileSHA = await getFileSHA();
+                    const fileSHA = await getFileSHA(githubConfig.dataFilePath);
                     
                     const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
                         method: 'PUT',
@@ -1322,30 +1430,31 @@
                         console.log('Data berhasil disimpan ke GitHub');
                         populateFilterDropdowns();
                         updateTotalContainer();
+                        updateGitHubConnectionStatus(true);
                         return true;
                     } else {
                         const errorText = await response.text();
                         console.error('Gagal menyimpan data ke GitHub:', errorText);
-                        localStorage.setItem('scannedData', JSON.stringify(scannedData));
-                        showNotification('Gagal menyimpan ke GitHub, data disimpan lokal', 'error');
+                        showNotification('Gagal menyimpan ke GitHub: ' + errorText, 'error');
+                        updateGitHubConnectionStatus(false);
                         return false;
                     }
                 } catch (error) {
                     console.error('Error menyimpan data ke GitHub:', error);
-                    localStorage.setItem('scannedData', JSON.stringify(scannedData));
-                    showNotification('Error menyimpan ke GitHub, data disimpan lokal', 'error');
+                    showNotification('Error menyimpan ke GitHub: ' + error.message, 'error');
+                    updateGitHubConnectionStatus(false);
                     return false;
                 }
             }
             
             // Fungsi untuk mendapatkan SHA file (diperlukan untuk update)
-            async function getFileSHA() {
+            async function getFileSHA(filePath) {
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
                     return null;
                 }
                 
                 try {
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
+                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${filePath}`, {
                         headers: {
                             'Authorization': `token ${githubConfig.token}`
                         }
@@ -1364,16 +1473,11 @@
             
             // Fungsi untuk memuat data dari GitHub
             async function loadFromGitHub() {
-                // Coba muat dari local storage terlebih dahulu
-                const savedData = localStorage.getItem('scannedData');
-                if (savedData) {
-                    scannedData = JSON.parse(savedData);
-                    populateFilterDropdowns();
-                    updateTotalContainer();
-                }
-                
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    console.warn('Konfigurasi GitHub belum lengkap, muat data dari local storage');
+                    console.warn('Konfigurasi GitHub belum lengkap, tidak dapat memuat data');
+                    scannedData = [];
+                    renderTable();
+                    updateGitHubConnectionStatus(false);
                     return false;
                 }
                 
@@ -1390,19 +1494,109 @@
                         scannedData = JSON.parse(decodedData);
                         populateFilterDropdowns();
                         updateTotalContainer();
-                        
-                        localStorage.setItem('scannedData', JSON.stringify(scannedData));
-                        
+                        updateGitHubConnectionStatus(true);
                         return true;
                     } else if (response.status === 404) {
+                        // File tidak ditemukan, buat array kosong
                         scannedData = [];
+                        renderTable();
+                        updateGitHubConnectionStatus(true);
                         return true;
                     } else {
                         console.error('Gagal memuat data dari GitHub:', await response.text());
+                        scannedData = [];
+                        renderTable();
+                        updateGitHubConnectionStatus(false);
                         return false;
                     }
                 } catch (error) {
                     console.error('Error memuat data dari GitHub:', error);
+                    scannedData = [];
+                    renderTable();
+                    updateGitHubConnectionStatus(false);
+                    return false;
+                }
+            }
+            
+            // Fungsi untuk memuat master data dari GitHub
+            async function loadMasterDataFromGitHub() {
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    console.warn('Konfigurasi GitHub belum lengkap, tidak dapat memuat master data');
+                    masterData = [];
+                    renderMasterTable();
+                    return false;
+                }
+                
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.masterDataFilePath}`, {
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const decodedData = atob(data.content);
+                        masterData = JSON.parse(decodedData);
+                        renderMasterTable();
+                        return true;
+                    } else if (response.status === 404) {
+                        // File tidak ditemukan, buat array kosong
+                        masterData = [];
+                        renderMasterTable();
+                        return true;
+                    } else {
+                        console.error('Gagal memuat master data dari GitHub:', await response.text());
+                        masterData = [];
+                        renderMasterTable();
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Error memuat master data dari GitHub:', error);
+                    masterData = [];
+                    renderMasterTable();
+                    return false;
+                }
+            }
+            
+            // Fungsi untuk menyimpan master data ke GitHub
+            async function saveMasterDataToGitHub() {
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    console.warn('Konfigurasi GitHub belum lengkap');
+                    showNotification('Konfigurasi GitHub belum lengkap!', 'error');
+                    return false;
+                }
+                
+                try {
+                    // Cek apakah file sudah ada
+                    const fileSHA = await getFileSHA(githubConfig.masterDataFilePath);
+                    
+                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.masterDataFilePath}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: 'Update master data',
+                            content: btoa(unescape(encodeURIComponent(JSON.stringify(masterData, null, 2))),
+                            sha: fileSHA
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        console.log('Master data berhasil disimpan ke GitHub');
+                        showNotification('Master data berhasil disimpan ke GitHub!');
+                        return true;
+                    } else {
+                        const errorText = await response.text();
+                        console.error('Gagal menyimpan master data ke GitHub:', errorText);
+                        showNotification('Gagal menyimpan master data ke GitHub: ' + errorText, 'error');
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Error menyimpan master data ke GitHub:', error);
+                    showNotification('Error menyimpan master data ke GitHub: ' + error.message, 'error');
                     return false;
                 }
             }
@@ -1425,19 +1619,33 @@
                         showNotification('Koneksi GitHub berhasil!', 'success');
                         githubStatusSpan.textContent = 'Terkoneksi';
                         githubStatusSpan.style.color = '#27ae60';
+                        updateGitHubConnectionStatus(true);
                         return true;
                     } else {
                         const errorText = await response.text();
                         showNotification('Gagal terhubung ke GitHub: ' + errorText, 'error');
                         githubStatusSpan.textContent = 'Gagal terkoneksi';
                         githubStatusSpan.style.color = '#e74c3c';
+                        updateGitHubConnectionStatus(false);
                         return false;
                     }
                 } catch (error) {
                     showNotification('Error testing koneksi GitHub: ' + error.message, 'error');
                     githubStatusSpan.textContent = 'Error';
                     githubStatusSpan.style.color = '#e74c3c';
+                    updateGitHubConnectionStatus(false);
                     return false;
+                }
+            }
+            
+            // Fungsi untuk memperbarui status koneksi GitHub
+            function updateGitHubConnectionStatus(connected) {
+                if (connected) {
+                    githubConnectionStatus.textContent = 'Terkoneksi GitHub';
+                    githubConnectionStatus.className = 'github-status connected';
+                } else {
+                    githubConnectionStatus.textContent = 'Tidak Terkoneksi GitHub';
+                    githubConnectionStatus.className = 'github-status disconnected';
                 }
             }
             
@@ -1447,13 +1655,17 @@
                     username: document.getElementById('githubUsername').value.trim(),
                     repo: document.getElementById('githubRepo').value.trim(),
                     token: document.getElementById('githubToken').value.trim(),
-                    dataFilePath: document.getElementById('dataFilePath').value.trim() || 'data/scannedData.json'
+                    dataFilePath: document.getElementById('dataFilePath').value.trim() || 'data/scannedData.json',
+                    masterDataFilePath: 'data/masterData.json'
                 };
                 
+                // Simpan konfigurasi ke localStorage
                 localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
                 showNotification('Konfigurasi GitHub berhasil disimpan!');
                 
+                // Muat ulang data dari GitHub
                 loadFromGitHub();
+                loadMasterDataFromGitHub();
             }
             
             // Fungsi untuk memuat konfigurasi GitHub dari local storage
@@ -1470,9 +1682,11 @@
                     if (githubConfig.username && githubConfig.repo && githubConfig.token) {
                         githubStatusSpan.textContent = 'Terkonfigurasi';
                         githubStatusSpan.style.color = '#27ae60';
+                        updateGitHubConnectionStatus(true);
                     } else {
                         githubStatusSpan.textContent = 'Belum dikonfigurasi';
                         githubStatusSpan.style.color = '#7f8c8d';
+                        updateGitHubConnectionStatus(false);
                     }
                 }
             }
@@ -1524,21 +1738,6 @@
                 
                 hideEditModal();
                 showNotification('Data berhasil diupdate!');
-            }
-            
-            // Fungsi untuk memuat master data dari local storage
-            function loadMasterData() {
-                const savedMasterData = localStorage.getItem('masterData');
-                if (savedMasterData) {
-                    masterData = JSON.parse(savedMasterData);
-                    renderMasterTable();
-                }
-            }
-            
-            // Fungsi untuk menyimpan master data ke local storage
-            function saveMasterData() {
-                localStorage.setItem('masterData', JSON.stringify(masterData));
-                renderMasterTable();
             }
             
             // Fungsi untuk merender tabel master data
@@ -1615,7 +1814,8 @@
                     
                     // Simpan data master
                     masterData = jsonData;
-                    saveMasterData();
+                    saveMasterDataToGitHub();
+                    renderMasterTable();
                     
                     showNotification('Master data berhasil diupload!');
                     masterFileInput.value = '';
@@ -1753,14 +1953,12 @@
                 
                 // Muat data dari GitHub
                 loadFromGitHub();
+                loadMasterDataFromGitHub();
                 renderTable();
                 updateTotalEan();
                 updateTotalContainer();
                 populateFilterDropdowns();
                 toggleEanInput();
-                
-                // Muat master data
-                loadMasterData();
                 
                 // Fokuskan ke input EAN jika sudah diaktifkan
                 if (!eanInput.disabled) {
@@ -1814,6 +2012,21 @@
             editModal.addEventListener('click', function(e) {
                 if (e.target === editModal) {
                     hideEditModal();
+                }
+            });
+            
+            // Event listener untuk modal notifikasi EAN
+            closeEanNotificationModalBtn.addEventListener('click', function() {
+                eanNotificationModal.style.display = 'none';
+            });
+            
+            confirmEanNotificationModalBtn.addEventListener('click', function() {
+                eanNotificationModal.style.display = 'none';
+            });
+            
+            eanNotificationModal.addEventListener('click', function(e) {
+                if (e.target === eanNotificationModal) {
+                    eanNotificationModal.style.display = 'none';
                 }
             });
             
@@ -1986,7 +2199,7 @@
             }
             
             // Fungsi untuk menghapus data master terpilih
-            function deleteSelectedMasterData() {
+            async function deleteSelectedMasterData() {
                 const checkedBoxes = document.querySelectorAll('.master-checkbox:checked');
                 if (checkedBoxes.length === 0) {
                     showNotification('Pilih data yang akan dihapus terlebih dahulu!', 'error');
@@ -2007,7 +2220,7 @@
                     masterData.splice(index, 1);
                 });
                 
-                saveMasterData();
+                await saveMasterDataToGitHub();
                 selectAllMasterData.checked = false;
                 updateDeleteMasterButtonState();
                 
@@ -2044,14 +2257,12 @@
             
             // Inisialisasi
             loadGithubConfig();
-            loadFromGitHub();
             setupMobileMenu();
             setUserView();
             renderTable();
             updateTotalEan();
             updateTotalContainer();
             toggleEanInput();
-            loadMasterData();
             
             // Tampilkan form pemilihan user pertama kali
             toggleMainContent(false);
