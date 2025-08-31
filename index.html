@@ -53,6 +53,7 @@
             color: white;
             padding: 30px 20px;
             text-align: center;
+            position: relative;
         }
 
         .login-header h1 {
@@ -68,17 +69,17 @@
             opacity: 0.9;
         }
 
-        .login-Customer-selector {
+        .login-customer-selector {
             padding: 30px;
         }
 
-        .Customer-options {
+        .customer-options {
             display: flex;
             gap: 20px;
             flex-direction: column;
         }
 
-        .Customer-option {
+        .customer-option {
             text-align: center;
             padding: 25px;
             border: 2px solid var(--border);
@@ -86,44 +87,73 @@
             cursor: pointer;
             transition: var(--transition);
             background: white;
+            position: relative;
+            overflow: hidden;
         }
 
-        .Customer-option:hover {
+        .customer-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+            transition: var(--transition);
+        }
+
+        .customer-option:hover {
             transform: translateY(-5px);
             box-shadow: var(--shadow);
         }
 
-        .Customer-option.tumi.active, .Customer-option.tumi:hover {
+        .customer-option.tumi.active, .customer-option.tumi:hover {
             border-color: var(--tumi-color);
             background-color: #f4eef8;
         }
 
-        .Customer-option.samsonite.active, .Customer-option.samsonite:hover {
+        .customer-option.tumi.active::before, .customer-option.tumi:hover::before {
+            background: var(--tumi-color);
+        }
+
+        .customer-option.samsonite.active, .customer-option.samsonite:hover {
             border-color: var(--samsonite-color);
             background-color: #fdf2e9;
         }
 
-        .Customer-option i {
-            font-size: 36px;
-            margin-bottom: 15px;
-            color: var(--gray);
+        .customer-option.samsonite.active::before, .customer-option.samsonite:hover::before {
+            background: var(--samsonite-color);
         }
 
-        .Customer-option.tumi.active i, .Customer-option.tumi:hover i {
-            color: var(--tumi-color);
+        .customer-logo {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: var(--transition);
         }
 
-        .Customer-option.samsonite.active i, .Customer-option.samsonite:hover i {
-            color: var(--samsonite-color);
+        .customer-logo img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
 
-        .Customer-name {
+        .customer-option:hover .customer-logo {
+            transform: scale(1.05);
+        }
+
+        .customer-name {
             font-size: 1.2rem;
             font-weight: bold;
             margin-bottom: 8px;
         }
 
-        .Customer-desc {
+        .customer-desc {
             font-size: 0.9rem;
             color: var(--gray);
         }
@@ -140,17 +170,15 @@
             .login-container {
                 max-width: 100%;
             }
-        }
-
-        .Customer-logo {
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            margin: 0 auto 15px;
+            
+            .customer-logo {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .customer-option {
+                padding: 20px;
+            }
         }
 
         .instructions {
@@ -159,31 +187,92 @@
             color: var(--dark);
             font-weight: 500;
         }
+
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .loading-spinner.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--primary);
+            border-top: 5px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .language-selector {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+
+        .language-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .language-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
     </style>
 </head>
 <body>
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+        <p>Mengarahkan ke sistem...</p>
+    </div>
+
     <div class="login-container">
         <div class="login-header">
+            <div class="language-selector">
+                <button class="language-btn" id="languageBtn">ID | EN</button>
+            </div>
             <h1><i class="fas fa-barcode"></i> Web Scan KED</h1>
             <p>Linc Logistics KED</p>
         </div>
         
-        <div class="login-Customer-selector">
-            <p class="instructions">Klik pada Customer yang ingin Anda akses:</p>
-            <div class="Customer-options">
-                <div class="Customer-option tumi active" data-Customer="tumi">
-                    <div class="Customer-logo">
-                        <i class="fas fa-suitcase"></i>
+        <div class="login-customer-selector">
+            <p class="instructions" id="instructionsText">Klik pada Customer yang ingin Anda akses:</p>
+            <div class="customer-options">
+                <div class="customer-option tumi active" data-customer="tumi">
+                    <div class="customer-logo">
+                        <img src="https://drive.google.com/thumbnail?id=1fQPm1v3u1LpfR2C7bgW0S_LTPpK09OsH&sz=w200" alt="Tumi Logo" onerror="this.src='https://via.placeholder.com/80?text=Tumi'">
                     </div>
-                    <div class="Customer-name">Tumi</div>
-                    <div class="Customer-desc">Akses sistem inventory Tumi</div>
+                    <div class="customer-name">Tumi</div>
+                    <div class="customer-desc">Akses sistem inventory Tumi</div>
                 </div>
-                <div class="Customer-option samsonite" data-Customer="samsonite">
-                    <div class="Customer-logo">
-                        <i class="fas fa-briefcase"></i>
+                <div class="customer-option samsonite" data-customer="samsonite">
+                    <div class="customer-logo">
+                        <img src="https://drive.google.com/thumbnail?id=1bajVBnzN57iob98CmKYOfs8l3OOgWwOt&sz=w200" alt="Samsonite Logo" onerror="this.src='https://via.placeholder.com/80?text=Samsonite'">
                     </div>
-                    <div class="Customer-name">Samsonite</div>
-                    <div class="Customer-desc">Akses sistem inventory Samsonite</div>
+                    <div class="customer-name">Samsonite</div>
+                    <div class="customer-desc">Akses sistem inventory Samsonite</div>
                 </div>
             </div>
         </div>
@@ -195,23 +284,66 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const CustomerOptions = document.querySelectorAll('.Customer-option');
+            // Elements
+            const customerOptions = document.querySelectorAll('.customer-option');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const languageBtn = document.getElementById('languageBtn');
+            const instructionsText = document.getElementById('instructionsText');
             let selectedCustomer = 'tumi'; // Default Customer
+            let currentLanguage = 'id'; // Default language
             
+            // Language content
+            const languageContent = {
+                id: {
+                    instructions: "Klik pada Customer yang ingin Anda akses:",
+                    tumiDesc: "Akses sistem inventory Tumi",
+                    samsoniteDesc: "Akses sistem inventory Samsonite",
+                    loading: "Mengarahkan ke sistem...",
+                    footer: "© 2025 Web Scan KED | Powered by Riyan Pratama P"
+                },
+                en: {
+                    instructions: "Click on the Customer you want to access:",
+                    tumiDesc: "Access Tumi inventory system",
+                    samsoniteDesc: "Access Samsonite inventory system",
+                    loading: "Redirecting to system...",
+                    footer: "© 2025 Web Scan KED | Powered by Riyan Pratama P"
+                }
+            };
+
+            // Toggle language
+            languageBtn.addEventListener('click', function() {
+                currentLanguage = currentLanguage === 'id' ? 'en' : 'id';
+                updateLanguage();
+            });
+
+            // Update language function
+            function updateLanguage() {
+                instructionsText.textContent = languageContent[currentLanguage].instructions;
+                document.querySelector('.customer-option.tumi .customer-desc').textContent = languageContent[currentLanguage].tumiDesc;
+                document.querySelector('.customer-option.samsonite .customer-desc').textContent = languageContent[currentLanguage].samsoniteDesc;
+                document.querySelector('.loading-spinner p').textContent = languageContent[currentLanguage].loading;
+                document.querySelector('.login-footer p').textContent = languageContent[currentLanguage].footer;
+                languageBtn.textContent = currentLanguage === 'id' ? 'ID | EN' : 'EN | ID';
+            }
+
             // Handle Customer selection and auto-redirect
-            CustomerOptions.forEach(option => {
+            customerOptions.forEach(option => {
                 option.addEventListener('click', function() {
                     // Remove active class from all options
-                    CustomerOptions.forEach(opt => opt.classList.remove('active'));
+                    customerOptions.forEach(opt => opt.classList.remove('active'));
                     
                     // Add active class to clicked option
                     this.classList.add('active');
                     
                     // Update selected Customer
-                    selectedCustomer = this.getAttribute('data-Customer');
+                    selectedCustomer = this.getAttribute('data-customer');
                     
                     // Save Customer preference to localStorage
-                    localStorage.setItem('Customer', selectedCustomer);
+                    localStorage.setItem('customer', selectedCustomer);
+                    localStorage.setItem('language', currentLanguage);
+                    
+                    // Show loading spinner
+                    loadingSpinner.classList.add('active');
                     
                     // Redirect to the appropriate page after a brief delay
                     setTimeout(() => {
@@ -220,21 +352,37 @@
                         } else {
                             window.location.href = 'Samsonite.html';
                         }
-                    }, 300); // 300ms delay for visual feedback
+                    }, 800); // 800ms delay for visual feedback
                 });
             });
             
             // Check if there's a saved Customer preference
-            const savedCustomer = localStorage.getItem('Customer');
+            const savedCustomer = localStorage.getItem('customer');
+            const savedLanguage = localStorage.getItem('language');
+            
             if (savedCustomer) {
                 selectedCustomer = savedCustomer;
-                CustomerOptions.forEach(option => {
+                customerOptions.forEach(option => {
                     option.classList.remove('active');
-                    if (option.getAttribute('data-Customer') === savedCustomer) {
+                    if (option.getAttribute('data-customer') === savedCustomer) {
                         option.classList.add('active');
                     }
                 });
             }
+            
+            if (savedLanguage) {
+                currentLanguage = savedLanguage;
+                updateLanguage();
+            }
+            
+            // Add keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === '1' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    customerOptions[0].click();
+                } else if (e.key === '2' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    customerOptions[1].click();
+                }
+            });
         });
     </script>
 </body>
