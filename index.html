@@ -195,7 +195,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.9);
             z-index: 9999;
             justify-content: center;
             align-items: center;
@@ -240,12 +240,33 @@
         .language-btn:hover {
             background: rgba(255, 255, 255, 0.3);
         }
+        
+        .back-button {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
     </style>
 </head>
 <body>
     <div class="loading-spinner" id="loadingSpinner">
         <div class="spinner"></div>
-        <p>Mengarahkan ke sistem...</p>
+        <p id="loadingText">Mengarahkan ke sistem...</p>
     </div>
 
     <div class="login-container">
@@ -289,8 +310,12 @@
             const loadingSpinner = document.getElementById('loadingSpinner');
             const languageBtn = document.getElementById('languageBtn');
             const instructionsText = document.getElementById('instructionsText');
+            const loadingText = document.getElementById('loadingText');
             let selectedCustomer = 'tumi'; // Default Customer
             let currentLanguage = 'id'; // Default language
+            
+            // Pastikan loading spinner non-aktif saat halaman dimuat
+            loadingSpinner.classList.remove('active');
             
             // Language content
             const languageContent = {
@@ -321,7 +346,7 @@
                 instructionsText.textContent = languageContent[currentLanguage].instructions;
                 document.querySelector('.customer-option.tumi .customer-desc').textContent = languageContent[currentLanguage].tumiDesc;
                 document.querySelector('.customer-option.samsonite .customer-desc').textContent = languageContent[currentLanguage].samsoniteDesc;
-                document.querySelector('.loading-spinner p').textContent = languageContent[currentLanguage].loading;
+                loadingText.textContent = languageContent[currentLanguage].loading;
                 document.querySelector('.login-footer p').textContent = languageContent[currentLanguage].footer;
                 languageBtn.textContent = currentLanguage === 'id' ? 'ID | EN' : 'EN | ID';
             }
@@ -347,6 +372,9 @@
                     
                     // Redirect to the appropriate page after a brief delay
                     setTimeout(() => {
+                        // Hapus status aktif spinner sebelum redirect
+                        loadingSpinner.classList.remove('active');
+                        
                         if (selectedCustomer === 'tumi') {
                             window.location.href = 'Tumi.html';
                         } else {
@@ -382,6 +410,19 @@
                 } else if (e.key === '2' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
                     customerOptions[1].click();
                 }
+            });
+            
+            // Handle page navigation events
+            window.addEventListener('pageshow', function(event) {
+                // Pastikan spinner non-aktif ketika kembali ke halaman
+                if (event.persisted || performance.getEntriesByType("navigation")[0].type === 'back_forward') {
+                    loadingSpinner.classList.remove('active');
+                }
+            });
+            
+            // Pastikan spinner non-aktif jika halaman dimuat ulang
+            window.addEventListener('beforeunload', function() {
+                loadingSpinner.classList.remove('active');
             });
         });
     </script>
