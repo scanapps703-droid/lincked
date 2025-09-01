@@ -1593,7 +1593,7 @@
                 handleLogin();
             });
             
-            // Event listener untuk auto save pada input EAN dengan delay 0.01 detik (10ms)
+            // Event listener untuk auto save pada input EAN dengan delay 0.05 detik (50ms)
             eanInput.addEventListener('input', function() {
                 clearTimeout(eanInputTimer);
                 
@@ -1601,7 +1601,7 @@
                     if (eanInput.value.trim() !== '') {
                         saveData();
                     }
-                }, 10); // Delay 0.01 detik
+                }, 50); // Delay 0.05 detik
             });
             
             // Event listener untuk tombol Finish
