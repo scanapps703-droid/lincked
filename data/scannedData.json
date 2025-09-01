@@ -7459,5 +7459,23 @@
     "timestamp": "9/1/2025, 1:24:15 PM",
     "user": "Ferry",
     "date": "2025-09-01"
+  },
+  {
+    "pallet": "DID2507182135",
+    "container": "B9723UEL",
+    "ean": "5400520335944",
+    "qty": "1",
+    "timestamp": "9/1/2025, 1:24:17 PM",
+    "user": "Ferry",
+    "date": "2025-09-01"
+  },
+  {
+    "pallet": "DID2507182135",
+    "container": "B9723UEL",
+    "ean": "5400520335944",
+    "qty": "1",
+    "timestamp": "9/1/2025, 1:24:20 PM",
+    "user": "Ferry",
+    "date": "2025-09-01"
   }
 ]
