@@ -1911,7 +1911,7 @@
                 handleLogin();
             });
             
-            // Event listener untuk input EAN - cari data master (delay 0.01 detik)
+            // Event listener untuk input EAN - cari data master (delay 0.05 detik)
             eanInput.addEventListener('input', function() {
                 const ean = eanInput.value.trim();
                 
@@ -1932,7 +1932,7 @@
                     if (eanInput.value.trim() !== '') {
                         saveData();
                     }
-                }, 10);
+                }, 50);
             });
             
             // Event listener untuk tombol Finish
