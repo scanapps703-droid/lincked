@@ -26,6 +26,7 @@
             --transition: all 0.3s ease;
         }
 
+        /* CSS yang ada dipertahankan */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -40,6 +41,7 @@
             min-height: 100vh;
         }
 
+        /* CSS yang ada dipertahankan */
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -69,6 +71,7 @@
             gap: 10px;
         }
 
+        /* CSS yang ada dipertahankan */
         .tabs {
             display: flex;
             flex-direction: column;
@@ -701,6 +704,56 @@
         .conflict-warning i {
             color: #ffc107;
         }
+
+        /* Styling baru untuk status sinkronisasi */
+        .sync-status {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sync-status.pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .sync-status.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .sync-status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .sync-status i {
+            font-size: 16px;
+        }
+
+        .pending-sync-list {
+            margin-top: 15px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .pending-sync-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .pending-sync-item:last-child {
+            border-bottom: none;
+        }
     </style>
 </head>
 <body>
@@ -780,6 +833,18 @@
                         <button type="button" class="sync-button" id="syncButton" title="Sinkronisasi Data">
                             <i class="fas fa-sync"></i> Sync
                         </button>
+                    </div>
+                    
+                    <!-- Status sinkronisasi -->
+                    <div class="sync-status hidden" id="syncStatus">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="syncStatusText">Status sinkronisasi</span>
+                    </div>
+                    
+                    <!-- Daftar perubahan yang tertunda -->
+                    <div class="pending-sync-list hidden" id="pendingSyncList">
+                        <h4><i class="fas fa-clock"></i> Perubahan Tertunda</h4>
+                        <div id="pendingSyncItems"></div>
                     </div>
                 </div>
             </div>
@@ -1014,6 +1079,12 @@
             const githubStatusText = document.getElementById('githubStatusText');
             const syncButton = document.getElementById('syncButton');
             
+            // Elements untuk status sinkronisasi
+            const syncStatus = document.getElementById('syncStatus');
+            const syncStatusText = document.getElementById('syncStatusText');
+            const pendingSyncList = document.getElementById('pendingSyncList');
+            const pendingSyncItems = document.getElementById('pendingSyncItems');
+            
             let currentPallet = '';
             let currentContainer = '';
             let scannedData = [];
@@ -1025,6 +1096,9 @@
             let isSaving = false;
             let lastSyncSHA = null;
             let pendingChanges = [];
+            let lastSyncTime = null;
+            let syncRetryCount = 0;
+            const MAX_RETRY_COUNT = 3;
             
             // Konfigurasi GitHub
             let githubConfig = {
@@ -1111,6 +1185,62 @@
                 }
             }
             
+            // Fungsi untuk memperbarui tampilan status sinkronisasi
+            function updateSyncStatusUI() {
+                if (pendingChanges.length > 0) {
+                    syncStatus.classList.remove('hidden');
+                    syncStatus.classList.remove('success');
+                    syncStatus.classList.remove('error');
+                    syncStatus.classList.add('pending');
+                    syncStatusText.innerHTML = `<i class="fas fa-clock"></i> ${pendingChanges.length} perubahan tertunda`;
+                    
+                    pendingSyncList.classList.remove('hidden');
+                    
+                    // Perbarui daftar perubahan tertunda
+                    pendingSyncItems.innerHTML = '';
+                    pendingChanges.forEach((change, index) => {
+                        const item = document.createElement('div');
+                        item.className = 'pending-sync-item';
+                        
+                        if (change.type === 'add') {
+                            item.innerHTML = `
+                                <span>${change.data.ean} (Tambah)</span>
+                                <small>${new Date(change.data.timestamp).toLocaleTimeString()}</small>
+                            `;
+                        } else if (change.type === 'update') {
+                            item.innerHTML = `
+                                <span>${change.data.ean} (Edit)</span>
+                                <small>${new Date(change.data.timestamp).toLocaleTimeString()}</small>
+                            `;
+                        } else if (change.type === 'delete') {
+                            item.innerHTML = `
+                                <span>${change.data.ean} (Hapus)</span>
+                                <small>${new Date().toLocaleTimeString()}</small>
+                            `;
+                        }
+                        
+                        pendingSyncItems.appendChild(item);
+                    });
+                } else {
+                    syncStatus.classList.add('hidden');
+                    pendingSyncList.classList.add('hidden');
+                    
+                    if (lastSyncTime) {
+                        const lastSyncText = `Terakhir sinkron: ${new Date(lastSyncTime).toLocaleTimeString()}`;
+                        syncStatusText.textContent = lastSyncText;
+                    }
+                }
+                
+                // Perbarui status GitHub
+                if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                    if (pendingChanges.length > 0) {
+                        updateGitHubStatus(false, `${pendingChanges.length} perubahan tertunda`);
+                    } else {
+                        updateGitHubStatus(true, 'Terkoneksi');
+                    }
+                }
+            }
+            
             // Fungsi untuk menyimpan data (versi dioptimalkan)
             async function saveData() {
                 if (isSaving) return;
@@ -1133,6 +1263,19 @@
                     return;
                 }
                 
+                // Cek duplikasi data lokal sebelum menyimpan
+                const isLocalDuplicate = scannedData.some(item => 
+                    item.ean === ean && 
+                    item.pallet === currentPallet && 
+                    item.container === currentContainer
+                );
+                
+                if (isLocalDuplicate) {
+                    showNotification('Data dengan EAN ini sudah ada untuk pallet dan container ini!', 'error');
+                    eanInput.value = '';
+                    return;
+                }
+                
                 isSaving = true;
                 eanInput.classList.add('input-loading');
                 
@@ -1144,7 +1287,8 @@
                     timestamp: new Date().toLocaleString(),
                     user: currentUser,
                     date: new Date().toISOString().split('T')[0],
-                    version: Date.now() // Tambahkan versioning
+                    version: Date.now(), // Tambahkan versioning
+                    syncStatus: 'pending' // Status sinkronisasi
                 };
                 
                 // Simpan data ke array sementara
@@ -1167,11 +1311,12 @@
                 
                 // Tambahkan ke daftar perubahan yang belum disinkronisasi
                 pendingChanges.push({type: 'add', data: newData});
+                updateSyncStatusUI();
                 
                 // Kirim ke GitHub di background tanpa menunggu
                 syncPendingChanges().then(success => {
                     if (success) {
-                        showNotification('Data berhasil disimpan!');
+                        showNotification('Data berhasil disimpan dan disinkronisasi!');
                     } else {
                         showNotification('Data disimpan lokal, gagal ke GitHub', 'error');
                     }
@@ -1182,20 +1327,32 @@
             
             // Fungsi untuk sinkronisasi perubahan yang tertunda
             async function syncPendingChanges() {
-                if (pendingChanges.length === 0) return true;
+                if (pendingChanges.length === 0) {
+                    updateSyncStatusUI();
+                    return true;
+                }
                 
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
                     console.warn('Konfigurasi GitHub belum lengkap, data disimpan di local storage');
+                    updateSyncStatusUI();
                     return false;
                 }
                 
                 try {
+                    // Update status menjadi menyinkronkan
+                    syncStatus.classList.remove('pending');
+                    syncStatus.classList.remove('success');
+                    syncStatus.classList.remove('error');
+                    syncStatus.classList.add('pending');
+                    syncStatusText.innerHTML = `<i class="fas fa-sync fa-spin"></i> Menyinkronkan ${pendingChanges.length} perubahan...`;
+                    
                     // Ambil data terbaru dari GitHub
                     const { data: latestData, sha } = await getGitHubData();
                     
                     // Gabungkan perubahan
                     let mergedData = latestData || [];
                     let hasConflict = false;
+                    let duplicateCount = 0;
                     
                     for (const change of pendingChanges) {
                         if (change.type === 'add') {
@@ -1207,15 +1364,60 @@
                             );
                             
                             if (!isDuplicate) {
+                                // Hapus status pending sebelum menyimpan ke GitHub
+                                delete change.data.syncStatus;
                                 mergedData.push(change.data);
                             } else {
                                 hasConflict = true;
+                                duplicateCount++;
+                                
+                                // Hapus dari scannedData lokal karena sudah ada di GitHub
+                                const index = scannedData.findIndex(item => 
+                                    item.ean === change.data.ean && 
+                                    item.pallet === change.data.pallet && 
+                                    item.container === change.data.container &&
+                                    item.syncStatus === 'pending'
+                                );
+                                
+                                if (index !== -1) {
+                                    scannedData.splice(index, 1);
+                                    localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                                    renderTable();
+                                }
+                            }
+                        } else if (change.type === 'update') {
+                            // Untuk update, cari index data yang akan diupdate
+                            const index = mergedData.findIndex(item => 
+                                item.ean === change.data.ean && 
+                                item.pallet === change.data.pallet && 
+                                item.container === change.data.container
+                            );
+                            
+                            if (index !== -1) {
+                                // Hapus status pending sebelum menyimpan ke GitHub
+                                delete change.data.syncStatus;
+                                mergedData[index] = change.data;
+                            } else {
+                                // Jika tidak ditemukan, treat as add
+                                delete change.data.syncStatus;
+                                mergedData.push(change.data);
+                            }
+                        } else if (change.type === 'delete') {
+                            // Untuk delete, hapus data yang sesuai
+                            const index = mergedData.findIndex(item => 
+                                item.ean === change.data.ean && 
+                                item.pallet === change.data.pallet && 
+                                item.container === change.data.container
+                            );
+                            
+                            if (index !== -1) {
+                                mergedData.splice(index, 1);
                             }
                         }
                     }
                     
-                    if (hasConflict) {
-                        showNotification('Terdeteksi duplikat data, beberapa data tidak disinkronisasi', 'error');
+                    if (duplicateCount > 0) {
+                        showNotification(`Terdeteksi ${duplicateCount} data duplikat, tidak disinkronisasi`, 'error');
                     }
                     
                     // Simpan ke GitHub
@@ -1227,12 +1429,58 @@
                         scannedData = mergedData;
                         localStorage.setItem('scannedData', JSON.stringify(scannedData));
                         lastSyncSHA = sha;
+                        lastSyncTime = new Date();
+                        syncRetryCount = 0;
+                        
+                        updateSyncStatusUI();
+                        renderTable();
+                        updateTotalEan();
+                        updateTotalContainer();
+                        
+                        syncStatus.classList.remove('pending');
+                        syncStatus.classList.add('success');
+                        syncStatusText.innerHTML = `<i class="fas fa-check-circle"></i> Berhasil disinkronisasi`;
+                        
+                        // Sembunyikan status sukses setelah 3 detik
+                        setTimeout(() => {
+                            if (pendingChanges.length === 0) {
+                                syncStatus.classList.add('hidden');
+                            }
+                        }, 3000);
+                        
                         return true;
+                    } else {
+                        // Jika gagal, tingkatkan jumlah percobaan
+                        syncRetryCount++;
+                        
+                        if (syncRetryCount >= MAX_RETRY_COUNT) {
+                            syncStatus.classList.remove('pending');
+                            syncStatus.classList.add('error');
+                            syncStatusText.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Gagal setelah ${MAX_RETRY_COUNT} percobaan`;
+                            
+                            // Reset counter setelah beberapa waktu
+                            setTimeout(() => {
+                                syncRetryCount = 0;
+                                updateSyncStatusUI();
+                            }, 60000);
+                        } else {
+                            updateSyncStatusUI();
+                        }
+                        
+                        return false;
                     }
-                    
-                    return false;
                 } catch (error) {
                     console.error('Error syncing pending changes:', error);
+                    
+                    syncStatus.classList.remove('pending');
+                    syncStatus.classList.add('error');
+                    syncStatusText.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Error: ${error.message}`;
+                    
+                    // Reset status setelah beberapa waktu
+                    setTimeout(() => {
+                        updateSyncStatusUI();
+                    }, 5000);
+                    
                     return false;
                 }
             }
@@ -1488,7 +1736,16 @@
                     const { data, sha } = await getGitHubData();
                     
                     if (data !== null) {
+                        // Simpan data yang masih pending
+                        const pendingData = scannedData.filter(item => item.syncStatus === 'pending');
+                        
                         scannedData = data;
+                        
+                        // Tambahkan kembali data yang masih pending
+                        pendingData.forEach(item => {
+                            scannedData.push(item);
+                        });
+                        
                         populateFilterDropdowns();
                         updateTotalContainer();
                         
@@ -1650,7 +1907,8 @@
                     ean: editEanInput.value,
                     qty: editQtyInput.value,
                     timestamp: new Date().toLocaleString(),
-                    version: newVersion
+                    version: newVersion,
+                    syncStatus: 'pending'
                 };
                 
                 // Update data lokal
@@ -1659,6 +1917,7 @@
                 
                 // Tambahkan ke daftar perubahan
                 pendingChanges.push({type: 'update', data: updatedData});
+                updateSyncStatusUI();
                 
                 // Sinkronisasi dengan GitHub
                 const success = await syncPendingChanges();
@@ -1708,6 +1967,7 @@
                 deletedData.forEach(data => {
                     pendingChanges.push({type: 'delete', data: data});
                 });
+                updateSyncStatusUI();
                 
                 // Sinkronisasi dengan GitHub
                 const success = await syncPendingChanges();
@@ -1752,13 +2012,9 @@
                 
                 // Set interval sinkronisasi setiap 30 detik
                 githubSyncInterval = setInterval(async () => {
-                    if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                    if (githubConfig.username && githubConfig.repo && githubConfig.token && pendingChanges.length > 0) {
                         console.log('Melakukan sinkronisasi otomatis dengan GitHub...');
-                        await loadFromGitHub();
                         await syncPendingChanges();
-                        renderTable();
-                        updateTotalEan();
-                        updateTotalContainer();
                     }
                 }, 30000); // 30 detik
             }
@@ -1905,6 +2161,9 @@
                     startGitHubSyncInterval();
                 }
                 
+                // Perbarui status sinkronisasi
+                updateSyncStatusUI();
+                
                 // Fokuskan ke input EAN jika sudah diaktifkan
                 if (!eanInput.disabled) {
                     eanInput.focus();
@@ -1993,6 +2252,11 @@
                 
                 const row = document.createElement('tr');
                 
+                // Tandai baris dengan warna berbeda jika statusnya pending
+                if (data.syncStatus === 'pending') {
+                    row.style.backgroundColor = '#fff3cd';
+                }
+                
                 row.innerHTML = `
                     <td class="checkbox-cell">
                         <input type="checkbox" class="data-checkbox" data-index="${index}">
@@ -2075,6 +2339,7 @@
                     
                     // Tambahkan ke daftar perubahan
                     pendingChanges.push({type: 'delete', data: deletedData});
+                    updateSyncStatusUI();
                     
                     // Sinkronisasi dengan GitHub
                     const success = await syncPendingChanges();
@@ -2127,6 +2392,7 @@
             updateTotalEan();
             updateTotalContainer();
             toggleEanInput();
+            updateSyncStatusUI();
             
             // Tampilkan form pemilihan user pertama kali
             toggleMainContent(false);
