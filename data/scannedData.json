@@ -2635,5 +2635,14 @@
     "timestamp": "9/1/2025, 10:14:10 AM",
     "user": "Anton",
     "date": "2025-09-01"
+  },
+  {
+    "pallet": "DID2507182313",
+    "container": "B9921JP",
+    "ean": "5400520335982",
+    "qty": "1",
+    "timestamp": "9/1/2025, 10:14:14 AM",
+    "user": "Anton",
+    "date": "2025-09-01"
   }
 ]
