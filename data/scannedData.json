@@ -7,5 +7,14 @@
     "timestamp": "2025-09-01 08:56:57",
     "user": "Admin",
     "date": "2025-09-01"
+  },
+  {
+    "pallet": "B01",
+    "container": "B01",
+    "ean": "1461087186   4PC",
+    "qty": "1",
+    "timestamp": "2025-09-01 08:57:00",
+    "user": "Admin",
+    "date": "2025-09-01"
   }
 ]
