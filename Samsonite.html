@@ -7,6 +7,7 @@
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* CSS yang ada dipertahankan */
         :root {
             --primary: #3498db;
             --primary-dark: #2980b9;
@@ -650,6 +651,40 @@
             display: flex;
             justify-content: flex-end;
         }
+
+        /* Styling untuk indikator loading */
+        .loading-indicator {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .input-loading {
+            position: relative;
+        }
+
+        .input-loading::after {
+            content: '';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(52, 152, 219, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
     </style>
 </head>
 <body>
@@ -754,7 +789,7 @@
                                         <label for="pallet"><i class="fas fa-pallet"></i> Pallet ID</label>
                                         <div class="input-with-button">
                                             <input type="text" id="pallet" required placeholder="Masukkan Pallet ID">
-                                            <button type="button" class="btn-info" id="savePalletBtn"><i class="fas fa-save"></i> Simpan Pallet</button>
+                                            <button type="button" class="btn-info" id="savePalletBtn"><i class="fas fa-save"></i> Simban Pallet</button>
                                         </div>
                                     </div>
                                 </div>
@@ -762,10 +797,12 @@
                                 <div class="form-group">
                                     <div>
                                         <label for="ean"><i class="fas fa-barcode"></i> EAN</label>
-                                        <input type="text" id="ean" required placeholder="Masukkan atau scan kode EAN" disabled>
-                                        <small id="eanHelpText" style="color: #e74c3c; display: none;">
-                                            <i class="fas fa-exclamation-circle"></i> Harap set Container dan Pallet terlebih dahulu
-                                        </small>
+                                        <div class="input-with-button">
+                                            <input type="text" id="ean" required placeholder="Masukkan atau scan kode EAN" disabled>
+                                            <small id="eanHelpText" style="color: #e74c3c; display: none;">
+                                                <i class="fas fa-exclamation-circle"></i> Harap set Container dan Pallet terlebih dahulu
+                                            </small>
+                                        </div>
                                     </div>
                                     <div>
                                         <label for="qty"><i class="fas fa-cubes"></i> Qty (default: 1)</label>
@@ -960,6 +997,7 @@
             let eanInputTimer = null;
             let currentEditingIndex = -1;
             let githubSyncInterval = null;
+            let isSaving = false;
             
             // Konfigurasi GitHub
             let githubConfig = {
@@ -1046,8 +1084,10 @@
                 }
             }
             
-            // Fungsi untuk menyimpan data
+            // Fungsi untuk menyimpan data (versi dioptimalkan)
             async function saveData() {
+                if (isSaving) return;
+                
                 const ean = eanInput.value.trim();
                 const qty = qtyInput.value;
                 
@@ -1066,6 +1106,9 @@
                     return;
                 }
                 
+                isSaving = true;
+                eanInput.classList.add('input-loading');
+                
                 const newData = {
                     pallet: currentPallet,
                     container: currentContainer,
@@ -1077,8 +1120,12 @@
                 };
                 
                 scannedData.push(newData);
-                await saveToGitHub();
-                renderTable();
+                
+                // Simpan ke localStorage langsung untuk respons yang cepat
+                localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                
+                // Update UI tanpa menunggu GitHub
+                addTableRow(newData, scannedData.length - 1);
                 updateTotalEan();
                 updateTotalContainer();
                 
@@ -1086,7 +1133,19 @@
                 eanInput.value = '';
                 qtyInput.value = 1;
                 
-                showNotification('Data berhasil disimpan!');
+                eanInput.classList.remove('input-loading');
+                isSaving = false;
+                
+                // Kirim ke GitHub di background tanpa menunggu
+                saveToGitHub().then(success => {
+                    if (success) {
+                        showNotification('Data berhasil disimpan!');
+                    } else {
+                        showNotification('Data disimpan lokal, gagal ke GitHub', 'error');
+                    }
+                }).catch(err => {
+                    console.error('Error saving to GitHub:', err);
+                });
             }
             
             // Fungsi untuk logout
@@ -1593,7 +1652,7 @@
                 handleLogin();
             });
             
-            // Event listener untuk auto save pada input EAN dengan delay 0.05 detik (50ms)
+            // Event listener untuk auto save pada input EAN dengan delay 100ms
             eanInput.addEventListener('input', function() {
                 clearTimeout(eanInputTimer);
                 
@@ -1601,7 +1660,7 @@
                     if (eanInput.value.trim() !== '') {
                         saveData();
                     }
-                }, 50); // Delay 0.05 detik
+                }, 100); // Delay 100ms
             });
             
             // Event listener untuk tombol Finish
@@ -1786,6 +1845,53 @@
                 }, 3000);
             }
             
+            // Fungsi untuk menambahkan baris ke tabel (lebih efisien)
+            function addTableRow(data, index) {
+                if (emptyState.classList.contains('hidden') === false) {
+                    emptyState.classList.add('hidden');
+                }
+                
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td class="checkbox-cell">
+                        <input type="checkbox" class="data-checkbox" data-index="${index}">
+                    </td>
+                    <td>${data.container}</td>
+                    <td>${data.pallet}</td>
+                    <td>${data.ean}</td>
+                    <td>${data.qty}</td>
+                    <td>${data.timestamp}</td>
+                    <td>${data.user}</td>
+                    <td class="actions">
+                        ${isAdmin ? `<i class="fas fa-edit btn-edit" data-index="${index}"></i>
+                        <i class="fas fa-trash btn-delete" data-index="${index}"></i>` : ''}
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+                
+                // Tambahkan event listener untuk tombol edit dan hapus
+                if (isAdmin) {
+                    const editBtn = row.querySelector('.btn-edit');
+                    const deleteBtn = row.querySelector('.btn-delete');
+                    
+                    if (editBtn) {
+                        editBtn.addEventListener('click', function() {
+                            const index = parseInt(this.getAttribute('data-index'));
+                            showEditModal(index);
+                        });
+                    }
+                    
+                    if (deleteBtn) {
+                        deleteBtn.addEventListener('click', function() {
+                            const index = parseInt(this.getAttribute('data-index'));
+                            deleteData(index);
+                        });
+                    }
+                }
+            }
+            
             // Fungsi untuk merender tabel
             function renderTable() {
                 // Kosongkan tabel
@@ -1814,43 +1920,8 @@
                 
                 // Tambahkan data ke tabel
                 dataToShow.forEach((data, index) => {
-                    const row = document.createElement('tr');
-                    
-                    row.innerHTML = `
-                        <td class="checkbox-cell">
-                            <input type="checkbox" class="data-checkbox" data-index="${index}">
-                        </td>
-                        <td>${data.container}</td>
-                        <td>${data.pallet}</td>
-                        <td>${data.ean}</td>
-                        <td>${data.qty}</td>
-                        <td>${data.timestamp}</td>
-                        <td>${data.user}</td>
-                        <td class="actions">
-                            ${isAdmin ? `<i class="fas fa-edit btn-edit" data-index="${index}"></i>
-                            <i class="fas fa-trash btn-delete" data-index="${index}"></i>` : ''}
-                        </td>
-                    `;
-                    
-                    tableBody.appendChild(row);
+                    addTableRow(data, index);
                 });
-                
-                // Tambahkan event listener untuk tombol edit dan hapus
-                if (isAdmin) {
-                    document.querySelectorAll('.btn-edit').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const index = parseInt(this.getAttribute('data-index'));
-                            showEditModal(index);
-                        });
-                    });
-                    
-                    document.querySelectorAll('.btn-delete').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const index = parseInt(this.getAttribute('data-index'));
-                            deleteData(index);
-                        });
-                    });
-                }
             }
             
             // Fungsi untuk menghapus data
