@@ -53,5 +53,16 @@
     "timestamp": "2/9/2025, 15.16.28",
     "user": "Riyan",
     "date": "2025-09-02"
+  },
+  {
+    "pallet": "A01",
+    "container": "B01",
+    "ean": "883509187638",
+    "sku": "152924-1041",
+    "description": "STEPHANO CLUTCH",
+    "qty": "1",
+    "timestamp": "2/9/2025, 15.16.32",
+    "user": "Riyan",
+    "date": "2025-09-02"
   }
 ]
