@@ -88,5 +88,15 @@
     "user": "Riyan",
     "date": "2025-09-02",
     "version": 1756788619367
+  },
+  {
+    "pallet": "Pallet01",
+    "container": "Test01",
+    "ean": "1554801041  60PC",
+    "qty": "1",
+    "timestamp": "2025-09-02T04:50:24.106Z",
+    "user": "Riyan",
+    "date": "2025-09-02",
+    "version": 1756788624106
   }
 ]
