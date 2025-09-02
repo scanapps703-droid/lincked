@@ -7,6 +7,7 @@
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* CSS tetap sama seperti sebelumnya */
         :root {
             --primary: #3498db;
             --primary-dark: #2980b9;
@@ -812,6 +813,7 @@
                                 
                                 <div class="button-group">
                                     <button type="button" class="btn-primary" id="finishBtn"><i class="fas fa-check"></i> Finish</button>
+                                    <button type="button" class="btn-info" id="manualSyncBtn"><i class="fas fa-sync"></i> Sync ke GitHub</button>
                                 </div>
                             </form>
                         </div>
@@ -1009,6 +1011,7 @@
             const savePalletBtn = document.getElementById('savePalletBtn');
             const saveContainerBtn = document.getElementById('saveContainerBtn');
             const finishBtn = document.getElementById('finishBtn');
+            const manualSyncBtn = document.getElementById('manualSyncBtn');
             const exportSelectedBtn = document.getElementById('exportSelectedBtn');
             const userSelect = document.getElementById('userSelect');
             const containerSelect = document.getElementById('containerSelect');
@@ -1070,6 +1073,9 @@
             let eanInputTimer = null;
             let currentEditingIndex = -1;
             let githubSyncInterval = null;
+            let lastScanTime = null;
+            let autoSyncTimeout = null;
+            let isScanning = false;
             
             // Konfigurasi GitHub
             let githubConfig = {
@@ -1132,6 +1138,9 @@
                 if (githubConfig.username && githubConfig.repo && githubConfig.token) {
                     githubSyncInterval = setInterval(async () => {
                         try {
+                            // Cek jika sedang dalam proses scan, jangan sinkronisasi
+                            if (isScanning) return;
+                            
                             await loadFromGitHub();
                             await loadMasterDataFromGitHub();
                             console.log('Auto-sinkronisasi dengan GitHub berhasil');
@@ -1140,6 +1149,42 @@
                         }
                     }, 30000); // 30 detik
                 }
+            }
+            
+            // Fungsi untuk sinkronisasi manual ke GitHub
+            async function manualSyncToGitHub() {
+                try {
+                    showNotification('Memulai sinkronisasi manual...');
+                    const success = await saveToGitHub();
+                    if (success) {
+                        showNotification('Sinkronisasi manual berhasil!');
+                    } else {
+                        showNotification('Gagal sinkronisasi manual', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error sinkronisasi manual:', error);
+                    showNotification('Error sinkronisasi manual', 'error');
+                }
+            }
+            
+            // Fungsi untuk memulai timer sinkronisasi setelah 1 menit tidak ada scan
+            function startAutoSyncTimer() {
+                // Hapus timeout sebelumnya jika ada
+                if (autoSyncTimeout) {
+                    clearTimeout(autoSyncTimeout);
+                }
+                
+                // Set timeout untuk sinkronisasi setelah 1 menit
+                autoSyncTimeout = setTimeout(async () => {
+                    if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                        try {
+                            await saveToGitHub();
+                            console.log('Auto-sinkronisasi setelah 1 menit tidak ada scan');
+                        } catch (error) {
+                            console.error('Gagal auto-sinkronisasi setelah 1 menit:', error);
+                        }
+                    }
+                }, 60000); // 1 menit
             }
             
             // Fungsi untuk menampilkan/menyembunyikan konten utama
@@ -1228,7 +1273,13 @@
             
             // Fungsi untuk mencari data master berdasarkan EAN
             function findMasterDataByEan(ean) {
-                return masterData.find(item => item.EAN === ean) || null;
+                // Gunakan Map untuk pencarian yang lebih cepat (jika data besar)
+                for (let i = 0; i < masterData.length; i++) {
+                    if (masterData[i].EAN === ean) {
+                        return masterData[i];
+                    }
+                }
+                return null;
             }
             
             // Fungsi untuk menyimpan data
@@ -1251,12 +1302,16 @@
                     return;
                 }
                 
+                // Tandai sedang dalam proses scan
+                isScanning = true;
+                
                 // Cari data master berdasarkan EAN
                 const masterItem = findMasterDataByEan(ean);
                 
                 // Jika EAN tidak ditemukan di master data
                 if (!masterItem) {
                     showManualNotification(`EAN ${ean} tidak ditemukan dalam master data!`);
+                    isScanning = false;
                     return;
                 }
                 
@@ -1276,7 +1331,10 @@
                 };
                 
                 scannedData.push(newData);
-                await saveToGitHub();
+                
+                // Simpan data ke GitHub (tanpa auto sync)
+                await saveToGitHub(false);
+                
                 renderTable();
                 updateTotalEan();
                 updateTotalContainer();
@@ -1286,6 +1344,15 @@
                 qtyInput.value = 1;
                 skuInput.value = '';
                 descriptionInput.value = '';
+                
+                // Tandai selesai proses scan
+                isScanning = false;
+                
+                // Catat waktu scan terakhir
+                lastScanTime = Date.now();
+                
+                // Mulai timer untuk sinkronisasi otomatis setelah 1 menit
+                startAutoSyncTimer();
                 
                 showNotification('Data berhasil disimpan!');
             }
@@ -1317,6 +1384,12 @@
                 if (githubSyncInterval) {
                     clearInterval(githubSyncInterval);
                     githubSyncInterval = null;
+                }
+                
+                // Hentikan timer sinkronisasi
+                if (autoSyncTimeout) {
+                    clearTimeout(autoSyncTimeout);
+                    autoSyncTimeout = null;
                 }
                 
                 // Tampilkan kembali form pemilihan user
@@ -1432,7 +1505,7 @@
             }
             
             // Fungsi untuk menyimpan data ke GitHub
-            async function saveToGitHub() {
+            async function saveToGitHub(enableAutoSync = true) {
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
                     console.warn('Konfigurasi GitHub belum lengkap, data disimpan di local storage');
                     localStorage.setItem('scannedData', JSON.stringify(scannedData));
@@ -1463,6 +1536,12 @@
                         populateFilterDropdowns();
                         updateTotalContainer();
                         updateGitHubStatusIndicator('connected', 'Terkoneksi');
+                        
+                        // Jika enableAutoSync true, setup auto sync
+                        if (enableAutoSync) {
+                            setupAutoSync();
+                        }
+                        
                         return true;
                     } else {
                         const errorText = await response.text();
@@ -1602,7 +1681,7 @@
             
             // Fungsi untuk menyimpan master data ke GitHub
             async function saveMasterDataToGitHub() {
-                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                if (!githubConfig.username || !githubConfig.repo && !githubConfig.token) {
                     console.warn('Konfigurasi GitHub belum lengkap, master data disimpan di local storage');
                     localStorage.setItem('masterData', JSON.stringify(masterData));
                     renderMasterTable();
@@ -1911,7 +1990,10 @@
                 handleLogin();
             });
             
-            // Event listener untuk input EAN - cari data master (delay 0.05 detik)
+            // Event listener untuk tombol sinkronisasi manual
+            manualSyncBtn.addEventListener('click', manualSyncToGitHub);
+            
+            // Event listener untuk input EAN - cari data master (delay 0.1 detik)
             eanInput.addEventListener('input', function() {
                 const ean = eanInput.value.trim();
                 
@@ -1932,7 +2014,7 @@
                     if (eanInput.value.trim() !== '') {
                         saveData();
                     }
-                }, 50);
+                }, 100);
             });
             
             // Event listener untuk tombol Finish
