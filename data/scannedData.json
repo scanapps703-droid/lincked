@@ -158,5 +158,25 @@
     "user": "Riyan",
     "date": "2025-09-02",
     "version": 1756788656958
+  },
+  {
+    "pallet": "Pallet02",
+    "container": "Test01",
+    "ean": "1554801041  60PC",
+    "qty": "1",
+    "timestamp": "2025-09-02T04:51:03.691Z",
+    "user": "Riyan",
+    "date": "2025-09-02",
+    "version": 1756788663691
+  },
+  {
+    "pallet": "Pallet02",
+    "container": "Test01",
+    "ean": "1554801041  60PC",
+    "qty": "1",
+    "timestamp": "2025-09-02T04:51:04.195Z",
+    "user": "Riyan",
+    "date": "2025-09-02",
+    "version": 1756788664196
   }
 ]
