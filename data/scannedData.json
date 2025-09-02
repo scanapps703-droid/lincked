@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "pallet": "A",
+    "container": "B",
+    "ean": "0",
+    "qty": "1",
+    "timestamp": "2025-09-02T04:43:49.109Z",
+    "user": "Admin",
+    "date": "2025-09-02",
+    "version": 1756788229109
+  }
+]
