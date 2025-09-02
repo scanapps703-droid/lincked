@@ -1263,30 +1263,21 @@
                     return;
                 }
                 
-                // Cek duplikasi data lokal sebelum menyimpan
-                const isLocalDuplicate = scannedData.some(item => 
-                    item.ean === ean && 
-                    item.pallet === currentPallet && 
-                    item.container === currentContainer
-                );
-                
-                if (isLocalDuplicate) {
-                    showNotification('Data dengan EAN ini sudah ada untuk pallet dan container ini!', 'error');
-                    eanInput.value = '';
-                    return;
-                }
-                
                 isSaving = true;
                 eanInput.classList.add('input-loading');
+                
+                // Membuat timestamp unik dengan presisi milidetik
+                const now = new Date();
+                const timestamp = now.toISOString(); // Menggunakan ISO string untuk timestamp yang konsisten
                 
                 const newData = {
                     pallet: currentPallet,
                     container: currentContainer,
                     ean,
                     qty,
-                    timestamp: new Date().toLocaleString(),
+                    timestamp: timestamp,
                     user: currentUser,
-                    date: new Date().toISOString().split('T')[0],
+                    date: now.toISOString().split('T')[0],
                     version: Date.now(), // Tambahkan versioning
                     syncStatus: 'pending' // Status sinkronisasi
                 };
@@ -1351,46 +1342,19 @@
                     
                     // Gabungkan perubahan
                     let mergedData = latestData || [];
-                    let hasConflict = false;
-                    let duplicateCount = 0;
                     
                     for (const change of pendingChanges) {
                         if (change.type === 'add') {
-                            // Cek duplikat sebelum menambahkan
-                            const isDuplicate = mergedData.some(item => 
-                                item.ean === change.data.ean && 
-                                item.pallet === change.data.pallet && 
-                                item.container === change.data.container
-                            );
-                            
-                            if (!isDuplicate) {
-                                // Hapus status pending sebelum menyimpan ke GitHub
-                                delete change.data.syncStatus;
-                                mergedData.push(change.data);
-                            } else {
-                                hasConflict = true;
-                                duplicateCount++;
-                                
-                                // Hapus dari scannedData lokal karena sudah ada di GitHub
-                                const index = scannedData.findIndex(item => 
-                                    item.ean === change.data.ean && 
-                                    item.pallet === change.data.pallet && 
-                                    item.container === change.data.container &&
-                                    item.syncStatus === 'pending'
-                                );
-                                
-                                if (index !== -1) {
-                                    scannedData.splice(index, 1);
-                                    localStorage.setItem('scannedData', JSON.stringify(scannedData));
-                                    renderTable();
-                                }
-                            }
+                            // Hapus status pending sebelum menyimpan ke GitHub
+                            delete change.data.syncStatus;
+                            mergedData.push(change.data);
                         } else if (change.type === 'update') {
                             // Untuk update, cari index data yang akan diupdate
                             const index = mergedData.findIndex(item => 
                                 item.ean === change.data.ean && 
                                 item.pallet === change.data.pallet && 
-                                item.container === change.data.container
+                                item.container === change.data.container &&
+                                item.timestamp === change.data.timestamp
                             );
                             
                             if (index !== -1) {
@@ -1407,17 +1371,14 @@
                             const index = mergedData.findIndex(item => 
                                 item.ean === change.data.ean && 
                                 item.pallet === change.data.pallet && 
-                                item.container === change.data.container
+                                item.container === change.data.container &&
+                                item.timestamp === change.data.timestamp
                             );
                             
                             if (index !== -1) {
                                 mergedData.splice(index, 1);
                             }
                         }
-                    }
-                    
-                    if (duplicateCount > 0) {
-                        showNotification(`Terdeteksi ${duplicateCount} data duplikat, tidak disinkronisasi`, 'error');
                     }
                     
                     // Simpan ke GitHub
@@ -1906,7 +1867,7 @@
                     pallet: editPalletInput.value,
                     ean: editEanInput.value,
                     qty: editQtyInput.value,
-                    timestamp: new Date().toLocaleString(),
+                    timestamp: new Date().toISOString(), // Gunakan timestamp yang lebih presisi
                     version: newVersion,
                     syncStatus: 'pending'
                 };
@@ -2086,6 +2047,9 @@
                 palletInput.value = '';
                 containerInput.value = '';
                 toggleEanInput();
+                
+                // Jalankan sinkronisasi setelah mengganti pallet/container
+                syncPendingChanges();
             });
             
             savePalletBtn.addEventListener('click', function() {
@@ -2101,6 +2065,9 @@
                 updateTotalEan();
                 updateTotalContainer();
                 toggleEanInput();
+                
+                // Jalankan sinkronisasi setelah mengganti pallet
+                syncPendingChanges();
             });
             
             saveContainerBtn.addEventListener('click', function() {
@@ -2118,6 +2085,9 @@
                 updateTotalContainer();
                 updateTotalEan();
                 toggleEanInput();
+                
+                // Jalankan sinkronisasi setelah mengganti container
+                syncPendingChanges();
             });
             
             // Event listener untuk tombol export
@@ -2265,7 +2235,7 @@
                     <td>${data.pallet}</td>
                     <td>${data.ean}</td>
                     <td>${data.qty}</td>
-                    <td>${data.timestamp}</td>
+                    <td>${new Date(data.timestamp).toLocaleString()}</td>
                     <td>${data.user}</td>
                     <td class="actions">
                         ${isAdmin ? `<i class="fas fa-edit btn-edit" data-index="${index}"></i>
