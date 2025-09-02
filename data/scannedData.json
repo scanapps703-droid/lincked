@@ -98,5 +98,15 @@
     "user": "Admin",
     "date": "2025-09-02",
     "version": 1756788283923
+  },
+  {
+    "pallet": "B",
+    "container": "B",
+    "ean": "0",
+    "qty": "1",
+    "timestamp": "2025-09-02T04:44:45.308Z",
+    "user": "Admin",
+    "date": "2025-09-02",
+    "version": 1756788285308
   }
 ]
