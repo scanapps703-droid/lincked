@@ -26,7 +26,6 @@
             --transition: all 0.3s ease;
         }
 
-        /* CSS yang ada dipertahankan */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -41,7 +40,6 @@
             min-height: 100vh;
         }
 
-        /* CSS yang ada dipertahankan */
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -71,7 +69,6 @@
             gap: 10px;
         }
 
-        /* CSS yang ada dipertahankan */
         .tabs {
             display: flex;
             flex-direction: column;
@@ -505,13 +502,12 @@
             color: white;
             border: none;
             border-radius: 4px;
-            padding: 4px 8px;
-            margin-left: 8px;
+            padding: 10px 15px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
         }
 
         .sync-button:hover {
@@ -830,9 +826,6 @@
                     </p>
                     <div class="user-controls">
                         <button type="button" class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
-                        <button type="button" class="sync-button" id="syncButton" title="Sinkronisasi Data">
-                            <i class="fas fa-sync"></i> Sync
-                        </button>
                     </div>
                     
                     <!-- Status sinkronisasi -->
@@ -876,7 +869,7 @@
                                         <label for="pallet"><i class="fas fa-pallet"></i> Pallet ID</label>
                                         <div class="input-with-button">
                                             <input type="text" id="pallet" required placeholder="Masukkan Pallet ID">
-                                            <button type="button" class="btn-info" id="savePalletBtn"><i class="fas fa-save"></i> Simpan Pallet</button>
+                                            <button type="button" class="btn-info" id="savePalletBtn"><i class="fas fa-save"></i> Simban Pallet</button>
                                         </div>
                                     </div>
                                 </div>
@@ -899,6 +892,9 @@
                                 
                                 <div class="button-group">
                                     <button type="button" class="btn-primary" id="finishBtn"><i class="fas fa-check"></i> Finish</button>
+                                    <button type="button" class="sync-button" id="syncButton" title="Sinkronisasi Data">
+                                        <i class="fas fa-sync"></i> Sync
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -1092,7 +1088,6 @@
             let isAdmin = false;
             let eanInputTimer = null;
             let currentEditingIndex = -1;
-            let githubSyncInterval = null;
             let isSaving = false;
             let lastSyncSHA = null;
             let pendingChanges = [];
@@ -1241,7 +1236,7 @@
                 }
             }
             
-            // Fungsi untuk menyimpan data (versi dioptimalkan)
+            // Fungsi untuk menyimpan data (hanya ke local storage)
             async function saveData() {
                 if (isSaving) return;
                 
@@ -1268,7 +1263,7 @@
                 
                 // Membuat timestamp unik dengan presisi milidetik
                 const now = new Date();
-                const timestamp = now.toISOString(); // Menggunakan ISO string untuk timestamp yang konsisten
+                const timestamp = now.toISOString();
                 
                 const newData = {
                     pallet: currentPallet,
@@ -1278,8 +1273,8 @@
                     timestamp: timestamp,
                     user: currentUser,
                     date: now.toISOString().split('T')[0],
-                    version: Date.now(), // Tambahkan versioning
-                    syncStatus: 'pending' // Status sinkronisasi
+                    version: Date.now(),
+                    syncStatus: 'pending'
                 };
                 
                 // Simpan data ke array sementara
@@ -1288,7 +1283,7 @@
                 // Simpan ke localStorage langsung untuk respons yang cepat
                 localStorage.setItem('scannedData', JSON.stringify(scannedData));
                 
-                // Update UI tanpa menunggu GitHub
+                // Update UI
                 addTableRow(newData, scannedData.length - 1);
                 updateTotalEan();
                 updateTotalContainer();
@@ -1304,28 +1299,21 @@
                 pendingChanges.push({type: 'add', data: newData});
                 updateSyncStatusUI();
                 
-                // Kirim ke GitHub di background tanpa menunggu
-                syncPendingChanges().then(success => {
-                    if (success) {
-                        showNotification('Data berhasil disimpan dan disinkronisasi!');
-                    } else {
-                        showNotification('Data disimpan lokal, gagal ke GitHub', 'error');
-                    }
-                }).catch(err => {
-                    console.error('Error saving to GitHub:', err);
-                });
+                showNotification('Data berhasil disimpan (lokal). Gunakan Sync untuk mengirim ke GitHub.');
             }
             
             // Fungsi untuk sinkronisasi perubahan yang tertunda
             async function syncPendingChanges() {
                 if (pendingChanges.length === 0) {
                     updateSyncStatusUI();
+                    showNotification('Tidak ada perubahan yang perlu disinkronisasi.');
                     return true;
                 }
                 
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
                     console.warn('Konfigurasi GitHub belum lengkap, data disimpan di local storage');
                     updateSyncStatusUI();
+                    showNotification('Konfigurasi GitHub belum lengkap. Data hanya disimpan lokal.', 'error');
                     return false;
                 }
                 
@@ -1463,12 +1451,6 @@
                 currentContainer = '';
                 currentContainerSpan.textContent = 'Belum dipilih';
                 toggleEanInput();
-                
-                // Hentikan interval sinkronisasi
-                if (githubSyncInterval) {
-                    clearInterval(githubSyncInterval);
-                    githubSyncInterval = null;
-                }
                 
                 // Update status GitHub
                 updateGitHubStatus(false, 'Tidak terkoneksi');
@@ -1787,11 +1769,6 @@
                 // Test koneksi setelah menyimpan konfigurasi
                 testGitHubConnection();
                 loadFromGitHub();
-                
-                // Mulai interval sinkronisasi jika belum ada
-                if (!githubSyncInterval) {
-                    startGitHubSyncInterval();
-                }
             }
             
             // Fungsi untuk memuat konfigurasi GitHub dari local storage
@@ -1867,7 +1844,7 @@
                     pallet: editPalletInput.value,
                     ean: editEanInput.value,
                     qty: editQtyInput.value,
-                    timestamp: new Date().toISOString(), // Gunakan timestamp yang lebih presisi
+                    timestamp: new Date().toISOString(),
                     version: newVersion,
                     syncStatus: 'pending'
                 };
@@ -1880,17 +1857,7 @@
                 pendingChanges.push({type: 'update', data: updatedData});
                 updateSyncStatusUI();
                 
-                // Sinkronisasi dengan GitHub
-                const success = await syncPendingChanges();
-                
-                if (success) {
-                    renderTable();
-                    updateTotalEan();
-                    updateTotalContainer();
-                    showNotification('Data berhasil diupdate!');
-                } else {
-                    showNotification('Data diupdate lokal, gagal ke GitHub', 'error');
-                }
+                showNotification('Data berhasil diupdate (lokal). Gunakan Sync untuk mengirim ke GitHub.');
                 
                 hideEditModal();
             }
@@ -1911,7 +1878,7 @@
                 // Dapatkan indeks data yang dipilih (dalam urutan terbalik untuk menghindari masalah indeks saat menghapus)
                 const indexesToDelete = Array.from(checkboxes)
                     .map(checkbox => parseInt(checkbox.dataset.index))
-                    .sort((a, b) => b - a); // Urutkan dari yang terbesar ke terkecil
+                    .sort((a, b) => b - a);
                 
                 // Simpan data yang akan dihapus untuk sinkronisasi
                 const deletedData = indexesToDelete.map(index => scannedData[index]);
@@ -1930,17 +1897,10 @@
                 });
                 updateSyncStatusUI();
                 
-                // Sinkronisasi dengan GitHub
-                const success = await syncPendingChanges();
-                
-                if (success) {
-                    renderTable();
-                    updateTotalEan();
-                    updateTotalContainer();
-                    showNotification(`${indexesToDelete.length} data berhasil dihapus!`);
-                } else {
-                    showNotification('Data dihapus lokal, gagal ke GitHub', 'error');
-                }
+                renderTable();
+                updateTotalEan();
+                updateTotalContainer();
+                showNotification(`${indexesToDelete.length} data berhasil dihapus (lokal). Gunakan Sync untuk mengirim ke GitHub.`);
                 
                 // Reset select all checkbox
                 selectAllCheckbox.checked = false;
@@ -1962,22 +1922,6 @@
                 } else {
                     githubStatusIndicator.style.display = 'inline-flex';
                 }
-            }
-            
-            // Fungsi untuk memulai interval sinkronisasi GitHub
-            function startGitHubSyncInterval() {
-                // Hentikan interval yang sudah ada jika ada
-                if (githubSyncInterval) {
-                    clearInterval(githubSyncInterval);
-                }
-                
-                // Set interval sinkronisasi setiap 30 detik
-                githubSyncInterval = setInterval(async () => {
-                    if (githubConfig.username && githubConfig.repo && githubConfig.token && pendingChanges.length > 0) {
-                        console.log('Melakukan sinkronisasi otomatis dengan GitHub...');
-                        await syncPendingChanges();
-                    }
-                }, 30000); // 30 detik
             }
             
             // Fungsi untuk sinkronisasi manual
@@ -2017,7 +1961,7 @@
                     if (eanInput.value.trim() !== '') {
                         saveData();
                     }
-                }, 100); // Delay 100ms
+                }, 100);
             });
             
             // Event listener untuk tombol Finish
@@ -2047,9 +1991,6 @@
                 palletInput.value = '';
                 containerInput.value = '';
                 toggleEanInput();
-                
-                // Jalankan sinkronisasi setelah mengganti pallet/container
-                syncPendingChanges();
             });
             
             savePalletBtn.addEventListener('click', function() {
@@ -2065,9 +2006,6 @@
                 updateTotalEan();
                 updateTotalContainer();
                 toggleEanInput();
-                
-                // Jalankan sinkronisasi setelah mengganti pallet
-                syncPendingChanges();
             });
             
             saveContainerBtn.addEventListener('click', function() {
@@ -2085,9 +2023,6 @@
                 updateTotalContainer();
                 updateTotalEan();
                 toggleEanInput();
-                
-                // Jalankan sinkronisasi setelah mengganti container
-                syncPendingChanges();
             });
             
             // Event listener untuk tombol export
@@ -2125,11 +2060,6 @@
                 updateTotalContainer();
                 populateFilterDropdowns();
                 toggleEanInput();
-                
-                // Mulai interval sinkronisasi jika konfigurasi GitHub ada
-                if (githubConfig.username && githubConfig.repo && githubConfig.token) {
-                    startGitHubSyncInterval();
-                }
                 
                 // Perbarui status sinkronisasi
                 updateSyncStatusUI();
@@ -2214,7 +2144,7 @@
                 }, 3000);
             }
             
-            // Fungsi untuk menambahkan baris ke tabel (lebih efisien)
+            // Fungsi untuk menambahkan baris ke tabel
             function addTableRow(data, index) {
                 if (emptyState.classList.contains('hidden') === false) {
                     emptyState.classList.add('hidden');
@@ -2311,17 +2241,10 @@
                     pendingChanges.push({type: 'delete', data: deletedData});
                     updateSyncStatusUI();
                     
-                    // Sinkronisasi dengan GitHub
-                    const success = await syncPendingChanges();
-                    
-                    if (success) {
-                        renderTable();
-                        updateTotalEan();
-                        updateTotalContainer();
-                        showNotification('Data berhasil dihapus');
-                    } else {
-                        showNotification('Data dihapus lokal, gagal ke GitHub', 'error');
-                    }
+                    renderTable();
+                    updateTotalEan();
+                    updateTotalContainer();
+                    showNotification('Data berhasil dihapus (lokal). Gunakan Sync untuk mengirim ke GitHub.');
                 }
             }
             
