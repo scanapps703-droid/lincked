@@ -1,1 +1,482 @@
-[]
+[
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:34:26.032Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881266032
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:34:35.394Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881275394
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:35:21.376Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881321376
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:35:26.599Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881326600
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:35:31.253Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881331253
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:35:35.778Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881335779
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:35:51.147Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881351147
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:35:57.112Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881357113
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:36:02.542Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881362543
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:36:10.955Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881370955
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:36:15.605Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881375605
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:36:20.147Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881380147
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:36:52.020Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881412020
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:36:57.103Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881417103
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:37:05.037Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881425038
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:37:10.930Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881430931
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:37:16.269Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881436269
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:37:22.789Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881442789
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:37:28.096Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881448096
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:37:32.420Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881452420
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:37:38.157Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881458157
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:37:44.011Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881464012
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:37:48.712Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881468712
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:37:52.665Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881472665
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:39:05.396Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881545396
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:39:32.225Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881572225
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:39:33.562Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881573562
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:39:49.319Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881589319
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:39:51.376Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881591376
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:39:57.432Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881597432
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:40:07.126Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881607126
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:40:15.238Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881615239
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:40:24.340Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881624340
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:40:30.634Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881630634
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:40:41.600Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881641600
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:40:49.378Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881649378
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:42:57.264Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881777264
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:43:08.327Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881788327
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:43:15.816Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881795816
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:43:22.754Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881802754
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:43:29.199Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881809199
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:43:35.919Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881815919
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:43:45.115Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881825115
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:43:51.802Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881831802
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:43:59.497Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881839497
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:44:08.317Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881848317
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:44:16.035Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881856035
+  },
+  {
+    "pallet": "DID2507181804",
+    "container": "B 9477 AX",
+    "ean": "5400520277305",
+    "qty": "1",
+    "timestamp": "2025-09-03T06:44:24.914Z",
+    "user": "Anton",
+    "date": "2025-09-03",
+    "version": 1756881864914
+  }
+]
