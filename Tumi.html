@@ -6,24 +6,29 @@
     <title>TUMI</title>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* CSS tetap sama seperti sebelumnya */
         :root {
-            --primary: #3498db;
-            --primary-dark: #2980b9;
-            --success: #2ecc71;
-            --success-dark: #27ae60;
-            --warning: #f39c12;
-            --warning-dark: #e67e22;
-            --danger: #e74c3c;
-            --danger-dark: #c0392b;
-            --light: #f8f9fa;
-            --dark: #2c3e50;
-            --gray: #7f8c8d;
-            --border: #ddd;
-            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            --radius: 8px;
-            --transition: all 0.3s ease;
+            --spark-primary: #3490dc;
+            --spark-primary-dark: #2779bd;
+            --spark-secondary: #6c757d;
+            --spark-success: #38c172;
+            --spark-success-dark: #2d995b;
+            --spark-danger: #e3342f;
+            --spark-danger-dark: #cc1f1a;
+            --spark-warning: #ffed4a;
+            --spark-warning-dark: #f2d024;
+            --spark-info: #6cb2eb;
+            --spark-light: #f8f9fa;
+            --spark-dark: #343a40;
+            --spark-gray: #6c757d;
+            --spark-gray-light: #e2e8f0;
+            --spark-border: #e2e8f0;
+            --spark-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --spark-radius: 0.375rem;
+            --spark-transition: all 0.2s ease;
+            --spark-sidebar-width: 16rem;
+            --spark-header-height: 4rem;
         }
 
         * {
@@ -33,9 +38,9 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            color: #333;
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #4a5568;
             line-height: 1.6;
             min-height: 100vh;
         }
@@ -49,62 +54,142 @@
             min-height: 100vh;
         }
 
+        /* Header Styles */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding: 15px 20px;
+            margin-bottom: 1.5rem;
+            padding: 1rem 1.5rem;
             background: white;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            border-radius: var(--spark-radius);
+            box-shadow: var(--spark-shadow);
+            border-left: 4px solid var(--spark-primary);
         }
 
         h1 {
-            color: var(--dark);
+            color: var(--spark-primary);
             margin: 0;
             font-size: 1.8rem;
             display: flex;
             align-items: center;
             gap: 10px;
+            font-weight: 700;
         }
 
+        /* Login Form Styles */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+        }
+
+        .login-box {
+            background: white;
+            padding: 2.5rem;
+            border-radius: var(--spark-radius);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border-top: 4px solid var(--spark-primary);
+        }
+
+        .login-box h2 {
+            color: var(--spark-primary);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .login-box p {
+            color: var(--spark-gray);
+            margin-bottom: 1.5rem;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-input {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--spark-border);
+            border-radius: var(--spark-radius);
+            font-size: 1rem;
+            transition: var(--spark-transition);
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--spark-primary);
+            box-shadow: 0 0 0 3px rgba(52, 144, 220, 0.2);
+        }
+
+        .login-btn {
+            background-color: var(--spark-primary);
+            color: white;
+            border: none;
+            border-radius: var(--spark-radius);
+            padding: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--spark-transition);
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .login-btn:hover {
+            background-color: var(--spark-primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Tab Styles */
         .tabs {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
         }
 
         .tab {
-            padding: 12px 15px;
+            padding: 0.75rem 1rem;
             cursor: pointer;
-            background-color: var(--light);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            transition: var(--transition);
+            background-color: white;
+            border: 1px solid var(--spark-border);
+            border-radius: var(--spark-radius);
+            transition: var(--spark-transition);
             display: flex;
             align-items: center;
             gap: 10px;
+            font-weight: 600;
+            color: var(--spark-gray);
         }
 
         .tab.active {
-            background-color: var(--primary);
+            background-color: var(--spark-primary);
             color: white;
             font-weight: bold;
-            border-color: var(--primary);
+            border-color: var(--spark-primary);
         }
 
         .tab:hover:not(.active) {
-            background-color: #e9ecef;
+            background-color: var(--spark-gray-light);
+            color: var(--spark-dark);
         }
 
         .tab-content {
             display: none;
             background-color: #fff;
-            padding: 20px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            border-radius: var(--spark-radius);
+            box-shadow: var(--spark-shadow);
+            border: 1px solid var(--spark-border);
         }
 
         .tab-content.active {
@@ -114,17 +199,18 @@
 
         .content-wrapper {
             display: flex;
-            gap: 20px;
+            gap: 1.5rem;
             flex: 1;
         }
 
         .sidebar {
-            width: 250px;
+            width: var(--spark-sidebar-width);
             background-color: #fff;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 15px;
-            transition: var(--transition);
+            border-radius: var(--spark-radius);
+            box-shadow: var(--spark-shadow);
+            padding: 1rem;
+            transition: var(--spark-transition);
+            border: 1px solid var(--spark-border);
         }
 
         .main-content {
@@ -133,79 +219,86 @@
             flex-direction: column;
         }
 
-        .user-info, .container-info, .github-config, .form-container, .export-controls, .summary, .master-data {
+        /* Card Styles */
+        .user-info, .container-info, .github-config, .form-container, .export-controls, .summary, .master-data-config {
             background-color: #fff;
-            padding: 15px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
+            padding: 1.25rem;
+            border-radius: var(--spark-radius);
+            box-shadow: var(--spark-shadow);
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--spark-border);
         }
 
         .container-info {
-            background-color: #e8f4fc;
-            border-left: 4px solid var(--primary);
+            background-color: #ebf4ff;
+            border-left: 4px solid var(--spark-primary);
         }
 
         .github-config {
             border-left: 4px solid #6e5494;
         }
 
+        .master-data-config {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .github-config h3, .master-data-config h3 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
         .github-config h3 {
             color: #6e5494;
-            margin-top: 0;
         }
 
-        .master-data {
-            border-left: 4px solid #9b59b6;
-        }
-
-        .master-data h3 {
-            color: #9b59b6;
-            margin-top: 0;
+        .master-data-config h3 {
+            color: #e74c3c;
         }
 
         .summary {
-            background: linear-gradient(135deg, #e8f4fc 0%, #c5e3f6 100%);
+            background: white;
             text-align: center;
             font-weight: bold;
-            padding: 20px;
+            padding: 1.5rem;
             display: flex;
             justify-content: space-around;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 1.5rem;
         }
 
         .summary-item {
-            padding: 15px;
+            padding: 1.25rem;
             background: white;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            border-radius: var(--spark-radius);
+            box-shadow: var(--spark-shadow);
             min-width: 200px;
             flex: 1;
+            border: 1px solid var(--spark-border);
         }
 
         .summary-item i {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            color: var(--spark-primary);
         }
 
         .summary-value {
-            font-size: 24px;
+            font-size: 1.75rem;
             font-weight: bold;
-            color: var(--dark);
-            margin: 5px 0;
+            color: var(--spark-dark);
+            margin: 0.25rem 0;
         }
 
         .summary-label {
-            color: var(--gray);
-            font-size: 14px;
+            color: var(--spark-gray);
+            font-size: 0.875rem;
         }
 
+        /* Form Styles */
         .form-group {
             display: flex;
-            gap: 20px;
-            margin-bottom: 15px;
+            gap: 1.25rem;
+            margin-bottom: 1rem;
             flex-wrap: wrap;
         }
 
@@ -217,26 +310,28 @@
         }
 
         label {
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: var(--dark);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--spark-dark);
             display: flex;
             align-items: center;
             gap: 5px;
+            font-size: 0.875rem;
         }
 
         input, select {
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 16px;
-            transition: var(--transition);
+            padding: 0.75rem;
+            border: 1px solid var(--spark-border);
+            border-radius: var(--spark-radius);
+            font-size: 1rem;
+            transition: var(--spark-transition);
+            font-family: 'Nunito', sans-serif;
         }
 
         input:focus, select:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            border-color: var(--spark-primary);
+            box-shadow: 0 0 0 3px rgba(52, 144, 220, 0.2);
         }
 
         input:read-only {
@@ -251,122 +346,127 @@
         .input-with-button {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 0.5rem;
         }
 
+        /* Button Styles */
         button {
-            padding: 12px 16px;
+            padding: 0.75rem 1rem;
             border: none;
-            border-radius: 6px;
+            border-radius: var(--spark-radius);
             cursor: pointer;
-            font-size: 16px;
+            font-size: 0.875rem;
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: var(--transition);
+            gap: 0.5rem;
+            transition: var(--spark-transition);
             font-weight: 600;
+            font-family: 'Nunito', sans-serif;
         }
 
         .btn-primary {
-            background-color: var(--primary);
+            background-color: var(--spark-primary);
             color: white;
         }
 
         .btn-primary:hover {
-            background-color: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: var(--spark-primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .btn-info {
-            background-color: var(--success);
+            background-color: var(--spark-info);
             color: white;
         }
 
         .btn-info:hover {
-            background-color: var(--success-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #5a9fe4;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .btn-warning {
-            background-color: var(--warning);
-            color: white;
+            background-color: var(--spark-warning);
+            color: var(--spark-dark);
         }
 
         .btn-warning:hover {
-            background-color: var(--warning-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #f2d024;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .btn-excel {
-            background-color: var(--success);
+            background-color: var(--spark-success);
             color: white;
         }
 
         .btn-excel:hover {
-            background-color: var(--success-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: var(--spark-success-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .btn-logout {
-            background-color: var(--danger);
+            background-color: var(--spark-danger);
             color: white;
         }
 
         .btn-logout:hover {
-            background-color: var(--danger-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: var(--spark-danger-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .button-group {
             display: flex;
-            gap: 10px;
+            gap: 0.75rem;
             justify-content: flex-end;
-            margin-top: 20px;
+            margin-top: 1.5rem;
             flex-wrap: wrap;
         }
 
+        /* Table Styles */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
             background-color: #fff;
-            border-radius: var(--radius);
+            border-radius: var(--spark-radius);
             overflow: hidden;
-            box-shadow: var(--shadow);
+            box-shadow: var(--spark-shadow);
+            border: 1px solid var(--spark-border);
         }
 
         th, td {
-            padding: 14px 16px;
+            padding: 0.875rem 1rem;
             text-align: left;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--spark-border);
+            font-size: 0.875rem;
         }
 
         th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-            color: var(--dark);
+            background-color: #f7fafc;
+            font-weight: 600;
+            color: var(--spark-dark);
             position: sticky;
             top: 0;
         }
 
         tr:hover {
-            background-color: #f9f9f9;
+            background-color: #f7fafc;
         }
 
         .actions {
             display: flex;
-            gap: 10px;
+            gap: 0.75rem;
         }
 
         .btn-edit {
-            color: var(--primary);
+            color: var(--spark-primary);
             cursor: pointer;
-            transition: var(--transition);
+            transition: var(--spark-transition);
         }
 
         .btn-edit:hover {
@@ -374,15 +474,16 @@
         }
 
         .btn-delete {
-            color: var(--danger);
+            color: var(--spark-danger);
             cursor: pointer;
-            transition: var(--transition);
+            transition: var(--spark-transition);
         }
 
         .btn-delete:hover {
             transform: scale(1.2);
         }
 
+        /* Modal Styles */
         .user-selection {
             position: fixed;
             top: 0;
@@ -398,18 +499,19 @@
 
         .user-selection-box {
             background-color: white;
-            padding: 30px;
-            border-radius: var(--radius);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+            border-radius: var(--spark-radius);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             width: 90%;
             max-width: 500px;
             text-align: center;
+            border: 1px solid var(--spark-border);
         }
 
         .user-selection-input {
             display: flex;
-            gap: 10px;
-            margin: 20px 0;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
         }
 
         .modal {
@@ -427,29 +529,30 @@
 
         .modal-content {
             background-color: white;
-            padding: 25px;
-            border-radius: var(--radius);
+            padding: 1.5rem;
+            border-radius: var(--spark-radius);
             width: 90%;
             max-width: 500px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--spark-border);
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 1.25rem;
         }
 
         .modal-form-group {
-            margin-bottom: 15px;
+            margin-bottom: 1rem;
         }
 
         .modal-actions {
             display: flex;
             justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
         }
 
         .hidden {
@@ -458,28 +561,74 @@
 
         .empty-state {
             text-align: center;
-            padding: 40px;
-            color: var(--gray);
+            padding: 2.5rem;
+            color: var(--spark-gray);
         }
 
         .notification {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: var(--success);
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background-color: var(--spark-success);
             color: white;
-            padding: 15px 20px;
-            border-radius: 6px;
-            box-shadow: var(--shadow);
+            padding: 0.875rem 1.25rem;
+            border-radius: var(--spark-radius);
+            box-shadow: var(--spark-shadow);
             display: none;
             z-index: 1000;
             animation: slideIn 0.3s ease;
+            font-weight: 600;
         }
 
         .notification.error {
-            background-color: var(--danger);
+            background-color: var(--spark-danger);
         }
 
+        /* GitHub Connection Status */
+        .github-connection-status {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .github-connected {
+            background-color: var(--spark-success);
+            color: white;
+        }
+
+        .github-disconnected {
+            background-color: var(--spark-gray);
+            color: white;
+        }
+
+        .github-error {
+            background-color: var(--spark-danger);
+            color: white;
+        }
+
+        .sync-button {
+            background-color: var(--spark-primary);
+            color: white;
+            border: none;
+            border-radius: var(--spark-radius);
+            padding: 0.625rem 0.875rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-weight: 600;
+        }
+
+        .sync-button:hover {
+            background-color: var(--spark-primary-dark);
+        }
+
+        /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -490,6 +639,7 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
+        /* Responsive Styles */
         @media (max-width: 992px) {
             .content-wrapper {
                 flex-direction: column;
@@ -497,7 +647,7 @@
             
             .sidebar {
                 width: 100%;
-                margin-bottom: 20px;
+                margin-bottom: 1.5rem;
             }
             
             .summary {
@@ -512,7 +662,7 @@
         @media (max-width: 768px) {
             .form-group {
                 flex-direction: column;
-                gap: 15px;
+                gap: 1rem;
             }
             
             .form-group > div {
@@ -542,25 +692,31 @@
                 display: block;
                 overflow-x: auto;
             }
+
+            .github-connection-status {
+                margin-left: 0;
+                margin-top: 0.5rem;
+                display: block;
+            }
         }
 
         @media (max-width: 480px) {
             .container {
-                padding: 10px;
+                padding: 0.75rem;
             }
             
             .header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 10px;
+                gap: 0.75rem;
             }
             
             .user-selection-box {
-                padding: 20px;
+                padding: 1.5rem;
             }
             
             .modal-content {
-                padding: 15px;
+                padding: 1.25rem;
             }
             
             .summary-item {
@@ -572,9 +728,9 @@
             display: none;
             background: none;
             border: none;
-            font-size: 24px;
+            font-size: 1.5rem;
             cursor: pointer;
-            color: var(--dark);
+            color: var(--spark-dark);
         }
 
         @media (max-width: 992px) {
@@ -587,108 +743,149 @@
             }
         }
 
-        .table-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
+        /* Checkbox Styles */
+        .checkbox-cell {
+            width: 40px;
+            text-align: center;
         }
 
-        .select-all-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .bulk-delete-btn {
-            background-color: var(--danger);
-            color: white;
-        }
-
-        .bulk-delete-btn:hover {
-            background-color: var(--danger-dark);
-        }
-
-        .bulk-delete-btn:disabled {
-            background-color: var(--gray);
-            cursor: not-allowed;
-        }
-
-        input[type="checkbox"] {
+        .select-all-checkbox {
             width: 18px;
             height: 18px;
             cursor: pointer;
         }
 
-        .manual-notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: var(--danger);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 6px;
-            box-shadow: var(--shadow);
-            z-index: 1000;
-            animation: slideIn 0.3s ease;
+        .data-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .delete-selected-container {
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* Loading Indicator */
+        .loading-indicator {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .input-loading {
+            position: relative;
+        }
+
+        .input-loading::after {
+            content: '';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(52, 144, 220, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--spark-primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        /* Conflict Warning */
+        .conflict-warning {
+            background-color: #fff3cd;
+            border-left: 4px solid var(--spark-warning);
+            padding: 0.875rem;
+            margin-bottom: 1rem;
+            border-radius: var(--spark-radius);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .conflict-warning i {
+            color: var(--spark-warning-dark);
+        }
+
+        /* Sync Status */
+        .sync-status {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--spark-radius);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sync-status.pending {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .sync-status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .sync-status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .sync-status i {
+            font-size: 1rem;
+        }
+
+        .pending-sync-list {
+            margin-top: 1rem;
+            border: 1px solid var(--spark-border);
+            border-radius: var(--spark-radius);
+            padding: 0.875rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .pending-sync-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            max-width: 400px;
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--spark-border);
+            font-size: 0.875rem;
         }
 
-        .manual-notification .close-btn {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-            margin-left: 15px;
-        }
-
-        .github-status {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 14px;
-            padding: 5px 10px;
-            border-radius: 4px;
-            background-color: #f8f9fa;
-        }
-
-        .github-status.connected {
-            color: var(--success);
-        }
-
-        .github-status.disconnected {
-            color: var(--danger);
-        }
-
-        .github-status.pending {
-            color: var(--warning);
-        }
-
-        .header-user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .pending-sync-item:last-child {
+            border-bottom: none;
         }
     </style>
 </head>
 <body>
-    <div class="user-selection" id="userSelection">
-        <div class="user-selection-box">
-            <h2><i class="fas fa-user"></i> Masukkan Username</h2>
+    <!-- Tampilan login -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <h2><i class="fas fa-user"></i> TUMI</h2>
             <p>Silakan masukkan username Anda untuk melanjutkan</p>
-            <form id="loginForm">
-                <div class="user-selection-input">
-                    <input type="text" id="initialUsernameInput" placeholder="Masukkan username" required>
-                    <button type="submit" class="btn-info" id="initialSetUserBtn"><i class="fas fa-check"></i> Lanjutkan</button>
-                </div>
+            <form id="loginForm" class="login-form">
+                <input type="text" id="usernameInput" class="form-input" placeholder="Masukkan username" required autofocus>
+                <button type="submit" class="login-btn"><i class="fas fa-check"></i> Lanjutkan</button>
             </form>
         </div>
     </div>
 
+    <!-- Modal untuk edit data -->
     <div class="modal" id="editModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -697,6 +894,7 @@
             </div>
             <form id="editForm">
                 <input type="hidden" id="editIndex">
+                <input type="hidden" id="editVersion">
                 <div class="modal-form-group">
                     <label for="editContainer">No. Container</label>
                     <input type="text" id="editContainer" required>
@@ -711,11 +909,11 @@
                 </div>
                 <div class="modal-form-group">
                     <label for="editSku">SKU</label>
-                    <input type="text" id="editSku" readonly>
+                    <input type="text" id="editSku" required>
                 </div>
                 <div class="modal-form-group">
                     <label for="editDescription">Description</label>
-                    <input type="text" id="editDescription" readonly>
+                    <input type="text" id="editDescription" required>
                 </div>
                 <div class="modal-form-group">
                     <label for="editQty">Qty</label>
@@ -729,18 +927,41 @@
         </div>
     </div>
 
+    <!-- Modal untuk edit master data -->
+    <div class="modal" id="editMasterModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> Edit Master Data</h2>
+                <button class="close-modal" id="closeMasterModal">&times;</button>
+            </div>
+            <form id="editMasterForm">
+                <input type="hidden" id="editMasterIndex">
+                <div class="modal-form-group">
+                    <label for="editMasterEan">EAN</label>
+                    <input type="text" id="editMasterEan" required>
+                </div>
+                <div class="modal-form-group">
+                    <label for="editMasterSku">SKU</label>
+                    <input type="text" id="editMasterSku" required>
+                </div>
+                <div class="modal-form-group">
+                    <label for="editMasterDescription">Description</label>
+                    <input type="text" id="editMasterDescription" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-warning" id="cancelEditMasterBtn">Batal</button>
+                    <button type="submit" class="btn-info">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="container" id="mainContainer" style="display: none;">
         <div class="header">
             <h1><i class="fas fa-barcode"></i> TUMI</h1>
-            <div class="header-user-info">
-                <div class="github-status" id="githubStatusIndicator">
-                    <i class="fab fa-github"></i>
-                    <span id="githubStatusText">Memeriksa...</span>
-                </div>
-                <button class="mobile-menu-btn" id="mobileMenuBtn">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
         
         <div class="content-wrapper">
@@ -748,13 +969,31 @@
                 <div class="tabs">
                     <div class="tab active" data-tab="input"><i class="fas fa-keyboard"></i> Input Data</div>
                     <div class="tab" data-tab="github" id="githubTabBtn"><i class="fab fa-github"></i> GitHub Config</div>
-                    <div class="tab hidden" data-tab="master" id="masterTabBtn"><i class="fas fa-database"></i> Master Data</div>
+                    <div class="tab" data-tab="master" id="masterTabBtn"><i class="fas fa-database"></i> Master Data</div>
                 </div>
                 
                 <div class="user-info">
-                    <p><i class="fas fa-user"></i> User: <span id="currentUser">Guest</span> <span id="userTypeBadge" class="hidden"></span></p>
+                    <p>
+                        <i class="fas fa-user"></i> User: <span id="currentUser">Guest</span> 
+                        <span id="userTypeBadge" class="hidden"></span>
+                        <span id="githubStatusIndicator" class="github-connection-status github-disconnected">
+                            <i class="fab fa-github"></i> <span id="githubStatusText">Tidak Terkoneksi</span>
+                        </span>
+                    </p>
                     <div class="user-controls">
                         <button type="button" class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    </div>
+                    
+                    <!-- Status sinkronisasi -->
+                    <div class="sync-status hidden" id="syncStatus">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="syncStatusText">Status sinkronisasi</span>
+                    </div>
+                    
+                    <!-- Daftar perubahan yang tertunda -->
+                    <div class="pending-sync-list hidden" id="pendingSyncList">
+                        <h4><i class="fas fa-clock"></i> Perubahan Tertunda</h4>
+                        <div id="pendingSyncItems"></div>
                     </div>
                 </div>
             </div>
@@ -762,6 +1001,11 @@
             <div class="main-content">
                 <div id="adminInterface">
                     <div class="tab-content active" id="inputTab">
+                        <div class="conflict-warning" id="conflictWarning" style="display: none;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span id="conflictMessage">Terjadi konflik data. Silakan sinkronisasi ulang.</span>
+                        </div>
+                        
                         <div class="container-info" id="containerInfo">
                             <p><i class="fas fa-info-circle"></i> No. Pallet saat ini: <span id="currentPallet">Belum dipilih</span></p>
                             <p><i class="fas fa-truck"></i> No. Container saat ini: <span id="currentContainer">Belum dipilih</span></p>
@@ -789,31 +1033,35 @@
                                 <div class="form-group">
                                     <div>
                                         <label for="ean"><i class="fas fa-barcode"></i> EAN</label>
-                                        <input type="text" id="ean" required placeholder="Masukkan atau scan kode EAN" disabled>
-                                        <small id="eanHelpText" style="color: #e74c3c; display: none;">
-                                            <i class="fas fa-exclamation-circle"></i> Harap set Container dan Pallet terlebih dahulu
-                                        </small>
+                                        <div class="input-with-button">
+                                            <input type="text" id="ean" required placeholder="Masukkan atau scan kode EAN" disabled>
+                                            <small id="eanHelpText" style="color: #e74c3c; display: none;">
+                                                <i class="fas fa-exclamation-circle"></i> Harap set Container dan Pallet terlebih dahulu
+                                            </small>
+                                        </div>
                                     </div>
                                     <div>
                                         <label for="qty"><i class="fas fa-cubes"></i> Qty (default: 1)</label>
                                         <input type="number" id="qty" value="1" min="1" placeholder="Jumlah" disabled>
                                     </div>
                                 </div>
-
+                                
                                 <div class="form-group">
                                     <div>
-                                        <label for="sku"><i class="fas fa-tag"></i> SKU</label>
-                                        <input type="text" id="sku" readonly placeholder="Akan terisi otomatis">
+                                        <label for="sku"><i class="fas fa-barcode"></i> SKU</label>
+                                        <input type="text" id="sku" readonly>
                                     </div>
                                     <div>
                                         <label for="description"><i class="fas fa-file-alt"></i> Description</label>
-                                        <input type="text" id="description" readonly placeholder="Akan terisi otomatis">
+                                        <input type="text" id="description" readonly>
                                     </div>
                                 </div>
                                 
                                 <div class="button-group">
                                     <button type="button" class="btn-primary" id="finishBtn"><i class="fas fa-check"></i> Finish</button>
-                                    <button type="button" class="btn-info" id="manualSyncBtn"><i class="fas fa-sync"></i> Sync ke GitHub</button>
+                                    <button type="button" class="sync-button" id="syncButton" title="Sinkronisasi Data">
+                                        <i class="fas fa-sync"></i> Sync ke GitHub
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -843,32 +1091,31 @@
                             <input type="date" id="dateTo" placeholder="Sampai Tanggal">
                             <button type="button" class="btn-excel" id="exportSelectedBtn"><i class="fas fa-file-excel"></i> Export Selected</button>
                         </div>
-                        
-                        <div class="table-controls" id="inputTableControls">
-                            <div class="select-all-container">
-                                <input type="checkbox" id="selectAllInputData">
-                                <label for="selectAllInputData">Pilih Semua</label>
-                            </div>
-                            <button type="button" class="bulk-delete-btn" id="deleteSelectedInputBtn" disabled>
-                                <i class="fas fa-trash"></i> Hapus Data Terpilih
-                            </button>
+
+                        <!-- Container untuk tombol Delete Selected -->
+                        <div class="delete-selected-container" id="deleteSelectedContainer">
+                            <button type="button" class="btn-logout" id="deleteSelectedBtn"><i class="fas fa-trash"></i> Delete Selected</button>
                         </div>
                         
                         <table id="dataTable">
                             <thead>
                                 <tr>
-                                    <th width="50px"></th>
+                                    <th class="checkbox-cell">
+                                        <input type="checkbox" id="selectAllCheckbox" class="select-all-checkbox">
+                                    </th>
                                     <th><i class="fas fa-truck"></i> No. Container</th>
                                     <th><i class="fas fa-pallet"></i> Pallet ID</th>
                                     <th><i class="fas fa-barcode"></i> EAN</th>
-                                    <th><i class="fas fa-tag"></i> SKU</th>
+                                    <th><i class="fas fa-barcode"></i> SKU</th>
                                     <th><i class="fas fa-file-alt"></i> Description</th>
                                     <th><i class="fas fa-cubes"></i> Qty</th>
                                     <th><i class="fas fa-clock"></i> Timestamp</th>
+                                    <th><i class="fas fa-user"></i> User</th>
                                     <th><i class="fas fa-cog"></i> Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody">
+                                <!-- Data akan ditampilkan di sini -->
                             </tbody>
                         </table>
                         
@@ -912,13 +1159,6 @@
                                     </div>
                                 </div>
                                 
-                                <div class="form-group">
-                                    <div>
-                                        <label for="masterDataFilePath"><i class="fas fa-database"></i> Master Data File Path</label>
-                                        <input type="text" id="masterDataFilePath" value="data/masterData.json" placeholder="Path file master data di repository">
-                                    </div>
-                                </div>
-                                
                                 <div class="button-group">
                                     <button type="button" class="btn-info" id="saveGithubConfigBtn"><i class="fas fa-save"></i> Simpan Konfigurasi</button>
                                     <button type="button" class="btn-primary" id="testGithubConnectionBtn"><i class="fas fa-plug"></i> Test Koneksi</button>
@@ -932,54 +1172,49 @@
                     </div>
 
                     <div class="tab-content" id="masterTab">
-                        <div class="master-data">
+                        <div class="master-data-config">
                             <h3><i class="fas fa-database"></i> Master Data Management</h3>
-                            <p>Upload dan kelola data master (EAN, SKU, Description)</p>
+                            <p>Kelola data master EAN, SKU, dan Description</p>
                         </div>
                         
                         <div class="form-container">
-                            <div class="button-group">
-                                <button type="button" class="btn-excel" id="downloadTemplateBtn"><i class="fas fa-download"></i> Download Template</button>
-                                <button type="button" class="btn-info" id="syncMasterDataBtn"><i class="fas fa-sync"></i> Sinkronisasi Master Data</button>
-                            </div>
-                            
-                            <form id="uploadMasterForm">
+                            <form id="masterDataForm">
                                 <div class="form-group">
                                     <div>
-                                        <label for="masterFile"><i class="fas fa-upload"></i> Upload Master Data (Excel)</label>
-                                        <input type="file" id="masterFile" accept=".xlsx, .xls">
+                                        <label for="masterEan"><i class="fas fa-barcode"></i> EAN</label>
+                                        <input type="text" id="masterEan" required placeholder="Masukkan EAN">
+                                    </div>
+                                    <div>
+                                        <label for="masterSku"><i class="fas fa-barcode"></i> SKU</label>
+                                        <input type="text" id="masterSku" required placeholder="Masukkan SKU">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div>
+                                        <label for="masterDescription"><i class="fas fa-file-alt"></i> Description</label>
+                                        <input type="text" id="masterDescription" required placeholder="Masukkan Description">
                                     </div>
                                 </div>
                                 <div class="button-group">
-                                    <button type="submit" class="btn-info"><i class="fas fa-upload"></i> Upload</button>
+                                    <button type="submit" class="btn-primary"><i class="fas fa-plus"></i> Tambah</button>
+                                    <button type="button" class="btn-info" id="uploadMasterBtn"><i class="fas fa-upload"></i> Upload Master</button>
+                                    <button type="button" class="btn-excel" id="downloadTemplateBtn"><i class="fas fa-download"></i> Download Template</button>
+                                    <button type="button" class="sync-button" id="syncMasterBtn"><i class="fas fa-sync"></i> Sync Master Data</button>
                                 </div>
                             </form>
                         </div>
-                        
-                        <div class="summary">
-                            <i class="fas fa-info-circle"></i> Total Master Data: <span id="totalMasterData">0</span> records
-                        </div>
-                        
-                        <div class="table-controls" id="masterTableControls">
-                            <div class="select-all-container">
-                                <input type="checkbox" id="selectAllMasterData">
-                                <label for="selectAllMasterData">Pilih Semua</label>
-                            </div>
-                            <button type="button" class="bulk-delete-btn" id="deleteSelectedMasterBtn" disabled>
-                                <i class="fas fa-trash"></i> Hapus Data Terpilih
-                            </button>
-                        </div>
-                        
+
                         <table id="masterDataTable">
                             <thead>
                                 <tr>
-                                    <th width="50px"></th>
                                     <th>EAN</th>
                                     <th>SKU</th>
                                     <th>Description</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="masterTableBody">
+                            <tbody id="masterDataTableBody">
+                                <!-- Data master akan ditampilkan di sini -->
                             </tbody>
                         </table>
                     </div>
@@ -998,9 +1233,9 @@
             const palletInput = document.getElementById('pallet');
             const containerInput = document.getElementById('container');
             const eanInput = document.getElementById('ean');
+            const qtyInput = document.getElementById('qty');
             const skuInput = document.getElementById('sku');
             const descriptionInput = document.getElementById('description');
-            const qtyInput = document.getElementById('qty');
             const eanHelpText = document.getElementById('eanHelpText');
             const tableBody = document.getElementById('tableBody');
             const emptyState = document.getElementById('emptyState');
@@ -1011,7 +1246,6 @@
             const savePalletBtn = document.getElementById('savePalletBtn');
             const saveContainerBtn = document.getElementById('saveContainerBtn');
             const finishBtn = document.getElementById('finishBtn');
-            const manualSyncBtn = document.getElementById('manualSyncBtn');
             const exportSelectedBtn = document.getElementById('exportSelectedBtn');
             const userSelect = document.getElementById('userSelect');
             const containerSelect = document.getElementById('containerSelect');
@@ -1023,10 +1257,9 @@
             const adminInterface = document.getElementById('adminInterface');
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             const sidebar = document.getElementById('sidebar');
-            const userSelection = document.getElementById('userSelection');
+            const loginContainer = document.getElementById('loginContainer');
             const mainContainer = document.getElementById('mainContainer');
-            const initialUsernameInput = document.getElementById('initialUsernameInput');
-            const initialSetUserBtn = document.getElementById('initialSetUserBtn');
+            const usernameInput = document.getElementById('usernameInput');
             const logoutBtn = document.getElementById('logoutBtn');
             const tabs = document.querySelectorAll('.tab');
             const tabContents = document.querySelectorAll('.tab-content');
@@ -1036,14 +1269,8 @@
             const githubStatusSpan = document.getElementById('githubStatus');
             const githubTabBtn = document.getElementById('githubTabBtn');
             const masterTabBtn = document.getElementById('masterTabBtn');
-            const downloadTemplateBtn = document.getElementById('downloadTemplateBtn');
-            const uploadMasterForm = document.getElementById('uploadMasterForm');
-            const masterFileInput = document.getElementById('masterFile');
-            const totalMasterDataSpan = document.getElementById('totalMasterData');
-            const masterTableBody = document.getElementById('masterTableBody');
-            const githubStatusIndicator = document.getElementById('githubStatusIndicator');
-            const githubStatusText = document.getElementById('githubStatusText');
-            const syncMasterDataBtn = document.getElementById('syncMasterDataBtn');
+            const conflictWarning = document.getElementById('conflictWarning');
+            const conflictMessage = document.getElementById('conflictMessage');
             
             // Modal elements
             const editModal = document.getElementById('editModal');
@@ -1051,18 +1278,47 @@
             const cancelEditBtn = document.getElementById('cancelEditBtn');
             const editForm = document.getElementById('editForm');
             const editIndexInput = document.getElementById('editIndex');
+            const editVersionInput = document.getElementById('editVersion');
             const editContainerInput = document.getElementById('editContainer');
             const editPalletInput = document.getElementById('editPallet');
             const editEanInput = document.getElementById('editEan');
             const editSkuInput = document.getElementById('editSku');
             const editDescriptionInput = document.getElementById('editDescription');
             const editQtyInput = document.getElementById('editQty');
+
+            // Master Data elements
+            const masterDataForm = document.getElementById('masterDataForm');
+            const masterEanInput = document.getElementById('masterEan');
+            const masterSkuInput = document.getElementById('masterSku');
+            const masterDescriptionInput = document.getElementById('masterDescription');
+            const uploadMasterBtn = document.getElementById('uploadMasterBtn');
+            const downloadTemplateBtn = document.getElementById('downloadTemplateBtn');
+            const syncMasterBtn = document.getElementById('syncMasterBtn');
+            const masterDataTableBody = document.getElementById('masterDataTableBody');
+            const editMasterModal = document.getElementById('editMasterModal');
+            const closeMasterModalBtn = document.getElementById('closeMasterModal');
+            const cancelEditMasterBtn = document.getElementById('cancelEditMasterBtn');
+            const editMasterForm = document.getElementById('editMasterForm');
+            const editMasterIndexInput = document.getElementById('editMasterIndex');
+            const editMasterEanInput = document.getElementById('editMasterEan');
+            const editMasterSkuInput = document.getElementById('editMasterSku');
+            const editMasterDescriptionInput = document.getElementById('editMasterDescription');
             
-            // Elements untuk fitur delete dengan checkbox
-            const selectAllInputData = document.getElementById('selectAllInputData');
-            const deleteSelectedInputBtn = document.getElementById('deleteSelectedInputBtn');
-            const selectAllMasterData = document.getElementById('selectAllMasterData');
-            const deleteSelectedMasterBtn = document.getElementById('deleteSelectedMasterBtn');
+            // Elements untuk fitur delete dengan checklist
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+            const deleteSelectedContainer = document.getElementById('deleteSelectedContainer');
+            
+            // Elements untuk fitur baru: status GitHub dan sinkronisasi
+            const githubStatusIndicator = document.getElementById('githubStatusIndicator');
+            const githubStatusText = document.getElementById('githubStatusText');
+            const syncButton = document.getElementById('syncButton');
+            
+            // Elements untuk status sinkronisasi
+            const syncStatus = document.getElementById('syncStatus');
+            const syncStatusText = document.getElementById('syncStatusText');
+            const pendingSyncList = document.getElementById('pendingSyncList');
+            const pendingSyncItems = document.getElementById('pendingSyncItems');
             
             let currentPallet = '';
             let currentContainer = '';
@@ -1072,10 +1328,12 @@
             let isAdmin = false;
             let eanInputTimer = null;
             let currentEditingIndex = -1;
-            let githubSyncInterval = null;
-            let lastScanTime = null;
-            let autoSyncTimeout = null;
-            let isScanning = false;
+            let isSaving = false;
+            let lastSyncSHA = null;
+            let pendingChanges = [];
+            let lastSyncTime = null;
+            let syncRetryCount = 0;
+            const MAX_RETRY_COUNT = 3;
             
             // Konfigurasi GitHub
             let githubConfig = {
@@ -1083,117 +1341,17 @@
                 repo: '',
                 token: '',
                 dataFilePath: 'data/scannedData.json',
-                masterDataFilePath: 'data/masterData.json'
+                masterDataFilePath: 'data/masterData.json',
+                lastSync: null
             };
-            
-            // Fungsi untuk menampilkan notifikasi manual
-            function showManualNotification(message, type = 'error') {
-                // Hapus notifikasi manual sebelumnya jika ada
-                const existingNotification = document.querySelector('.manual-notification');
-                if (existingNotification) {
-                    existingNotification.remove();
-                }
-                
-                const notification = document.createElement('div');
-                notification.className = `manual-notification ${type === 'error' ? 'error' : ''}`;
-                notification.innerHTML = `
-                    <div>${message}</div>
-                    <button class="close-btn">&times;</button>
-                `;
-                
-                document.body.appendChild(notification);
-                
-                // Event listener untuk tombol close
-                notification.querySelector('.close-btn').addEventListener('click', function() {
-                    notification.remove();
-                });
-            }
-            
-            // Fungsi untuk memperbarui status GitHub di header
-            function updateGitHubStatusIndicator(status, message) {
-                githubStatusIndicator.className = 'github-status';
-                githubStatusText.textContent = message;
-                
-                switch(status) {
-                    case 'connected':
-                        githubStatusIndicator.classList.add('connected');
-                        break;
-                    case 'disconnected':
-                        githubStatusIndicator.classList.add('disconnected');
-                        break;
-                    case 'pending':
-                        githubStatusIndicator.classList.add('pending');
-                        break;
-                }
-            }
-            
-            // Fungsi untuk sinkronisasi otomatis dengan GitHub
-            function setupAutoSync() {
-                // Hentikan interval sebelumnya jika ada
-                if (githubSyncInterval) {
-                    clearInterval(githubSyncInterval);
-                }
-                
-                // Jika GitHub terkoneksi, atur sinkronisasi otomatis setiap 30 detik
-                if (githubConfig.username && githubConfig.repo && githubConfig.token) {
-                    githubSyncInterval = setInterval(async () => {
-                        try {
-                            // Cek jika sedang dalam proses scan, jangan sinkronisasi
-                            if (isScanning) return;
-                            
-                            await loadFromGitHub();
-                            await loadMasterDataFromGitHub();
-                            console.log('Auto-sinkronisasi dengan GitHub berhasil');
-                        } catch (error) {
-                            console.error('Gagal auto-sinkronisasi dengan GitHub:', error);
-                        }
-                    }, 30000); // 30 detik
-                }
-            }
-            
-            // Fungsi untuk sinkronisasi manual ke GitHub
-            async function manualSyncToGitHub() {
-                try {
-                    showNotification('Memulai sinkronisasi manual...');
-                    const success = await saveToGitHub();
-                    if (success) {
-                        showNotification('Sinkronisasi manual berhasil!');
-                    } else {
-                        showNotification('Gagal sinkronisasi manual', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error sinkronisasi manual:', error);
-                    showNotification('Error sinkronisasi manual', 'error');
-                }
-            }
-            
-            // Fungsi untuk memulai timer sinkronisasi setelah 1 menit tidak ada scan
-            function startAutoSyncTimer() {
-                // Hapus timeout sebelumnya jika ada
-                if (autoSyncTimeout) {
-                    clearTimeout(autoSyncTimeout);
-                }
-                
-                // Set timeout untuk sinkronisasi setelah 1 menit
-                autoSyncTimeout = setTimeout(async () => {
-                    if (githubConfig.username && githubConfig.repo && githubConfig.token) {
-                        try {
-                            await saveToGitHub();
-                            console.log('Auto-sinkronisasi setelah 1 menit tidak ada scan');
-                        } catch (error) {
-                            console.error('Gagal auto-sinkronisasi setelah 1 menit:', error);
-                        }
-                    }
-                }, 60000); // 1 menit
-            }
             
             // Fungsi untuk menampilkan/menyembunyikan konten utama
             function toggleMainContent(show) {
                 if (show) {
-                    userSelection.style.display = 'none';
+                    loginContainer.style.display = 'none';
                     mainContainer.style.display = 'flex';
                 } else {
-                    userSelection.style.display = 'flex';
+                    loginContainer.style.display = 'flex';
                     mainContainer.style.display = 'none';
                 }
             }
@@ -1227,12 +1385,12 @@
                     // Tampilkan export controls untuk admin
                     document.getElementById('exportControls').classList.remove('hidden');
                     
-                    // Tampilkan tab Master Data untuk admin
-                    masterTabBtn.classList.remove('hidden');
+                    // Tampilkan container tombol delete selected
+                    deleteSelectedContainer.classList.remove('hidden');
                     
-                    // Tampilkan kontrol select all dan delete untuk admin
-                    document.getElementById('inputTableControls').classList.remove('hidden');
-                    document.getElementById('masterTableControls').classList.remove('hidden');
+                    // Tampilkan tab admin
+                    githubTabBtn.classList.remove('hidden');
+                    masterTabBtn.classList.remove('hidden');
                 } else {
                     userTypeBadge.textContent = '(User)';
                     userTypeBadge.classList.remove('hidden');
@@ -1248,12 +1406,19 @@
                     // Sembunyikan export controls untuk user biasa
                     document.getElementById('exportControls').classList.add('hidden');
                     
-                    // Sembunyikan tab Master Data untuk user biasa
+                    // Sembunyikan container tombol delete selected
+                    deleteSelectedContainer.classList.add('hidden');
+                    
+                    // Sembunyikan tab admin
+                    githubTabBtn.classList.add('hidden');
                     masterTabBtn.classList.add('hidden');
                     
-                    // Sembunyikan kontrol select all dan delete untuk user biasa
-                    document.getElementById('inputTableControls').classList.add('hidden');
-                    document.getElementById('masterTableControls').classList.add('hidden');
+                    // Pastikan tab aktif adalah Input Data
+                    tabs.forEach(tab => tab.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    document.querySelector('[data-tab="input"]').classList.add('active');
+                    document.getElementById('inputTab').classList.add('active');
                 }
             }
             
@@ -1272,20 +1437,74 @@
             }
             
             // Fungsi untuk mencari data master berdasarkan EAN
-            function findMasterDataByEan(ean) {
-                // Gunakan Map untuk pencarian yang lebih cepat (jika data besar)
-                for (let i = 0; i < masterData.length; i++) {
-                    if (masterData[i].EAN === ean) {
-                        return masterData[i];
-                    }
-                }
-                return null;
+            function findMasterData(ean) {
+                return masterData.find(item => item.ean === ean);
             }
             
-            // Fungsi untuk menyimpan data
+            // Fungsi untuk memperbarui tampilan status sinkronisasi
+            function updateSyncStatusUI() {
+                if (pendingChanges.length > 0) {
+                    syncStatus.classList.remove('hidden');
+                    syncStatus.classList.remove('success');
+                    syncStatus.classList.remove('error');
+                    syncStatus.classList.add('pending');
+                    syncStatusText.innerHTML = `<i class="fas fa-clock"></i> ${pendingChanges.length} perubahan tertunda`;
+                    
+                    pendingSyncList.classList.remove('hidden');
+                    
+                    // Perbarui daftar perubahan tertunda
+                    pendingSyncItems.innerHTML = '';
+                    pendingChanges.forEach((change, index) => {
+                        const item = document.createElement('div');
+                        item.className = 'pending-sync-item';
+                        
+                        if (change.type === 'add') {
+                            item.innerHTML = `
+                                <span>${change.data.ean} (Tambah)</span>
+                                <small>${new Date(change.data.timestamp).toLocaleTimeString()}</small>
+                            `;
+                        } else if (change.type === 'update') {
+                            item.innerHTML = `
+                                <span>${change.data.ean} (Edit)</span>
+                                <small>${new Date(change.data.timestamp).toLocaleTimeString()}</small>
+                            `;
+                        } else if (change.type === 'delete') {
+                            item.innerHTML = `
+                                <span>${change.data.ean} (Hapus)</span>
+                                <small>${new Date().toLocaleTimeString()}</small>
+                            `;
+                        }
+                        
+                        pendingSyncItems.appendChild(item);
+                    });
+                } else {
+                    syncStatus.classList.add('hidden');
+                    pendingSyncList.classList.add('hidden');
+                    
+                    if (lastSyncTime) {
+                        const lastSyncText = `Terakhir sinkron: ${new Date(lastSyncTime).toLocaleTimeString()}`;
+                        syncStatusText.textContent = lastSyncText;
+                    }
+                }
+                
+                // Perbarui status GitHub
+                if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                    if (pendingChanges.length > 0) {
+                        updateGitHubStatus(false, `${pendingChanges.length} perubahan tertunda`);
+                    } else {
+                        updateGitHubStatus(true, 'Terkoneksi');
+                    }
+                }
+            }
+            
+            // Fungsi untuk menyimpan data (hanya ke local storage)
             async function saveData() {
+                if (isSaving) return;
+                
                 const ean = eanInput.value.trim();
                 const qty = qtyInput.value;
+                const sku = skuInput.value;
+                const description = descriptionInput.value;
                 
                 if (!currentPallet) {
                     showNotification('Harap set pallet terlebih dahulu!', 'error');
@@ -1302,21 +1521,12 @@
                     return;
                 }
                 
-                // Tandai sedang dalam proses scan
-                isScanning = true;
+                isSaving = true;
+                eanInput.classList.add('input-loading');
                 
-                // Cari data master berdasarkan EAN
-                const masterItem = findMasterDataByEan(ean);
-                
-                // Jika EAN tidak ditemukan di master data
-                if (!masterItem) {
-                    showManualNotification(`EAN ${ean} tidak ditemukan dalam master data!`);
-                    isScanning = false;
-                    return;
-                }
-                
-                const sku = masterItem ? masterItem.SKU : '';
-                const description = masterItem ? masterItem.Description : '';
+                // Membuat timestamp unik dengan presisi milidetik
+                const now = new Date();
+                const timestamp = now.toISOString();
                 
                 const newData = {
                     pallet: currentPallet,
@@ -1325,17 +1535,21 @@
                     sku,
                     description,
                     qty,
-                    timestamp: new Date().toLocaleString(),
+                    timestamp: timestamp,
                     user: currentUser,
-                    date: new Date().toISOString().split('T')[0]
+                    date: now.toISOString().split('T')[0],
+                    version: Date.now(),
+                    syncStatus: 'pending'
                 };
                 
+                // Simpan data ke array sementara
                 scannedData.push(newData);
                 
-                // Simpan data ke GitHub (tanpa auto sync)
-                await saveToGitHub(false);
+                // Simpan ke localStorage langsung untuk respons yang cepat
+                localStorage.setItem('scannedData', JSON.stringify(scannedData));
                 
-                renderTable();
+                // Update UI
+                addTableRow(newData, scannedData.length - 1);
                 updateTotalEan();
                 updateTotalContainer();
                 
@@ -1345,16 +1559,146 @@
                 skuInput.value = '';
                 descriptionInput.value = '';
                 
-                // Tandai selesai proses scan
-                isScanning = false;
+                eanInput.classList.remove('input-loading');
+                isSaving = false;
                 
-                // Catat waktu scan terakhir
-                lastScanTime = Date.now();
+                // Tambahkan ke daftar perubahan yang belum disinkronisasi
+                pendingChanges.push({type: 'add', data: newData});
+                updateSyncStatusUI();
                 
-                // Mulai timer untuk sinkronisasi otomatis setelah 1 menit
-                startAutoSyncTimer();
+                showNotification('Data berhasil disimpan (lokal). Gunakan Sync untuk mengirim ke GitHub.');
+            }
+            
+            // Fungsi untuk sinkronisasi perubahan yang tertunda
+            async function syncPendingChanges() {
+                if (pendingChanges.length === 0) {
+                    updateSyncStatusUI();
+                    showNotification('Tidak ada perubahan yang perlu disinkronisasi.');
+                    return true;
+                }
                 
-                showNotification('Data berhasil disimpan!');
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    console.warn('Konfigurasi GitHub belum lengkap, data disimpan di local storage');
+                    updateSyncStatusUI();
+                    showNotification('Konfigurasi GitHub belum lengkap. Data hanya disimpan lokal.', 'error');
+                    return false;
+                }
+                
+                try {
+                    // Update status menjadi menyinkronkan
+                    syncStatus.classList.remove('pending');
+                    syncStatus.classList.remove('success');
+                    syncStatus.classList.remove('error');
+                    syncStatus.classList.add('pending');
+                    syncStatusText.innerHTML = `<i class="fas fa-sync fa-spin"></i> Menyinkronkan ${pendingChanges.length} perubahan...`;
+                    
+                    // Ambil data terbaru dari GitHub
+                    const { data: latestData, sha } = await getGitHubData();
+                    
+                    // Gabungkan perubahan
+                    let mergedData = latestData || [];
+                    
+                    for (const change of pendingChanges) {
+                        if (change.type === 'add') {
+                            // Hapus status pending sebelum menyimpan ke GitHub
+                            delete change.data.syncStatus;
+                            mergedData.push(change.data);
+                        } else if (change.type === 'update') {
+                            // Untuk update, cari index data yang akan diupdate
+                            const index = mergedData.findIndex(item => 
+                                item.ean === change.data.ean && 
+                                item.pallet === change.data.pallet && 
+                                item.container === change.data.container &&
+                                item.timestamp === change.data.timestamp
+                            );
+                            
+                            if (index !== -1) {
+                                // Hapus status pending sebelum menyimpan ke GitHub
+                                delete change.data.syncStatus;
+                                mergedData[index] = change.data;
+                            } else {
+                                // Jika tidak ditemukan, treat as add
+                                delete change.data.syncStatus;
+                                mergedData.push(change.data);
+                            }
+                        } else if (change.type === 'delete') {
+                            // Untuk delete, hapus data yang sesuai
+                            const index = mergedData.findIndex(item => 
+                                item.ean === change.data.ean && 
+                                item.pallet === change.data.pallet && 
+                                item.container === change.data.container &&
+                                item.timestamp === change.data.timestamp
+                            );
+                            
+                            if (index !== -1) {
+                                mergedData.splice(index, 1);
+                            }
+                        }
+                    }
+                    
+                    // Simpan ke GitHub
+                    const success = await saveToGitHub(mergedData, sha);
+                    
+                    if (success) {
+                        // Hapus perubahan yang berhasil disinkronisasi
+                        pendingChanges = [];
+                        scannedData = mergedData;
+                        localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                        lastSyncSHA = sha;
+                        lastSyncTime = new Date();
+                        syncRetryCount = 0;
+                        
+                        updateSyncStatusUI();
+                        renderTable();
+                        updateTotalEan();
+                        updateTotalContainer();
+                        
+                        syncStatus.classList.remove('pending');
+                        syncStatus.classList.add('success');
+                        syncStatusText.innerHTML = `<i class="fas fa-check-circle"></i> Berhasil disinkronisasi`;
+                        
+                        // Sembunyikan status sukses setelah 3 detik
+                        setTimeout(() => {
+                            if (pendingChanges.length === 0) {
+                                syncStatus.classList.add('hidden');
+                            }
+                        }, 3000);
+                        
+                        return true;
+                    } else {
+                        // Jika gagal, tingkatkan jumlah percobaan
+                        syncRetryCount++;
+                        
+                        if (syncRetryCount >= MAX_RETRY_COUNT) {
+                            syncStatus.classList.remove('pending');
+                            syncStatus.classList.add('error');
+                            syncStatusText.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Gagal setelah ${MAX_RETRY_COUNT} percobaan`;
+                            
+                            // Reset counter setelah beberapa waktu
+                            setTimeout(() => {
+                                syncRetryCount = 0;
+                                updateSyncStatusUI();
+                            }, 60000);
+                        } else {
+                            updateSyncStatusUI();
+                        }
+                        
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Error syncing pending changes:', error);
+                    
+                    syncStatus.classList.remove('pending');
+                    syncStatus.classList.add('error');
+                    syncStatusText.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Error: ${error.message}`;
+                    
+                    // Reset status setelah beberapa waktu
+                    setTimeout(() => {
+                        updateSyncStatusUI();
+                    }, 5000);
+                    
+                    return false;
+                }
             }
             
             // Fungsi untuk logout
@@ -1377,22 +1721,13 @@
                 currentContainerSpan.textContent = 'Belum dipilih';
                 toggleEanInput();
                 
+                // Update status GitHub
+                updateGitHubStatus(false, 'Tidak terkoneksi');
+                
                 // Muat data dari GitHub
                 loadFromGitHub();
                 
-                // Hentikan sinkronisasi otomatis
-                if (githubSyncInterval) {
-                    clearInterval(githubSyncInterval);
-                    githubSyncInterval = null;
-                }
-                
-                // Hentikan timer sinkronisasi
-                if (autoSyncTimeout) {
-                    clearTimeout(autoSyncTimeout);
-                    autoSyncTimeout = null;
-                }
-                
-                // Tampilkan kembali form pemilihan user
+                // Tampilkan kembali form login
                 toggleMainContent(false);
             }
             
@@ -1504,20 +1839,83 @@
                 showNotification('Data berhasil diekspor ke Excel!');
             }
             
+            // Fungsi untuk mendapatkan data dari GitHub termasuk SHA
+            async function getGitHubData() {
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    return { data: null, sha: null };
+                }
+                
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const decodedData = atob(data.content);
+                        return {
+                            data: JSON.parse(decodedData),
+                            sha: data.sha
+                        };
+                    } else if (response.status === 404) {
+                        return { data: [], sha: null };
+                    } else {
+                        const errorText = await response.text();
+                        console.error('Gagal memuat data dari GitHub:', errorText);
+                        return { data: null, sha: null };
+                    }
+                } catch (error) {
+                    console.error('Error memuat data dari GitHub:', error);
+                    return { data: null, sha: null };
+                }
+            }
+            
+            // Fungsi untuk mendapatkan master data dari GitHub
+            async function getGitHubMasterData() {
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    return { data: null, sha: null };
+                }
+                
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.masterDataFilePath}`, {
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const decodedData = atob(data.content);
+                        return {
+                            data: JSON.parse(decodedData),
+                            sha: data.sha
+                        };
+                    } else if (response.status === 404) {
+                        return { data: [], sha: null };
+                    } else {
+                        const errorText = await response.text();
+                        console.error('Gagal memuat master data dari GitHub:', errorText);
+                        return { data: null, sha: null };
+                    }
+                } catch (error) {
+                    console.error('Error memuat master data dari GitHub:', error);
+                    return { data: null, sha: null };
+                }
+            }
+            
             // Fungsi untuk menyimpan data ke GitHub
-            async function saveToGitHub(enableAutoSync = true) {
+            async function saveToGitHub(data, sha) {
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
                     console.warn('Konfigurasi GitHub belum lengkap, data disimpan di local storage');
-                    localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                    localStorage.setItem('scannedData', JSON.stringify(data));
                     populateFilterDropdowns();
                     updateTotalContainer();
                     return false;
                 }
                 
                 try {
-                    // Cek apakah file sudah ada
-                    const fileSHA = await getFileSHA(githubConfig.dataFilePath);
-                    
                     const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
                         method: 'PUT',
                         headers: {
@@ -1526,61 +1924,84 @@
                         },
                         body: JSON.stringify({
                             message: 'Update scanned data',
-                            content: btoa(unescape(encodeURIComponent(JSON.stringify(scannedData, null, 2)))),
-                            sha: fileSHA
+                            content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
+                            sha: sha
                         })
                     });
                     
                     if (response.ok) {
                         console.log('Data berhasil disimpan ke GitHub');
+                        githubConfig.lastSync = new Date();
+                        localStorage.setItem('githubLastSync', githubConfig.lastSync.toISOString());
                         populateFilterDropdowns();
                         updateTotalContainer();
-                        updateGitHubStatusIndicator('connected', 'Terkoneksi');
-                        
-                        // Jika enableAutoSync true, setup auto sync
-                        if (enableAutoSync) {
-                            setupAutoSync();
-                        }
-                        
+                        updateGitHubStatus(true, 'Terkoneksi');
                         return true;
                     } else {
                         const errorText = await response.text();
                         console.error('Gagal menyimpan data ke GitHub:', errorText);
-                        localStorage.setItem('scannedData', JSON.stringify(scannedData));
-                        updateGitHubStatusIndicator('disconnected', 'Gagal Koneksi');
-                        showNotification('Gagal menyimpan ke GitHub, data disimpan lokal', 'error');
+                        localStorage.setItem('scannedData', JSON.stringify(data));
+                        updateGitHubStatus(false, 'Error menyimpan');
+                        
+                        // Cek jika error karena konflik
+                        if (response.status === 409) {
+                            showNotification('Konflik data terdeteksi. Silakan sinkronisasi ulang.', 'error');
+                            conflictWarning.style.display = 'flex';
+                            conflictMessage.textContent = 'Konflik data terdeteksi. Silakan sinkronisasi ulang.';
+                        } else {
+                            showNotification('Gagal menyimpan ke GitHub, data disimpan lokal', 'error');
+                        }
+                        
                         return false;
                     }
                 } catch (error) {
                     console.error('Error menyimpan data ke GitHub:', error);
-                    localStorage.setItem('scannedData', JSON.stringify(scannedData));
-                    updateGitHubStatusIndicator('disconnected', 'Gagal Koneksi');
+                    localStorage.setItem('scannedData', JSON.stringify(data));
+                    updateGitHubStatus(false, 'Error koneksi');
                     showNotification('Error menyimpan ke GitHub, data disimpan lokal', 'error');
                     return false;
                 }
             }
             
-            // Fungsi untuk mendapatkan SHA file (diperlukan untuk update)
-            async function getFileSHA(filePath) {
+            // Fungsi untuk menyimpan master data ke GitHub
+            async function saveMasterDataToGitHub(data, sha) {
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    return null;
+                    console.warn('Konfigurasi GitHub belum lengkap, master data disimpan di local storage');
+                    localStorage.setItem('masterData', JSON.stringify(data));
+                    return false;
                 }
                 
                 try {
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${filePath}`, {
+                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.masterDataFilePath}`, {
+                        method: 'PUT',
                         headers: {
-                            'Authorization': `token ${githubConfig.token}`
-                        }
+                            'Authorization': `token ${githubConfig.token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: 'Update master data',
+                            content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
+                            sha: sha
+                        })
                     });
                     
                     if (response.ok) {
-                        const data = await response.json();
-                        return data.sha;
+                        console.log('Master data berhasil disimpan ke GitHub');
+                        localStorage.setItem('masterData', JSON.stringify(data));
+                        showNotification('Master data berhasil disimpan ke GitHub!');
+                        return true;
+                    } else {
+                        const errorText = await response.text();
+                        console.error('Gagal menyimpan master data ke GitHub:', errorText);
+                        localStorage.setItem('masterData', JSON.stringify(data));
+                        showNotification('Gagal menyimpan master data ke GitHub, data disimpan lokal', 'error');
+                        return false;
                     }
-                    return null;
                 } catch (error) {
-                    console.error('Error mendapatkan SHA file:', error);
-                    return null;
+                    console.error('Error menyimpan master data ke GitHub:', error);
+                    localStorage.setItem('masterData', JSON.stringify(data));
+                    showNotification('Error menyimpan master data ke GitHub, data disimpan lokal', 'error');
+                    return false;
                 }
             }
             
@@ -1596,42 +2017,46 @@
                 
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
                     console.warn('Konfigurasi GitHub belum lengkap, muat data dari local storage');
-                    updateGitHubStatusIndicator('disconnected', 'Tidak Terkoneksi');
+                    updateGitHubStatus(false, 'Tidak terkoneksi');
                     return false;
                 }
                 
                 try {
-                    updateGitHubStatusIndicator('pending', 'Menyinkronisasi...');
+                    const { data, sha } = await getGitHubData();
                     
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        const decodedData = atob(data.content);
-                        scannedData = JSON.parse(decodedData);
+                    if (data !== null) {
+                        // Simpan data yang masih pending
+                        const pendingData = scannedData.filter(item => item.syncStatus === 'pending');
+                        
+                        scannedData = data;
+                        
+                        // Tambahkan kembali data yang masih pending
+                        pendingData.forEach(item => {
+                            scannedData.push(item);
+                        });
+                        
                         populateFilterDropdowns();
                         updateTotalContainer();
                         
                         localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                        githubConfig.lastSync = new Date();
+                        localStorage.setItem('githubLastSync', githubConfig.lastSync.toISOString());
+                        lastSyncSHA = sha;
                         
-                        updateGitHubStatusIndicator('connected', 'Terkoneksi');
-                        return true;
-                    } else if (response.status === 404) {
-                        scannedData = [];
-                        updateGitHubStatusIndicator('connected', 'Terkoneksi');
+                        updateGitHubStatus(true, 'Terkoneksi');
+                        showNotification('Data berhasil disinkronisasi dari GitHub');
+                        
+                        // Sembunyikan peringatan konflik jika berhasil sinkronisasi
+                        conflictWarning.style.display = 'none';
+                        
                         return true;
                     } else {
-                        console.error('Gagal memuat data dari GitHub:', await response.text());
-                        updateGitHubStatusIndicator('disconnected', 'Gagal Koneksi');
+                        updateGitHubStatus(false, 'Error memuat data');
                         return false;
                     }
                 } catch (error) {
                     console.error('Error memuat data dari GitHub:', error);
-                    updateGitHubStatusIndicator('disconnected', 'Gagal Koneksi');
+                    updateGitHubStatus(false, 'Error koneksi');
                     return false;
                 }
             }
@@ -1642,7 +2067,7 @@
                 const savedMasterData = localStorage.getItem('masterData');
                 if (savedMasterData) {
                     masterData = JSON.parse(savedMasterData);
-                    renderMasterTable();
+                    renderMasterDataTable();
                 }
                 
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
@@ -1651,26 +2076,15 @@
                 }
                 
                 try {
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.masterDataFilePath}`, {
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`
-                        }
-                    });
+                    const { data, sha } = await getGitHubMasterData();
                     
-                    if (response.ok) {
-                        const data = await response.json();
-                        const decodedData = atob(data.content);
-                        masterData = JSON.parse(decodedData);
-                        renderMasterTable();
+                    if (data !== null) {
+                        masterData = data;
                         localStorage.setItem('masterData', JSON.stringify(masterData));
-                        return true;
-                    } else if (response.status === 404) {
-                        // File tidak ditemukan, buat file master data kosong
-                        masterData = [];
-                        await saveMasterDataToGitHub();
+                        renderMasterDataTable();
+                        showNotification('Master data berhasil disinkronisasi dari GitHub');
                         return true;
                     } else {
-                        console.error('Gagal memuat master data dari GitHub:', await response.text());
                         return false;
                     }
                 } catch (error) {
@@ -1679,62 +2093,15 @@
                 }
             }
             
-            // Fungsi untuk menyimpan master data ke GitHub
-            async function saveMasterDataToGitHub() {
-                if (!githubConfig.username || !githubConfig.repo && !githubConfig.token) {
-                    console.warn('Konfigurasi GitHub belum lengkap, master data disimpan di local storage');
-                    localStorage.setItem('masterData', JSON.stringify(masterData));
-                    renderMasterTable();
-                    return false;
-                }
-                
-                try {
-                    // Cek apakah file sudah ada
-                    const fileSHA = await getFileSHA(githubConfig.masterDataFilePath);
-                    
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.masterDataFilePath}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            message: 'Update master data',
-                            content: btoa(unescape(encodeURIComponent(JSON.stringify(masterData, null, 2)))),
-                            sha: fileSHA
-                        })
-                    });
-                    
-                    if (response.ok) {
-                        console.log('Master data berhasil disimpan ke GitHub');
-                        localStorage.setItem('masterData', JSON.stringify(masterData));
-                        renderMasterTable();
-                        return true;
-                    } else {
-                        const errorText = await response.text();
-                        console.error('Gagal menyimpan master data ke GitHub:', errorText);
-                        localStorage.setItem('masterData', JSON.stringify(masterData));
-                        showNotification('Gagal menyimpan master data ke GitHub, data disimpan lokal', 'error');
-                        return false;
-                    }
-                } catch (error) {
-                    console.error('Error menyimpan master data ke GitHub:', error);
-                    localStorage.setItem('masterData', JSON.stringify(masterData));
-                    showNotification('Error menyimpan master data ke GitHub, data disimpan lokal', 'error');
-                    return false;
-                }
-            }
-            
             // Fungsi untuk menguji koneksi GitHub
             async function testGitHubConnection() {
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
                     showNotification('Harap isi semua field konfigurasi GitHub!', 'error');
+                    updateGitHubStatus(false, 'Konfigurasi tidak lengkap');
                     return;
                 }
                 
                 try {
-                    updateGitHubStatusIndicator('pending', 'Menguji koneksi...');
-                    
                     const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}`, {
                         headers: {
                             'Authorization': `token ${githubConfig.token}`
@@ -1745,21 +2112,21 @@
                         showNotification('Koneksi GitHub berhasil!', 'success');
                         githubStatusSpan.textContent = 'Terkoneksi';
                         githubStatusSpan.style.color = '#27ae60';
-                        updateGitHubStatusIndicator('connected', 'Terkoneksi');
+                        updateGitHubStatus(true, 'Terkoneksi');
                         return true;
                     } else {
                         const errorText = await response.text();
                         showNotification('Gagal terhubung ke GitHub: ' + errorText, 'error');
                         githubStatusSpan.textContent = 'Gagal terkoneksi';
                         githubStatusSpan.style.color = '#e74c3c';
-                        updateGitHubStatusIndicator('disconnected', 'Gagal Koneksi');
+                        updateGitHubStatus(false, 'Gagal terkoneksi');
                         return false;
                     }
                 } catch (error) {
                     showNotification('Error testing koneksi GitHub: ' + error.message, 'error');
                     githubStatusSpan.textContent = 'Error';
                     githubStatusSpan.style.color = '#e74c3c';
-                    updateGitHubStatusIndicator('disconnected', 'Gagal Koneksi');
+                    updateGitHubStatus(false, 'Error koneksi');
                     return false;
                 }
             }
@@ -1771,16 +2138,15 @@
                     repo: document.getElementById('githubRepo').value.trim(),
                     token: document.getElementById('githubToken').value.trim(),
                     dataFilePath: document.getElementById('dataFilePath').value.trim() || 'data/scannedData.json',
-                    masterDataFilePath: document.getElementById('masterDataFilePath').value.trim() || 'data/masterData.json'
+                    masterDataFilePath: 'data/masterData.json',
+                    lastSync: githubConfig.lastSync
                 };
                 
                 localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
                 showNotification('Konfigurasi GitHub berhasil disimpan!');
                 
-                // Setup auto-sinkronisasi
-                setupAutoSync();
-                
-                // Muat data dari GitHub
+                // Test koneksi setelah menyimpan konfigurasi
+                testGitHubConnection();
                 loadFromGitHub();
                 loadMasterDataFromGitHub();
             }
@@ -1795,27 +2161,22 @@
                     document.getElementById('githubRepo').value = githubConfig.repo;
                     document.getElementById('githubToken').value = githubConfig.token;
                     document.getElementById('dataFilePath').value = githubConfig.dataFilePath;
-                    document.getElementById('masterDataFilePath').value = githubConfig.masterDataFilePath || 'data/masterData.json';
+                    
+                    // Load last sync time
+                    const lastSync = localStorage.getItem('githubLastSync');
+                    if (lastSync) {
+                        githubConfig.lastSync = new Date(lastSync);
+                    }
                     
                     if (githubConfig.username && githubConfig.repo && githubConfig.token) {
                         githubStatusSpan.textContent = 'Terkonfigurasi';
                         githubStatusSpan.style.color = '#27ae60';
-                        updateGitHubStatusIndicator('pending', 'Memeriksa...');
-                        
-                        // Test koneksi untuk memastikan konfigurasi valid
-                        testGitHubConnection().then(isConnected => {
-                            if (isConnected) {
-                                // Setup auto-sinkronisasi
-                                setupAutoSync();
-                            }
-                        });
+                        updateGitHubStatus(true, 'Terkoneksi');
                     } else {
                         githubStatusSpan.textContent = 'Belum dikonfigurasi';
                         githubStatusSpan.style.color = '#7f8c8d';
-                        updateGitHubStatusIndicator('disconnected', 'Tidak Terkoneksi');
+                        updateGitHubStatus(false, 'Tidak terkoneksi');
                     }
-                } else {
-                    updateGitHubStatusIndicator('disconnected', 'Tidak Terkoneksi');
                 }
             }
             
@@ -1825,6 +2186,7 @@
                 currentEditingIndex = index;
                 
                 editIndexInput.value = index;
+                editVersionInput.value = data.version || 0;
                 editContainerInput.value = data.container;
                 editPalletInput.value = data.pallet;
                 editEanInput.value = data.ean;
@@ -1848,136 +2210,432 @@
                 
                 if (currentEditingIndex === -1) return;
                 
-                scannedData[currentEditingIndex] = {
-                    ...scannedData[currentEditingIndex],
+                const originalData = scannedData[currentEditingIndex];
+                const newVersion = Date.now();
+                
+                // Cek jika data telah diubah oleh pengguna lain
+                if (originalData.version !== parseInt(editVersionInput.value)) {
+                    showNotification('Data telah diubah oleh pengguna lain. Silakan muat ulang data.', 'error');
+                    hideEditModal();
+                    return;
+                }
+                
+                const updatedData = {
+                    ...originalData,
                     container: editContainerInput.value,
                     pallet: editPalletInput.value,
                     ean: editEanInput.value,
                     sku: editSkuInput.value,
                     description: editDescriptionInput.value,
                     qty: editQtyInput.value,
-                    timestamp: new Date().toLocaleString()
+                    timestamp: new Date().toISOString(),
+                    version: newVersion,
+                    syncStatus: 'pending'
                 };
                 
-                await saveToGitHub();
+                // Update data lokal
+                scannedData[currentEditingIndex] = updatedData;
+                localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                
+                // Tambahkan ke daftar perubahan
+                pendingChanges.push({type: 'update', data: updatedData});
+                updateSyncStatusUI();
+                
+                showNotification('Data berhasil diupdate (lokal). Gunakan Sync untuk mengirim ke GitHub.');
+                
+                hideEditModal();
+            }
+            
+            // Fungsi untuk menghapus data yang dipilih
+            async function deleteSelectedData() {
+                const checkboxes = document.querySelectorAll('.data-checkbox:checked');
+                
+                if (checkboxes.length === 0) {
+                    showNotification('Tidak ada data yang dipilih untuk dihapus!', 'error');
+                    return;
+                }
+                
+                if (!confirm(`Apakah Anda yakin ingin menghapus ${checkboxes.length} data terpilih?`)) {
+                    return;
+                }
+                
+                // Dapatkan indeks data yang dipilih (dalam urutan terbalik untuk menghindari masalah indeks saat menghapus)
+                const indexesToDelete = Array.from(checkboxes)
+                    .map(checkbox => parseInt(checkbox.dataset.index))
+                    .sort((a, b) => b - a);
+                
+                // Simpan data yang akan dihapus untuk sinkronisasi
+                const deletedData = indexesToDelete.map(index => scannedData[index]);
+                
+                // Hapus data dari array
+                for (const index of indexesToDelete) {
+                    scannedData.splice(index, 1);
+                }
+                
+                // Simpan perubahan lokal
+                localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                
+                // Tambahkan ke daftar perubahan
+                deletedData.forEach(data => {
+                    pendingChanges.push({type: 'delete', data: data});
+                });
+                updateSyncStatusUI();
+                
+                renderTable();
+                updateTotalEan();
+                updateTotalContainer();
+                showNotification(`${indexesToDelete.length} data berhasil dihapus (lokal). Gunakan Sync untuk mengirim ke GitHub.`);
+                
+                // Reset select all checkbox
+                selectAllCheckbox.checked = false;
+            }
+            
+            // Fungsi untuk memperbarui status indikator koneksi GitHub
+            function updateGitHubStatus(isConnected, message) {
+                if (isConnected) {
+                    githubStatusIndicator.className = 'github-connection-status github-connected';
+                    githubStatusText.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+                } else {
+                    githubStatusIndicator.className = 'github-connection-status github-disconnected';
+                    githubStatusText.innerHTML = `<i class="fas fa-times-circle"></i> ${message}`;
+                }
+                
+                // Sembunyikan indikator jika tidak ada konfigurasi GitHub
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    githubStatusIndicator.style.display = 'none';
+                } else {
+                    githubStatusIndicator.style.display = 'inline-flex';
+                }
+            }
+            
+            // Fungsi untuk sinkronisasi manual
+            async function manualSync() {
+                showNotification('Memulai sinkronisasi dengan GitHub...');
+                syncButton.innerHTML = '<i class="fas fa-sync fa-spin"></i> Syncing...';
+                syncButton.disabled = true;
+                
+                await loadFromGitHub();
+                await syncPendingChanges();
                 renderTable();
                 updateTotalEan();
                 updateTotalContainer();
                 
-                hideEditModal();
-                showNotification('Data berhasil diupdate!');
+                syncButton.innerHTML = '<i class="fas fa-sync"></i> Sync';
+                syncButton.disabled = false;
+                showNotification('Sinkronisasi selesai');
             }
             
-            // Fungsi untuk memuat master data
-            function loadMasterData() {
-                // Coba muat dari local storage terlebih dahulu
-                const savedMasterData = localStorage.getItem('masterData');
-                if (savedMasterData) {
-                    masterData = JSON.parse(savedMasterData);
-                    renderMasterTable();
-                }
+            // Fungsi untuk sinkronisasi master data
+            async function syncMasterData() {
+                showNotification('Memulai sinkronisasi master data dengan GitHub...');
+                syncMasterBtn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Syncing...';
+                syncMasterBtn.disabled = true;
                 
-                // Jika GitHub sudah dikonfigurasi, muat dari GitHub
-                if (githubConfig.username && githubConfig.repo && githubConfig.token) {
-                    loadMasterDataFromGitHub();
-                }
-            }
-            
-            // Fungsi untuk menyimpan master data
-            async function saveMasterData() {
-                // Simpan ke GitHub jika sudah dikonfigurasi
-                if (githubConfig.username && githubConfig.repo && githubConfig.token) {
-                    await saveMasterDataToGitHub();
-                } else {
-                    // Simpan ke local storage
-                    localStorage.setItem('masterData', JSON.stringify(masterData));
-                    renderMasterTable();
-                }
-            }
-            
-            // Fungsi untuk merender tabel master data
-            function renderMasterTable() {
-                masterTableBody.innerHTML = '';
+                await loadMasterDataFromGitHub();
                 
-                if (masterData.length === 0) {
-                    masterTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Tidak ada data master</td></tr>';
-                    totalMasterDataSpan.textContent = '0';
+                syncMasterBtn.innerHTML = '<i class="fas fa-sync"></i> Sync Master Data';
+                syncMasterBtn.disabled = false;
+                showNotification('Sinkronisasi master data selesai');
+            }
+
+            // Fungsi untuk menangani login
+            function handleLogin() {
+                const username = usernameInput.value.trim();
+                if (!username) {
+                    showNotification('Harap masukkan username!', 'error');
                     return;
                 }
                 
-                masterData.forEach((item, index) => {
+                currentUser = username;
+                currentUserSpan.textContent = username;
+                isAdmin = checkIfAdmin(username);
+                setUserView();
+                
+                showNotification(`Selamat datang, ${username}!`);
+                
+                // Sembunyikan form login dan tampilkan konten utama
+                toggleMainContent(true);
+                
+                // Muat data dari GitHub
+                loadFromGitHub();
+                loadMasterDataFromGitHub();
+                renderTable();
+                updateTotalEan();
+                updateTotalContainer();
+                populateFilterDropdowns();
+                toggleEanInput();
+                
+                // Perbarui status sinkronisasi
+                updateSyncStatusUI();
+                
+                // Fokuskan ke input EAN jika sudah diaktifkan
+                if (!eanInput.disabled) {
+                    eanInput.focus();
+                }
+            }
+            
+            // Fungsi untuk menambahkan master data
+            function addMasterData(e) {
+                e.preventDefault();
+                
+                const ean = masterEanInput.value.trim();
+                const sku = masterSkuInput.value.trim();
+                const description = masterDescriptionInput.value.trim();
+                
+                if (!ean || !sku || !description) {
+                    showNotification('Harap isi semua field master data!', 'error');
+                    return;
+                }
+                
+                // Cek apakah EAN sudah ada
+                const existingIndex = masterData.findIndex(item => item.ean === ean);
+                if (existingIndex !== -1) {
+                    if (!confirm('EAN sudah ada dalam master data. Apakah Anda ingin memperbarui data?')) {
+                        return;
+                    }
+                    // Update data yang sudah ada
+                    masterData[existingIndex] = { ean, sku, description };
+                } else {
+                    // Tambahkan data baru
+                    masterData.push({ ean, sku, description });
+                }
+                
+                // Simpan ke local storage
+                localStorage.setItem('masterData', JSON.stringify(masterData));
+                
+                // Simpan ke GitHub jika terkoneksi
+                if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                    saveMasterDataToGitHub(masterData, null);
+                }
+                
+                // Update UI
+                renderMasterDataTable();
+                
+                // Reset form
+                masterDataForm.reset();
+                
+                showNotification('Master data berhasil disimpan!');
+            }
+            
+            // Fungsi untuk menampilkan modal edit master data
+            function showEditMasterModal(index) {
+                const data = masterData[index];
+                
+                editMasterIndexInput.value = index;
+                editMasterEanInput.value = data.ean;
+                editMasterSkuInput.value = data.sku;
+                editMasterDescriptionInput.value = data.description;
+                
+                editMasterModal.style.display = 'flex';
+            }
+            
+            // Fungsi untuk menyembunyikan modal edit master data
+            function hideEditMasterModal() {
+                editMasterModal.style.display = 'none';
+                editMasterForm.reset();
+            }
+            
+            // Fungsi untuk menyimpan perubahan master data
+            function saveEditedMasterData(e) {
+                e.preventDefault();
+                
+                const index = parseInt(editMasterIndexInput.value);
+                const ean = editMasterEanInput.value.trim();
+                const sku = editMasterSkuInput.value.trim();
+                const description = editMasterDescriptionInput.value.trim();
+                
+                if (!ean || !sku || !description) {
+                    showNotification('Harap isi semua field master data!', 'error');
+                    return;
+                }
+                
+                // Update data
+                masterData[index] = { ean, sku, description };
+                
+                // Simpan ke local storage
+                localStorage.setItem('masterData', JSON.stringify(masterData));
+                
+                // Simpan ke GitHub jika terkoneksi
+                if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                    saveMasterDataToGitHub(masterData, null);
+                }
+                
+                // Update UI
+                renderMasterDataTable();
+                
+                hideEditMasterModal();
+                showNotification('Master data berhasil diupdate!');
+            }
+            
+            // Fungsi untuk menghapus master data
+            function deleteMasterData(index) {
+                if (!confirm('Apakah Anda yakin ingin menghapus master data ini?')) {
+                    return;
+                }
+                
+                masterData.splice(index, 1);
+                
+                // Simpan ke local storage
+                localStorage.setItem('masterData', JSON.stringify(masterData));
+                
+                // Simpan ke GitHub jika terkoneksi
+                if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                    saveMasterDataToGitHub(masterData, null);
+                }
+                
+                // Update UI
+                renderMasterDataTable();
+                
+                showNotification('Master data berhasil dihapus!');
+            }
+            
+            // Fungsi untuk merender tabel master data
+            function renderMasterDataTable() {
+                masterDataTableBody.innerHTML = '';
+                
+                if (masterData.length === 0) {
+                    masterDataTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <h3>Belum ada master data</h3>
+                                <p>Tambahkan master data menggunakan form di atas</p>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                masterData.forEach((data, index) => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td><input type="checkbox" class="master-checkbox" data-index="${index}"></td>
-                        <td>${item.EAN}</td>
-                        <td>${item.SKU}</td>
-                        <td>${item.Description}</td>
+                        <td>${data.ean}</td>
+                        <td>${data.sku}</td>
+                        <td>${data.description}</td>
+                        <td class="actions">
+                            <i class="fas fa-edit btn-edit-master" data-index="${index}"></i>
+                            <i class="fas fa-trash btn-delete-master" data-index="${index}"></i>
+                        </td>
                     `;
-                    masterTableBody.appendChild(row);
+                    masterDataTableBody.appendChild(row);
                 });
                 
-                totalMasterDataSpan.textContent = masterData.length;
+                // Tambahkan event listener untuk tombol edit dan hapus
+                document.querySelectorAll('.btn-edit-master').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        showEditMasterModal(index);
+                    });
+                });
                 
-                // Tambahkan event listener untuk checkbox master data
-                document.querySelectorAll('.master-checkbox').forEach(checkbox => {
-                    checkbox.addEventListener('change', function() {
-                        updateDeleteMasterButtonState();
+                document.querySelectorAll('.btn-delete-master').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        deleteMasterData(index);
                     });
                 });
             }
             
-            // Fungsi untuk mendownload template master data
-            function downloadTemplate() {
+            // Fungsi untuk mengupload master data dari Excel
+            function uploadMasterData() {
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = '.xlsx, .xls';
+                
+                fileInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        
+                        // Ambil sheet pertama
+                        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                        
+                        // Konversi ke JSON
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                        
+                        // Proses data
+                        const newMasterData = [];
+                        
+                        jsonData.forEach(row => {
+                            const ean = row['EAN'] || row['ean'] || '';
+                            const sku = row['SKU'] || row['sku'] || '';
+                            const description = row['Description'] || row['description'] || '';
+                            
+                            if (ean && sku && description) {
+                                newMasterData.push({ ean, sku, description });
+                            }
+                        });
+                        
+                        if (newMasterData.length === 0) {
+                            showNotification('Tidak ada data yang valid ditemukan dalam file!', 'error');
+                            return;
+                        }
+                        
+                        // Gabungkan dengan data yang sudah ada
+                        masterData = [...masterData, ...newMasterData];
+                        
+                        // Hapus duplikat berdasarkan EAN
+                        const uniqueData = [];
+                        const eanSet = new Set();
+                        
+                        masterData.forEach(item => {
+                            if (!eanSet.has(item.ean)) {
+                                eanSet.add(item.ean);
+                                uniqueData.push(item);
+                            }
+                        });
+                        
+                        masterData = uniqueData;
+                        
+                        // Simpan ke local storage
+                        localStorage.setItem('masterData', JSON.stringify(masterData));
+                        
+                        // Simpan ke GitHub jika terkoneksi
+                        if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                            saveMasterDataToGitHub(masterData, null);
+                        }
+                        
+                        // Update UI
+                        renderMasterDataTable();
+                        
+                        showNotification(`Berhasil mengupload ${newMasterData.length} data master!`);
+                    };
+                    
+                    reader.readAsArrayBuffer(file);
+                });
+                
+                fileInput.click();
+            }
+            
+            // Fungsi untuk download template master data
+            function downloadMasterTemplate() {
+                // Data contoh untuk template
                 const templateData = [
-                    { EAN: '1234567890123', SKU: 'SKU001', Description: 'Produk Contoh 1' },
-                    { EAN: '2345678901234', SKU: 'SKU002', Description: 'Produk Contoh 2' },
-                    { EAN: '3456789012345', SKU: 'SKU003', Description: 'Produk Contoh 3' }
+                    { EAN: '1234567890123', SKU: 'TUMI-001', Description: 'Tumi Alpha Bravo Brief' },
+                    { EAN: '1234567890124', SKU: 'TUMI-002', Description: 'Tumi Voyageur Calais' },
+                    { EAN: '1234567890125', SKU: 'TUMI-003', Description: 'Tumi Harrison Backpack' }
                 ];
                 
+                // Buat worksheet
                 const ws = XLSX.utils.json_to_sheet(templateData);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, 'Master Data Template');
                 
-                XLSX.writeFile(wb, 'Master_Data_Template.xlsx');
+                // Buat workbook
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Template Master Data');
+                
+                // Buat nama file
+                const fileName = `Template_Master_Data_TUMI.xlsx`;
+                
+                // Download file
+                XLSX.writeFile(wb, fileName);
+                
                 showNotification('Template berhasil didownload!');
             }
-            
-            // Fungsi untuk mengupload master data
-            function uploadMasterData(e) {
-                e.preventDefault();
-                
-                const file = masterFileInput.files[0];
-                if (!file) {
-                    showNotification('Pilih file Excel terlebih dahulu!', 'error');
-                    return;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    
-                    // Ambil data dari sheet pertama
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                    
-                    // Validasi data
-                    if (!jsonData[0] || !jsonData[0].EAN || !jsonData[0].SKU || !jsonData[0].Description) {
-                        showNotification('Format file tidak sesuai! Pastikan file memiliki kolom EAN, SKU, dan Description.', 'error');
-                        return;
-                    }
-                    
-                    // Simpan data master
-                    masterData = jsonData;
-                    saveMasterData();
-                    
-                    showNotification('Master data berhasil diupload!');
-                    masterFileInput.value = '';
-                };
-                
-                reader.readAsArrayBuffer(file);
-            }
-            
+
             // Event listeners
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -1990,25 +2648,22 @@
                 handleLogin();
             });
             
-            // Event listener untuk tombol sinkronisasi manual
-            manualSyncBtn.addEventListener('click', manualSyncToGitHub);
-            
-            // Event listener untuk input EAN - cari data master (delay 0.1 detik)
+            // Event listener untuk auto save pada input EAN dengan delay 100ms
             eanInput.addEventListener('input', function() {
-                const ean = eanInput.value.trim();
+                clearTimeout(eanInputTimer);
                 
                 // Cari data master berdasarkan EAN
-                const masterItem = findMasterDataByEan(ean);
-                if (masterItem) {
-                    skuInput.value = masterItem.SKU;
-                    descriptionInput.value = masterItem.Description;
-                } else {
-                    skuInput.value = '';
-                    descriptionInput.value = '';
+                const eanValue = eanInput.value.trim();
+                if (eanValue) {
+                    const masterItem = findMasterData(eanValue);
+                    if (masterItem) {
+                        skuInput.value = masterItem.sku;
+                        descriptionInput.value = masterItem.description;
+                    } else {
+                        skuInput.value = '';
+                        descriptionInput.value = '';
+                    }
                 }
-                
-                // Auto save setelah 0.1 detik (sesuai permintaan)
-                clearTimeout(eanInputTimer);
                 
                 eanInputTimer = setTimeout(function() {
                     if (eanInput.value.trim() !== '') {
@@ -2043,8 +2698,6 @@
                 currentContainerSpan.textContent = 'Belum dipilih';
                 palletInput.value = '';
                 containerInput.value = '';
-                skuInput.value = '';
-                descriptionInput.value = '';
                 toggleEanInput();
             });
             
@@ -2090,44 +2743,8 @@
             
             logoutBtn.addEventListener('click', logout);
             
-            // Event listener untuk pemilihan user awal
-            function handleLogin() {
-                const username = initialUsernameInput.value.trim();
-                if (!username) {
-                    showNotification('Harap masukkan username!', 'error');
-                    return;
-                }
-                
-                currentUser = username;
-                currentUserSpan.textContent = username;
-                isAdmin = checkIfAdmin(username);
-                setUserView();
-                
-                showNotification(`Selamat datang, ${username}!`);
-                
-                // Sembunyikan form pemilihan user dan tampilkan konten utama
-                toggleMainContent(true);
-                
-                // Muat data dari GitHub
-                loadFromGitHub();
-                loadMasterData();
-                renderTable();
-                updateTotalEan();
-                updateTotalContainer();
-                populateFilterDropdowns();
-                toggleEanInput();
-                
-                // Setup auto-sinkronisasi
-                setupAutoSync();
-                
-                // Fokuskan ke input EAN jika sudah diaktifkan
-                if (!eanInput.disabled) {
-                    eanInput.focus();
-                }
-            }
-            
-            // Event listener untuk tekan Enter pada input username awal
-            initialUsernameInput.addEventListener('keypress', function(e) {
+            // Event listener untuk tekan Enter pada input username
+            usernameInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     handleLogin();
@@ -2139,7 +2756,7 @@
                 tab.addEventListener('click', function() {
                     const tabId = this.getAttribute('data-tab');
                     
-                    // Jika tab GitHub diklik dan user bukan admin
+                    // Jika tab GitHub atau Master Data diklik dan user bukan admin
                     if ((tabId === 'github' || tabId === 'master') && !isAdmin) {
                         showNotification('Hanya admin yang dapat mengakses menu ini!', 'error');
                         return;
@@ -2175,37 +2792,43 @@
                 }
             });
             
-            // Event listener untuk master data
-            downloadTemplateBtn.addEventListener('click', downloadTemplate);
-            uploadMasterForm.addEventListener('submit', uploadMasterData);
-            syncMasterDataBtn.addEventListener('click', function() {
-                loadMasterDataFromGitHub();
-                showNotification('Master data disinkronisasi dari GitHub');
-            });
-            
-            // Event listener untuk select all input data
-            selectAllInputData.addEventListener('change', function() {
-                const checkboxes = document.querySelectorAll('.input-checkbox');
+            // Event listener untuk select all checkbox
+            selectAllCheckbox.addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('.data-checkbox');
                 checkboxes.forEach(checkbox => {
-                    checkbox.checked = selectAllInputData.checked;
+                    checkbox.checked = selectAllCheckbox.checked;
                 });
-                updateDeleteInputButtonState();
             });
             
-            // Event listener untuk delete selected input data
-            deleteSelectedInputBtn.addEventListener('click', deleteSelectedInputData);
+            // Event listener untuk tombol delete selected
+            deleteSelectedBtn.addEventListener('click', deleteSelectedData);
             
-            // Event listener untuk select all master data
-            selectAllMasterData.addEventListener('change', function() {
-                const checkboxes = document.querySelectorAll('.master-checkbox');
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = selectAllMasterData.checked;
-                });
-                updateDeleteMasterButtonState();
+            // Event listener untuk tombol sinkronisasi manual
+            syncButton.addEventListener('click', manualSync);
+            
+            // Event listener untuk master data form
+            masterDataForm.addEventListener('submit', addMasterData);
+            
+            // Event listener untuk tombol upload master data
+            uploadMasterBtn.addEventListener('click', uploadMasterData);
+            
+            // Event listener untuk tombol download template
+            downloadTemplateBtn.addEventListener('click', downloadMasterTemplate);
+            
+            // Event listener untuk tombol sync master data
+            syncMasterBtn.addEventListener('click', syncMasterData);
+            
+            // Event listener untuk modal edit master data
+            closeMasterModalBtn.addEventListener('click', hideEditMasterModal);
+            cancelEditMasterBtn.addEventListener('click', hideEditMasterModal);
+            editMasterForm.addEventListener('submit', saveEditedMasterData);
+            
+            // Tutup modal ketika klik di luar konten modal
+            editMasterModal.addEventListener('click', function(e) {
+                if (e.target === editMasterModal) {
+                    hideEditMasterModal();
+                }
             });
-            
-            // Event listener untuk delete selected master data
-            deleteSelectedMasterBtn.addEventListener('click', deleteSelectedMasterData);
             
             // Fungsi untuk menampilkan notifikasi
             function showNotification(message, type = 'success') {
@@ -2216,6 +2839,60 @@
                 setTimeout(() => {
                     notification.style.display = 'none';
                 }, 3000);
+            }
+            
+            // Fungsi untuk menambahkan baris ke tabel
+            function addTableRow(data, index) {
+                if (emptyState.classList.contains('hidden') === false) {
+                    emptyState.classList.add('hidden');
+                }
+                
+                const row = document.createElement('tr');
+                
+                // Tandai baris dengan warna berbeda jika statusnya pending
+                if (data.syncStatus === 'pending') {
+                    row.style.backgroundColor = '#fff3cd';
+                }
+                
+                row.innerHTML = `
+                    <td class="checkbox-cell">
+                        <input type="checkbox" class="data-checkbox" data-index="${index}">
+                    </td>
+                    <td>${data.container}</td>
+                    <td>${data.pallet}</td>
+                    <td>${data.ean}</td>
+                    <td>${data.sku}</td>
+                    <td>${data.description}</td>
+                    <td>${data.qty}</td>
+                    <td>${new Date(data.timestamp).toLocaleString()}</td>
+                    <td>${data.user}</td>
+                    <td class="actions">
+                        ${isAdmin ? `<i class="fas fa-edit btn-edit" data-index="${index}"></i>
+                        <i class="fas fa-trash btn-delete" data-index="${index}"></i>` : ''}
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+                
+                // Tambahkan event listener untuk tombol edit dan hapus
+                if (isAdmin) {
+                    const editBtn = row.querySelector('.btn-edit');
+                    const deleteBtn = row.querySelector('.btn-delete');
+                    
+                    if (editBtn) {
+                        editBtn.addEventListener('click', function() {
+                            const index = parseInt(this.getAttribute('data-index'));
+                            showEditModal(index);
+                        });
+                    }
+                    
+                    if (deleteBtn) {
+                        deleteBtn.addEventListener('click', function() {
+                            const index = parseInt(this.getAttribute('data-index'));
+                            deleteData(index);
+                        });
+                    }
+                }
             }
             
             // Fungsi untuk merender tabel
@@ -2246,134 +2923,28 @@
                 
                 // Tambahkan data ke tabel
                 dataToShow.forEach((data, index) => {
-                    const row = document.createElement('tr');
-                    
-                    row.innerHTML = `
-                        <td><input type="checkbox" class="input-checkbox" data-index="${index}"></td>
-                        <td>${data.container}</td>
-                        <td>${data.pallet}</td>
-                        <td>${data.ean}</td>
-                        <td>${data.sku}</td>
-                        <td>${data.description}</td>
-                        <td>${data.qty}</td>
-                        <td>${data.timestamp}</td>
-                        <td class="actions">
-                            ${isAdmin ? `<i class="fas fa-edit btn-edit" data-index="${index}"></i>
-                            <i class="fas fa-trash btn-delete" data-index="${index}"></i>` : ''}
-                        </td>
-                    `;
-                    
-                    tableBody.appendChild(row);
+                    addTableRow(data, index);
                 });
-                
-                // Tambahkan event listener untuk checkbox input data
-                document.querySelectorAll('.input-checkbox').forEach(checkbox => {
-                    checkbox.addEventListener('change', function() {
-                        updateDeleteInputButtonState();
-                    });
-                });
-                
-                // Tambahkan event listener untuk tombol edit dan hapus
-                if (isAdmin) {
-                    document.querySelectorAll('.btn-edit').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const index = parseInt(this.getAttribute('data-index'));
-                            showEditModal(index);
-                        });
-                    });
-                    
-                    document.querySelectorAll('.btn-delete').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const index = parseInt(this.getAttribute('data-index'));
-                            deleteData(index);
-                        });
-                    });
-                }
             }
             
             // Fungsi untuk menghapus data
             async function deleteData(index) {
                 if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                    const deletedData = scannedData[index];
                     scannedData.splice(index, 1);
-                    await saveToGitHub();
+                    
+                    // Simpan perubahan lokal
+                    localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                    
+                    // Tambahkan ke daftar perubahan
+                    pendingChanges.push({type: 'delete', data: deletedData});
+                    updateSyncStatusUI();
+                    
                     renderTable();
                     updateTotalEan();
                     updateTotalContainer();
-                    showNotification('Data berhasil dihapus');
+                    showNotification('Data berhasil dihapus (lokal). Gunakan Sync untuk mengirim ke GitHub.');
                 }
-            }
-            
-            // Fungsi untuk mengupdate status tombol delete input data
-            function updateDeleteInputButtonState() {
-                const checkedBoxes = document.querySelectorAll('.input-checkbox:checked');
-                deleteSelectedInputBtn.disabled = checkedBoxes.length === 0;
-            }
-            
-            // Fungsi untuk mengupdate status tombol delete master data
-            function updateDeleteMasterButtonState() {
-                const checkedBoxes = document.querySelectorAll('.master-checkbox:checked');
-                deleteSelectedMasterBtn.disabled = checkedBoxes.length === 0;
-            }
-            
-            // Fungsi untuk menghapus data input terpilih
-            async function deleteSelectedInputData() {
-                const checkedBoxes = document.querySelectorAll('.input-checkbox:checked');
-                if (checkedBoxes.length === 0) {
-                    showNotification('Pilih data yang akan dihapus terlebih dahulu!', 'error');
-                    return;
-                }
-                
-                if (!confirm(`Apakah Anda yakin ingin menghapus ${checkedBoxes.length} data terpilih?`)) {
-                    return;
-                }
-                
-                // Dapatkan indeks data yang akan dihapus (dari yang tertinggi ke terendah untuk menghindari masalah indeks)
-                const indicesToDelete = Array.from(checkedBoxes)
-                    .map(checkbox => parseInt(checkbox.getAttribute('data-index')))
-                    .sort((a, b) => b - a);
-                
-                // Hapus data dari array scannedData
-                indicesToDelete.forEach(index => {
-                    scannedData.splice(index, 1);
-                });
-                
-                await saveToGitHub();
-                renderTable();
-                updateTotalEan();
-                updateTotalContainer();
-                selectAllInputData.checked = false;
-                updateDeleteInputButtonState();
-                
-                showNotification(`${indicesToDelete.length} data berhasil dihapus`);
-            }
-            
-            // Fungsi untuk menghapus data master terpilih
-            async function deleteSelectedMasterData() {
-                const checkedBoxes = document.querySelectorAll('.master-checkbox:checked');
-                if (checkedBoxes.length === 0) {
-                    showNotification('Pilih data yang akan dihapus terlebih dahulu!', 'error');
-                    return;
-                }
-                
-                if (!confirm(`Apakah Anda yakin ingin menghapus ${checkedBoxes.length} data master terpilih?`)) {
-                    return;
-                }
-                
-                // Dapatkan indeks data yang akan dihapus (dari yang tertinggi ke terendah untuk menghindari masalah indeks)
-                const indicesToDelete = Array.from(checkedBoxes)
-                    .map(checkbox => parseInt(checkbox.getAttribute('data-index')))
-                    .sort((a, b) => b - a);
-                
-                // Hapus data dari array masterData
-                indicesToDelete.forEach(index => {
-                    masterData.splice(index, 1);
-                });
-                
-                await saveMasterData();
-                selectAllMasterData.checked = false;
-                updateDeleteMasterButtonState();
-                
-                showNotification(`${indicesToDelete.length} data master berhasil dihapus`);
             }
             
             // Fungsi untuk mengupdate total EAN
@@ -2407,19 +2978,27 @@
             // Inisialisasi
             loadGithubConfig();
             loadFromGitHub();
-            loadMasterData();
+            
+            // Load master data dari local storage
+            const savedMasterData = localStorage.getItem('masterData');
+            if (savedMasterData) {
+                masterData = JSON.parse(savedMasterData);
+                renderMasterDataTable();
+            }
+            
             setupMobileMenu();
             setUserView();
             renderTable();
             updateTotalEan();
             updateTotalContainer();
             toggleEanInput();
+            updateSyncStatusUI();
             
-            // Tampilkan form pemilihan user pertama kali
+            // Tampilkan form login pertama kali
             toggleMainContent(false);
             
-            // Fokuskan ke input username pada form pemilihan user
-            initialUsernameInput.focus();
+            // Fokuskan ke input username pada form login
+            usernameInput.focus();
         });
     </script>
 </body>
