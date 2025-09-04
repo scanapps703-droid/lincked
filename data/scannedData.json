@@ -16398,5 +16398,105 @@
     "user": "Anton",
     "date": "2025-09-04",
     "version": 1756953062558
+  },
+  {
+    "pallet": "DID2507181849",
+    "container": "B9530JK",
+    "ean": "5400520367853",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:31:43.581Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953103582
+  },
+  {
+    "pallet": "DID2507181849",
+    "container": "B9530JK",
+    "ean": "5400520367853",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:31:44.424Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953104424
+  },
+  {
+    "pallet": "DID2507181849",
+    "container": "B9530JK",
+    "ean": "5400520367853",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:31:45.232Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953105232
+  },
+  {
+    "pallet": "DID2507181849",
+    "container": "B9530JK",
+    "ean": "5400520367853",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:31:47.014Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953107014
+  },
+  {
+    "pallet": "DID2507181849",
+    "container": "B9530JK",
+    "ean": "5400520367853",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:31:47.727Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953107727
+  },
+  {
+    "pallet": "DID2507181849",
+    "container": "B9530JK",
+    "ean": "5400520367853",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:31:49.242Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953109242
+  },
+  {
+    "pallet": "DID2507181849",
+    "container": "B9530JK",
+    "ean": "5400520367853",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:31:50.009Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953110009
+  },
+  {
+    "pallet": "DID2507181849",
+    "container": "B9530JK",
+    "ean": "5400520367853",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:31:50.726Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953110726
+  },
+  {
+    "pallet": "DID2507181849",
+    "container": "B9530JK",
+    "ean": "5400520367853",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:31:52.178Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953112178
+  },
+  {
+    "pallet": "DID2507181849",
+    "container": "B9530JK",
+    "ean": "5400520367853",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:31:52.943Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953112944
   }
 ]
