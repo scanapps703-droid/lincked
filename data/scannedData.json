@@ -26938,5 +26938,85 @@
     "user": "Anton",
     "date": "2025-09-04",
     "version": 1756959401501
+  },
+  {
+    "pallet": "DID2507181532",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:19:46.716Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756959586716
+  },
+  {
+    "pallet": "DID2507181532",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:19:47.515Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756959587515
+  },
+  {
+    "pallet": "DID2507181532",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:19:48.476Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756959588476
+  },
+  {
+    "pallet": "DID2507181532",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:19:49.283Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756959589283
+  },
+  {
+    "pallet": "DID2507181532",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:19:52.742Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756959592742
+  },
+  {
+    "pallet": "DID2507181532",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:19:53.506Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756959593506
+  },
+  {
+    "pallet": "DID2507181532",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:19:54.319Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756959594319
+  },
+  {
+    "pallet": "DID2507181532",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:19:55.297Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756959595298
   }
 ]
