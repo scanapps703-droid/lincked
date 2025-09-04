@@ -1128,7 +1128,7 @@
                                     </div>
                                     <div>
                                         <label for="dataFilePath"><i class="fas fa-file"></i> Data File Path</label>
-                                        <input type="text" id="dataFilePath" value="data/scannedData1.json" placeholder="Path file data di repository">
+                                        <input type="text" id="dataFilePath" value="data/scannedData.json" placeholder="Path file data di repository">
                                     </div>
                                 </div>
                                 
@@ -1319,7 +1319,7 @@
                 username: '',
                 repo: '',
                 token: '',
-                dataFilePath: 'data/scannedData1.json',
+                dataFilePath: 'data/scannedData.json',
                 masterDataFilePath: 'data/masterData.json',
                 lastSync: null
             };
@@ -2142,7 +2142,7 @@
                     username: document.getElementById('githubUsername').value.trim(),
                     repo: document.getElementById('githubRepo').value.trim(),
                     token: document.getElementById('githubToken').value.trim(),
-                    dataFilePath: document.getElementById('dataFilePath').value.trim() || 'data/scannedData1.json',
+                    dataFilePath: document.getElementById('dataFilePath').value.trim() || 'data/scannedData.json',
                     masterDataFilePath: 'data/masterData.json',
                     lastSync: githubConfig.lastSync
                 };
