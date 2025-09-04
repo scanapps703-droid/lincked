@@ -27928,5 +27928,85 @@
     "user": "Anton",
     "date": "2025-09-04",
     "version": 1756959798196
+  },
+  {
+    "pallet": "DID2507181498",
+    "container": "B 9921JP",
+    "ean": "5400520367921",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:23:13.813Z",
+    "user": "Faisalmt",
+    "date": "2025-09-04",
+    "version": 1756959793813
+  },
+  {
+    "pallet": "DID2507181498",
+    "container": "B 9921JP",
+    "ean": "5400520367921",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:23:14.435Z",
+    "user": "Faisalmt",
+    "date": "2025-09-04",
+    "version": 1756959794435
+  },
+  {
+    "pallet": "DID2507181498",
+    "container": "B 9921JP",
+    "ean": "5400520367921",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:23:15.070Z",
+    "user": "Faisalmt",
+    "date": "2025-09-04",
+    "version": 1756959795070
+  },
+  {
+    "pallet": "DID2507181498",
+    "container": "B 9921JP",
+    "ean": "5400520367921",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:23:15.728Z",
+    "user": "Faisalmt",
+    "date": "2025-09-04",
+    "version": 1756959795728
+  },
+  {
+    "pallet": "DID2507181498",
+    "container": "B 9921JP",
+    "ean": "5400520367921",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:23:18.851Z",
+    "user": "Faisalmt",
+    "date": "2025-09-04",
+    "version": 1756959798851
+  },
+  {
+    "pallet": "DID2507181498",
+    "container": "B 9921JP",
+    "ean": "5400520367921",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:23:19.621Z",
+    "user": "Faisalmt",
+    "date": "2025-09-04",
+    "version": 1756959799621
+  },
+  {
+    "pallet": "DID2507181498",
+    "container": "B 9921JP",
+    "ean": "5400520367921",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:23:20.320Z",
+    "user": "Faisalmt",
+    "date": "2025-09-04",
+    "version": 1756959800320
+  },
+  {
+    "pallet": "DID2507181498",
+    "container": "B 9921JP",
+    "ean": "5400520367921",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:23:21.025Z",
+    "user": "Faisalmt",
+    "date": "2025-09-04",
+    "version": 1756959801025
   }
 ]
