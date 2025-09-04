@@ -419,6 +419,17 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
+        .btn-delete-all {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-delete-all:hover {
+            background-color: #c0392b;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
         .button-group {
             display: flex;
             gap: 0.75rem;
@@ -484,36 +495,6 @@
         }
 
         /* Modal Styles */
-        .user-selection {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-
-        .user-selection-box {
-            background-color: white;
-            padding: 2rem;
-            border-radius: var(--spark-radius);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            max-width: 500px;
-            text-align: center;
-            border: 1px solid var(--spark-border);
-        }
-
-        .user-selection-input {
-            display: flex;
-            gap: 0.75rem;
-            margin: 1.5rem 0;
-        }
-
         .modal {
             display: none;
             position: fixed;
@@ -626,121 +607,6 @@
 
         .sync-button:hover {
             background-color: var(--spark-primary-dark);
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(100px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        /* Responsive Styles */
-        @media (max-width: 992px) {
-            .content-wrapper {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                margin-bottom: 1.5rem;
-            }
-            
-            .summary {
-                flex-direction: column;
-            }
-            
-            .summary-item {
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .form-group {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .form-group > div {
-                width: 100%;
-            }
-            
-            .button-group {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .export-controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .user-controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .user-selection-input {
-                flex-direction: column;
-            }
-            
-            table {
-                display: block;
-                overflow-x: auto;
-            }
-
-            .github-connection-status {
-                margin-left: 0;
-                margin-top: 0.5rem;
-                display: block;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 0.75rem;
-            }
-            
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.75rem;
-            }
-            
-            .user-selection-box {
-                padding: 1.5rem;
-            }
-            
-            .modal-content {
-                padding: 1.25rem;
-            }
-            
-            .summary-item {
-                min-width: 100%;
-            }
-        }
-
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--spark-dark);
-        }
-
-        @media (max-width: 992px) {
-            .mobile-menu-btn {
-                display: block;
-            }
-            
-            .sidebar.collapsed {
-                display: none;
-            }
         }
 
         /* Checkbox Styles */
@@ -870,6 +736,113 @@
         .pending-sync-item:last-child {
             border-bottom: none;
         }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                margin-bottom: 1.5rem;
+            }
+            
+            .summary {
+                flex-direction: column;
+            }
+            
+            .summary-item {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-group {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .form-group > div {
+                width: 100%;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .export-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .user-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .github-connection-status {
+                margin-left: 0;
+                margin-top: 0.5rem;
+                display: block;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0.75rem;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+            
+            .modal-content {
+                padding: 1.25rem;
+            }
+            
+            .summary-item {
+                min-width: 100%;
+            }
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--spark-dark);
+        }
+
+        @media (max-width: 992px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .sidebar.collapsed {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -917,7 +890,7 @@
                 </div>
                 <div class="modal-form-group">
                     <label for="editQty">Qty</label>
-                    <input type="number" id="editQty" min="1" required>
+                    <input type="number" id="editQty" min="1" required readonly>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-warning" id="cancelEditBtn">Batal</button>
@@ -1042,7 +1015,7 @@
                                     </div>
                                     <div>
                                         <label for="qty"><i class="fas fa-cubes"></i> Qty (default: 1)</label>
-                                        <input type="number" id="qty" value="1" min="1" placeholder="Jumlah" disabled>
+                                        <input type="number" id="qty" value="1" min="1" placeholder="Jumlah" readonly>
                                     </div>
                                 </div>
                                 
@@ -1082,7 +1055,7 @@
                         <div class="export-controls" id="exportControls">
                             <p><i class="fas fa-download"></i> Export Data by User & Container</p>
                             <select id="userSelect">
-                                <option value="">Pilih User</option>
+                                <option value="">All Users</option>
                             </select>
                             <select id="containerSelect">
                                 <option value="">Pilih Container</option>
@@ -1200,6 +1173,7 @@
                                     <button type="button" class="btn-info" id="uploadMasterBtn"><i class="fas fa-upload"></i> Upload Master</button>
                                     <button type="button" class="btn-excel" id="downloadTemplateBtn"><i class="fas fa-download"></i> Download Template</button>
                                     <button type="button" class="sync-button" id="syncMasterBtn"><i class="fas fa-sync"></i> Sync Master Data</button>
+                                    <button type="button" class="btn-delete-all" id="deleteAllMasterBtn"><i class="fas fa-trash"></i> Delete All Master Data</button>
                                 </div>
                             </form>
                         </div>
@@ -1303,6 +1277,7 @@
             const editMasterEanInput = document.getElementById('editMasterEan');
             const editMasterSkuInput = document.getElementById('editMasterSku');
             const editMasterDescriptionInput = document.getElementById('editMasterDescription');
+            const deleteAllMasterBtn = document.getElementById('deleteAllMasterBtn');
             
             // Elements untuk fitur delete dengan checklist
             const selectAllCheckbox = document.getElementById('selectAllCheckbox');
@@ -1335,6 +1310,10 @@
             let syncRetryCount = 0;
             const MAX_RETRY_COUNT = 3;
             
+            // Tambahan variabel untuk auto sync inactivity
+            let inactivityTimer = null;
+            const INACTIVITY_TIMEOUT = 60000; // 60 detik
+            
             // Konfigurasi GitHub
             let githubConfig = {
                 username: '',
@@ -1344,6 +1323,23 @@
                 masterDataFilePath: 'data/masterData.json',
                 lastSync: null
             };
+            
+            // Fungsi untuk reset inactivity timer
+            function resetInactivityTimer() {
+                // Hapus timer yang sudah ada
+                if (inactivityTimer) {
+                    clearTimeout(inactivityTimer);
+                }
+                
+                // Set timer baru
+                inactivityTimer = setTimeout(() => {
+                    // Jika tidak ada aktivitas selama 60 detik, lakukan sinkronisasi
+                    if (pendingChanges.length > 0) {
+                        console.log('Auto sync setelah 60 detik tidak ada aktivitas');
+                        manualSync();
+                    }
+                }, INACTIVITY_TIMEOUT);
+            }
             
             // Fungsi untuk menampilkan/menyembunyikan konten utama
             function toggleMainContent(show) {
@@ -1566,6 +1562,9 @@
                 pendingChanges.push({type: 'add', data: newData});
                 updateSyncStatusUI();
                 
+                // Reset timer inactivity
+                resetInactivityTimer();
+                
                 showNotification('Data berhasil disimpan (lokal). Gunakan Sync untuk mengirim ke GitHub.');
             }
             
@@ -1701,8 +1700,14 @@
                 }
             }
             
-            // Fungsi untuk logout
-            function logout() {
+            // Fungsi untuk logout dengan auto sync
+            async function logout() {
+                // Lakukan sinkronisasi sebelum logout
+                if (pendingChanges.length > 0) {
+                    showNotification('Menyinkronisasi data sebelum logout...');
+                    await syncPendingChanges();
+                }
+                
                 currentUser = 'Guest';
                 currentUserSpan.textContent = 'Guest';
                 isAdmin = false;
@@ -1734,7 +1739,7 @@
             // Fungsi untuk mengisi dropdown filter
             function populateFilterDropdowns() {
                 // Kosongkan dropdown
-                userSelect.innerHTML = '<option value="">Pilih User</option>';
+                userSelect.innerHTML = '<option value="">All Users</option>';
                 containerSelect.innerHTML = '<option value="">Pilih Container</option>';
                 
                 // Dapatkan nilai unik untuk setiap filter
@@ -2489,6 +2494,28 @@
                 showNotification('Master data berhasil dihapus!');
             }
             
+            // Fungsi untuk menghapus semua master data
+            function deleteAllMasterData() {
+                if (!confirm('Apakah Anda yakin ingin menghapus SEMUA master data? Tindakan ini tidak dapat dibatalkan!')) {
+                    return;
+                }
+                
+                masterData = [];
+                
+                // Simpan ke local storage
+                localStorage.setItem('masterData', JSON.stringify(masterData));
+                
+                // Simpan ke GitHub jika terkoneksi
+                if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                    saveMasterDataToGitHub(masterData, null);
+                }
+                
+                // Update UI
+                renderMasterDataTable();
+                
+                showNotification('Semua master data berhasil dihapus!');
+            }
+            
             // Fungsi untuk merender tabel master data
             function renderMasterDataTable() {
                 masterDataTableBody.innerHTML = '';
@@ -2651,6 +2678,7 @@
             // Event listener untuk auto save pada input EAN dengan delay 100ms
             eanInput.addEventListener('input', function() {
                 clearTimeout(eanInputTimer);
+                resetInactivityTimer(); // Reset timer inactivity
                 
                 // Cari data master berdasarkan EAN
                 const eanValue = eanInput.value.trim();
@@ -2817,6 +2845,9 @@
             
             // Event listener untuk tombol sync master data
             syncMasterBtn.addEventListener('click', syncMasterData);
+            
+            // Event listener untuk tombol delete all master data
+            deleteAllMasterBtn.addEventListener('click', deleteAllMasterData);
             
             // Event listener untuk modal edit master data
             closeMasterModalBtn.addEventListener('click', hideEditMasterModal);
@@ -2993,6 +3024,9 @@
             updateTotalContainer();
             toggleEanInput();
             updateSyncStatusUI();
+            
+            // Mulai timer inactivity
+            resetInactivityTimer();
             
             // Tampilkan form login pertama kali
             toggleMainContent(false);
