@@ -38328,5 +38328,85 @@
     "user": "Anton",
     "date": "2025-09-04",
     "version": 1756968818559
+  },
+  {
+    "pallet": "DID2509040547",
+    "container": "B9715UEI",
+    "ean": "5400520367921",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:54:08.052Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968848053
+  },
+  {
+    "pallet": "DID2509040547",
+    "container": "B9715UEI",
+    "ean": "5400520367921",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:54:09.007Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968849007
+  },
+  {
+    "pallet": "DID2509040547",
+    "container": "B9715UEI",
+    "ean": "5400520367921",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:54:09.904Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968849904
+  },
+  {
+    "pallet": "DID2509040547",
+    "container": "B9715UEI",
+    "ean": "5400520367921",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:54:10.856Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968850856
+  },
+  {
+    "pallet": "DID2509040547",
+    "container": "B9715UEI",
+    "ean": "5400520367921",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:54:13.742Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968853742
+  },
+  {
+    "pallet": "DID2509040547",
+    "container": "B9715UEI",
+    "ean": "5400520367921",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:54:14.792Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968854792
+  },
+  {
+    "pallet": "DID2509040547",
+    "container": "B9715UEI",
+    "ean": "5400520367921",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:54:15.490Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968855490
+  },
+  {
+    "pallet": "DID2509040547",
+    "container": "B9715UEI",
+    "ean": "5400520367921",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:54:16.292Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968856292
   }
 ]
