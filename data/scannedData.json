@@ -28818,5 +28818,85 @@
     "user": "Faisalmt",
     "date": "2025-09-04",
     "version": 1756960195598
+  },
+  {
+    "pallet": "DID2507181468",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:30:19.162Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756960219162
+  },
+  {
+    "pallet": "DID2507181468",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:30:20.047Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756960220047
+  },
+  {
+    "pallet": "DID2507181468",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:30:20.899Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756960220899
+  },
+  {
+    "pallet": "DID2507181468",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:30:21.886Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756960221886
+  },
+  {
+    "pallet": "DID2507181468",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:31:19.275Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756960279275
+  },
+  {
+    "pallet": "DID2507181468",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:31:20.681Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756960280681
+  },
+  {
+    "pallet": "DID2507181468",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:31:21.557Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756960281557
+  },
+  {
+    "pallet": "DID2507181468",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:31:22.310Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756960282310
   }
 ]
