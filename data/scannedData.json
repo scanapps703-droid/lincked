@@ -18678,5 +18678,65 @@
     "user": "Anton",
     "date": "2025-09-04",
     "version": 1756954300245
+  },
+  {
+    "pallet": "DID2507181612",
+    "container": "B9530JK",
+    "ean": "5400520367877",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:52:18.684Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756954338684
+  },
+  {
+    "pallet": "DID2507181612",
+    "container": "B9530JK",
+    "ean": "5400520367877",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:52:19.506Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756954339506
+  },
+  {
+    "pallet": "DID2507181612",
+    "container": "B9530JK",
+    "ean": "5400520367877",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:52:20.183Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756954340183
+  },
+  {
+    "pallet": "DID2507181612",
+    "container": "B9530JK",
+    "ean": "5400520367877",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:52:22.764Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756954342764
+  },
+  {
+    "pallet": "DID2507181612",
+    "container": "B9530JK",
+    "ean": "5400520367877",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:52:23.475Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756954343475
+  },
+  {
+    "pallet": "DID2507181612",
+    "container": "B9530JK",
+    "ean": "5400520367877",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:52:24.168Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756954344168
   }
 ]
