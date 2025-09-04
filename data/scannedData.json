@@ -39798,5 +39798,35 @@
     "user": "Gawung",
     "date": "2025-09-04",
     "version": 1756970168176
+  },
+  {
+    "pallet": "DID2509040471",
+    "container": "B9477AX",
+    "ean": "5400520315007",
+    "qty": "1",
+    "timestamp": "2025-09-04T07:17:51.799Z",
+    "user": "Gawung",
+    "date": "2025-09-04",
+    "version": 1756970271799
+  },
+  {
+    "pallet": "DID2509040471",
+    "container": "B9477AX",
+    "ean": "5400520315007",
+    "qty": "1",
+    "timestamp": "2025-09-04T07:18:08.727Z",
+    "user": "Gawung",
+    "date": "2025-09-04",
+    "version": 1756970288727
+  },
+  {
+    "pallet": "DID2509040471",
+    "container": "B9477AX",
+    "ean": "5400520315007",
+    "qty": "1",
+    "timestamp": "2025-09-04T07:18:27.672Z",
+    "user": "Gawung",
+    "date": "2025-09-04",
+    "version": 1756970307672
   }
 ]
