@@ -33028,5 +33028,85 @@
     "user": "Anton",
     "date": "2025-09-04",
     "version": 1756967065950
+  },
+  {
+    "pallet": "DID2509040565",
+    "container": "B9715UEI",
+    "ean": "5400520367938",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:25:30.841Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756967130841
+  },
+  {
+    "pallet": "DID2509040565",
+    "container": "B9715UEI",
+    "ean": "5400520367938",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:25:31.879Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756967131879
+  },
+  {
+    "pallet": "DID2509040565",
+    "container": "B9715UEI",
+    "ean": "5400520367938",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:25:32.697Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756967132697
+  },
+  {
+    "pallet": "DID2509040565",
+    "container": "B9715UEI",
+    "ean": "5400520367938",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:25:33.582Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756967133582
+  },
+  {
+    "pallet": "DID2509040565",
+    "container": "B9715UEI",
+    "ean": "5400520367938",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:25:37.136Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756967137136
+  },
+  {
+    "pallet": "DID2509040565",
+    "container": "B9715UEI",
+    "ean": "5400520367938",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:25:37.934Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756967137934
+  },
+  {
+    "pallet": "DID2509040565",
+    "container": "B9715UEI",
+    "ean": "5400520367938",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:25:38.656Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756967138656
+  },
+  {
+    "pallet": "DID2509040565",
+    "container": "B9715UEI",
+    "ean": "5400520367938",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:25:39.430Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756967139430
   }
 ]
