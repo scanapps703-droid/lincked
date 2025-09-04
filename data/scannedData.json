@@ -28168,5 +28168,85 @@
     "user": "Anton",
     "date": "2025-09-04",
     "version": 1756959865220
+  },
+  {
+    "pallet": "DID2507181476",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:25:37.573Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756959937574
+  },
+  {
+    "pallet": "DID2507181476",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:25:38.328Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756959938328
+  },
+  {
+    "pallet": "DID2507181476",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:25:39.128Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756959939128
+  },
+  {
+    "pallet": "DID2507181476",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:25:39.885Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756959939885
+  },
+  {
+    "pallet": "DID2507181476",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:25:46.615Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756959946615
+  },
+  {
+    "pallet": "DID2507181476",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:25:54.543Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756959954543
+  },
+  {
+    "pallet": "DID2507181476",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:25:58.651Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756959958651
+  },
+  {
+    "pallet": "DID2507181476",
+    "container": "B9715UEI",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T04:25:59.454Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756959959454
   }
 ]
