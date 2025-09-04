@@ -36568,5 +36568,105 @@
     "user": "Gawung",
     "date": "2025-09-04",
     "version": 1756968100126
+  },
+  {
+    "pallet": "DID2509040557",
+    "container": "B9715UEI",
+    "ean": "5400520367846",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:41:44.219Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968104219
+  },
+  {
+    "pallet": "DID2509040557",
+    "container": "B9715UEI",
+    "ean": "5400520367846",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:41:45.085Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968105085
+  },
+  {
+    "pallet": "DID2509040557",
+    "container": "B9715UEI",
+    "ean": "5400520367846",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:41:47.963Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968107963
+  },
+  {
+    "pallet": "DID2509040557",
+    "container": "B9715UEI",
+    "ean": "5400520367846",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:41:49.424Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968109424
+  },
+  {
+    "pallet": "DID2509040557",
+    "container": "B9715UEI",
+    "ean": "5400520367846",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:41:56.025Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968116025
+  },
+  {
+    "pallet": "DID2509040557",
+    "container": "B9715UEI",
+    "ean": "5400520367846",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:41:59.490Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968119491
+  },
+  {
+    "pallet": "DID2509040557",
+    "container": "B9715UEI",
+    "ean": "5400520367846",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:42:00.330Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968120330
+  },
+  {
+    "pallet": "DID2509040557",
+    "container": "B9715UEI",
+    "ean": "5400520367846",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:42:03.271Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968123271
+  },
+  {
+    "pallet": "DID2509040557",
+    "container": "B9715UEI",
+    "ean": "5400520367846",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:42:04.023Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968124023
+  },
+  {
+    "pallet": "DID2509040557",
+    "container": "B9715UEI",
+    "ean": "5400520367846",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:42:04.886Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756968124886
   }
 ]
