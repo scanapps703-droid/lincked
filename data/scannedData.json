@@ -17228,5 +17228,85 @@
     "user": "Anton",
     "date": "2025-09-04",
     "version": 1756953501019
+  },
+  {
+    "pallet": "DID2507181861",
+    "container": "B9530JK",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:39:02.636Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953542636
+  },
+  {
+    "pallet": "DID2507181861",
+    "container": "B9530JK",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:39:03.829Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953543829
+  },
+  {
+    "pallet": "DID2507181861",
+    "container": "B9530JK",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:39:04.665Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953544665
+  },
+  {
+    "pallet": "DID2507181861",
+    "container": "B9530JK",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:39:05.721Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953545721
+  },
+  {
+    "pallet": "DID2507181861",
+    "container": "B9530JK",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:39:09.790Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953549790
+  },
+  {
+    "pallet": "DID2507181861",
+    "container": "B9530JK",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:39:10.947Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953550947
+  },
+  {
+    "pallet": "DID2507181861",
+    "container": "B9530JK",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:39:11.741Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953551741
+  },
+  {
+    "pallet": "DID2507181861",
+    "container": "B9530JK",
+    "ean": "5400520367914",
+    "qty": "1",
+    "timestamp": "2025-09-04T02:39:12.461Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756953552461
   }
 ]
