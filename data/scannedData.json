@@ -32648,5 +32648,85 @@
     "user": "Anton",
     "date": "2025-09-04",
     "version": 1756966896929
+  },
+  {
+    "pallet": "DID2509040567",
+    "container": "B9715UEI",
+    "ean": "5400520367938",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:22:33.364Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756966953365
+  },
+  {
+    "pallet": "DID2509040567",
+    "container": "B9715UEI",
+    "ean": "5400520367938",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:22:34.193Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756966954193
+  },
+  {
+    "pallet": "DID2509040567",
+    "container": "B9715UEI",
+    "ean": "5400520367938",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:22:35.061Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756966955062
+  },
+  {
+    "pallet": "DID2509040567",
+    "container": "B9715UEI",
+    "ean": "5400520367938",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:22:35.860Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756966955860
+  },
+  {
+    "pallet": "DID2509040567",
+    "container": "B9715UEI",
+    "ean": "5400520367938",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:22:39.788Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756966959788
+  },
+  {
+    "pallet": "DID2509040567",
+    "container": "B9715UEI",
+    "ean": "5400520367938",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:22:40.662Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756966960662
+  },
+  {
+    "pallet": "DID2509040567",
+    "container": "B9715UEI",
+    "ean": "5400520367938",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:22:41.495Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756966961495
+  },
+  {
+    "pallet": "DID2509040567",
+    "container": "B9715UEI",
+    "ean": "5400520367938",
+    "qty": "1",
+    "timestamp": "2025-09-04T06:22:42.248Z",
+    "user": "Anton",
+    "date": "2025-09-04",
+    "version": 1756966962248
   }
 ]
