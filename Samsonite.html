@@ -326,6 +326,7 @@
 
         input:read-only {
             background-color: #f0f0f0;
+            cursor: not-allowed;
         }
 
         input:disabled {
@@ -899,7 +900,7 @@
                 </div>
                 <div class="modal-form-group">
                     <label for="editQty">Qty</label>
-                    <input type="number" id="editQty" min="1" required>
+                    <input type="number" id="editQty" min="1" required readonly>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-warning" id="cancelEditBtn">Batal</button>
@@ -994,7 +995,7 @@
                                     </div>
                                     <div>
                                         <label for="qty"><i class="fas fa-cubes"></i> Qty (default: 1)</label>
-                                        <input type="number" id="qty" value="1" min="1" placeholder="Jumlah" disabled>
+                                        <input type="number" id="qty" value="1" min="1" placeholder="Jumlah" disabled readonly>
                                     </div>
                                 </div>
                                 
@@ -1200,6 +1201,7 @@
             let pendingChanges = [];
             let lastSyncTime = null;
             let syncRetryCount = 0;
+            let inactivityTimer = null;
             const MAX_RETRY_COUNT = 3;
             
             // Konfigurasi GitHub
@@ -1210,6 +1212,17 @@
                 dataFilePath: 'data/scannedData.json',
                 lastSync: null
             };
+            
+            // Fungsi untuk reset timer aktivitas
+            function resetInactivityTimer() {
+                clearTimeout(inactivityTimer);
+                inactivityTimer = setTimeout(() => {
+                    if (pendingChanges.length > 0) {
+                        console.log('Auto sync setelah 1 menit tidak ada aktivitas');
+                        manualSync();
+                    }
+                }, 60000); // 1 menit
+            }
             
             // Fungsi untuk menampilkan/menyembunyikan konten utama
             function toggleMainContent(show) {
@@ -1406,6 +1419,9 @@
                 pendingChanges.push({type: 'add', data: newData});
                 updateSyncStatusUI();
                 
+                // Reset timer aktivitas
+                resetInactivityTimer();
+                
                 showNotification('Data berhasil disimpan (lokal). Gunakan Sync untuk mengirim ke GitHub.');
             }
             
@@ -1542,7 +1558,13 @@
             }
             
             // Fungsi untuk logout
-            function logout() {
+            async function logout() {
+                // Sinkronisasi data sebelum logout
+                if (pendingChanges.length > 0) {
+                    showNotification('Menyinkronisasi data sebelum logout...');
+                    await syncPendingChanges();
+                }
+                
                 currentUser = 'Guest';
                 currentUserSpan.textContent = 'Guest';
                 isAdmin = false;
@@ -1623,7 +1645,11 @@
                 // Filter data berdasarkan pilihan
                 let filteredData = scannedData;
                 
-                if (selectedUser) {
+                // Jika admin, tampilkan semua data atau data user tertentu
+                // Jika bukan admin, hanya tampilkan data user tersebut
+                if (!isAdmin) {
+                    filteredData = filteredData.filter(item => item.user === currentUser);
+                } else if (selectedUser) {
                     filteredData = filteredData.filter(item => item.user === selectedUser);
                 }
                 
@@ -1950,7 +1976,7 @@
                     container: editContainerInput.value,
                     pallet: editPalletInput.value,
                     ean: editEanInput.value,
-                    qty: editQtyInput.value,
+                    qty: editQtyInput.value, // Qty tetap readonly, tidak bisa diubah
                     timestamp: new Date().toISOString(),
                     version: newVersion,
                     syncStatus: 'pending'
@@ -1963,6 +1989,9 @@
                 // Tambahkan ke daftar perubahan
                 pendingChanges.push({type: 'update', data: updatedData});
                 updateSyncStatusUI();
+                
+                // Reset timer aktivitas
+                resetInactivityTimer();
                 
                 showNotification('Data berhasil diupdate (lokal). Gunakan Sync untuk mengirim ke GitHub.');
                 
@@ -2003,6 +2032,9 @@
                     pendingChanges.push({type: 'delete', data: data});
                 });
                 updateSyncStatusUI();
+                
+                // Reset timer aktivitas
+                resetInactivityTimer();
                 
                 renderTable();
                 updateTotalEan();
@@ -2046,6 +2078,9 @@
                 syncButton.innerHTML = '<i class="fas fa-sync"></i> Sync';
                 syncButton.disabled = false;
                 showNotification('Sinkronisasi selesai');
+                
+                // Reset timer aktivitas setelah sinkronisasi
+                resetInactivityTimer();
             }
 
             // Fungsi untuk menangani login
@@ -2076,6 +2111,9 @@
                 
                 // Perbarui status sinkronisasi
                 updateSyncStatusUI();
+                
+                // Mulai timer aktivitas
+                resetInactivityTimer();
                 
                 // Fokuskan ke input EAN jika sudah diaktifkan
                 if (!eanInput.disabled) {
@@ -2133,6 +2171,9 @@
                 palletInput.value = '';
                 containerInput.value = '';
                 toggleEanInput();
+                
+                // Reset timer aktivitas
+                resetInactivityTimer();
             });
             
             savePalletBtn.addEventListener('click', function() {
@@ -2148,6 +2189,9 @@
                 updateTotalEan();
                 updateTotalContainer();
                 toggleEanInput();
+                
+                // Reset timer aktivitas
+                resetInactivityTimer();
             });
             
             saveContainerBtn.addEventListener('click', function() {
@@ -2165,6 +2209,9 @@
                 updateTotalContainer();
                 updateTotalEan();
                 toggleEanInput();
+                
+                // Reset timer aktivitas
+                resetInactivityTimer();
             });
             
             // Event listener untuk tombol export
@@ -2173,6 +2220,9 @@
             // Event listener untuk perubahan dropdown user
             userSelect.addEventListener('change', function() {
                 updateContainerDropdown();
+                
+                // Reset timer aktivitas
+                resetInactivityTimer();
             });
             
             logoutBtn.addEventListener('click', logout);
@@ -2205,6 +2255,9 @@
                     
                     // Tampilkan konten yang sesuai
                     document.getElementById(`${tabId}Tab`).classList.add('active');
+                    
+                    // Reset timer aktivitas
+                    resetInactivityTimer();
                 });
             });
             
@@ -2232,6 +2285,9 @@
                 checkboxes.forEach(checkbox => {
                     checkbox.checked = selectAllCheckbox.checked;
                 });
+                
+                // Reset timer aktivitas
+                resetInactivityTimer();
             });
             
             // Event listener untuk tombol delete selected
@@ -2239,6 +2295,10 @@
             
             // Event listener untuk tombol sinkronisasi manual
             syncButton.addEventListener('click', manualSync);
+            
+            // Event listener untuk aktivitas pengguna
+            document.addEventListener('click', resetInactivityTimer);
+            document.addEventListener('keypress', resetInactivityTimer);
             
             // Fungsi untuk menampilkan notifikasi
             function showNotification(message, type = 'success') {
@@ -2347,6 +2407,9 @@
                     // Tambahkan ke daftar perubahan
                     pendingChanges.push({type: 'delete', data: deletedData});
                     updateSyncStatusUI();
+                    
+                    // Reset timer aktivitas
+                    resetInactivityTimer();
                     
                     renderTable();
                     updateTotalEan();
