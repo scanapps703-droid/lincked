@@ -10,5 +10,17 @@
     "user": "admin",
     "date": "2025-09-07",
     "version": 1757270261063
+  },
+  {
+    "pallet": "000001",
+    "container": "B9201XYT",
+    "ean": "1",
+    "sku": "",
+    "description": "",
+    "qty": "1",
+    "timestamp": "2025-09-07T18:40:25.747Z",
+    "user": "admin",
+    "date": "2025-09-07",
+    "version": 1757270425748
   }
 ]
