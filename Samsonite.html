@@ -1425,108 +1425,7 @@
                 showNotification('Data berhasil disimpan (lokal). Gunakan Sync untuk mengirim ke GitHub.');
             }
             
-            // Fungsi untuk mendapatkan data dari GitHub (diperbaiki)
-            async function getGitHubData() {
-                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    return { data: null, sha: null };
-                }
-                
-                try {
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        // Decode content dari base64
-                        const decodedData = atob(data.content.replace(/\s/g, ''));
-                        return {
-                            data: JSON.parse(decodedData),
-                            sha: data.sha
-                        };
-                    } else if (response.status === 404) {
-                        // File tidak ditemukan, kembalikan array kosong
-                        return { data: [], sha: null };
-                    } else {
-                        const errorData = await response.json();
-                        console.error('Gagal memuat data dari GitHub:', errorData.message);
-                        showNotification('Gagal memuat data dari GitHub: ' + errorData.message, 'error');
-                        return { data: null, sha: null };
-                    }
-                } catch (error) {
-                    console.error('Error memuat data dari GitHub:', error);
-                    showNotification('Error memuat data dari GitHub: ' + error.message, 'error');
-                    return { data: null, sha: null };
-                }
-            }
-            
-            // Fungsi untuk menyimpan data ke GitHub (diperbaiki)
-            async function saveToGitHub(data, sha) {
-                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    console.warn('Konfigurasi GitHub belum lengkap, data disimpan di local storage');
-                    localStorage.setItem('scannedData', JSON.stringify(data));
-                    populateFilterDropdowns();
-                    updateTotalContainer();
-                    return false;
-                }
-                
-                try {
-                    // Encode data ke base64
-                    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-                    
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`,
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/vnd.github.v3+json'
-                        },
-                        body: JSON.stringify({
-                            message: 'Update scanned data via SAMSONITE App',
-                            content: content,
-                            sha: sha
-                        })
-                    });
-                    
-                    if (response.ok) {
-                        const responseData = await response.json();
-                        console.log('Data berhasil disimpan ke GitHub', responseData);
-                        githubConfig.lastSync = new Date();
-                        localStorage.setItem('githubLastSync', githubConfig.lastSync.toISOString());
-                        localStorage.setItem('scannedData', JSON.stringify(data));
-                        populateFilterDropdowns();
-                        updateTotalContainer();
-                        updateGitHubStatus(true, 'Terkoneksi');
-                        showNotification('Data berhasil disinkronisasi ke GitHub!');
-                        return true;
-                    } else {
-                        const errorData = await response.json();
-                        console.error('Gagal menyimpan data ke GitHub:', errorData);
-                        
-                        // Jika ada konflik (status 409), muat data terbaru
-                        if (response.status === 409) {
-                            showNotification('Konflik data terdeteksi. Memuat data terbaru dari GitHub...', 'error');
-                            await loadFromGitHub();
-                        } else {
-                            showNotification('Gagal menyimpan ke GitHub: ' + errorData.message, 'error');
-                        }
-                        
-                        updateGitHubStatus(false, 'Error menyimpan');
-                        return false;
-                    }
-                } catch (error) {
-                    console.error('Error menyimpan data ke GitHub:', error);
-                    localStorage.setItem('scannedData', JSON.stringify(data));
-                    updateGitHubStatus(false, 'Error koneksi');
-                    showNotification('Error menyimpan ke GitHub: ' + error.message, 'error');
-                    return false;
-                }
-            }
-            
-            // Fungsi untuk sinkronisasi perubahan yang tertunda (diperbaiki)
+            // Fungsi untuk sinkronisasi perubahan yang tertunda
             async function syncPendingChanges() {
                 if (pendingChanges.length === 0) {
                     updateSyncStatusUI();
@@ -1551,14 +1450,6 @@
                     
                     // Ambil data terbaru dari GitHub
                     const { data: latestData, sha } = await getGitHubData();
-                    
-                    if (latestData === null) {
-                        // Gagal mengambil data dari GitHub
-                        syncStatus.classList.remove('pending');
-                        syncStatus.classList.add('error');
-                        syncStatusText.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Gagal mengambil data dari GitHub`;
-                        return false;
-                    }
                     
                     // Gabungkan perubahan
                     let mergedData = latestData || [];
@@ -1662,62 +1553,6 @@
                         updateSyncStatusUI();
                     }, 5000);
                     
-                    return false;
-                }
-            }
-            
-            // Fungsi untuk memuat data dari GitHub (diperbaiki)
-            async function loadFromGitHub() {
-                // Coba muat dari local storage terlebih dahulu
-                const savedData = localStorage.getItem('scannedData');
-                if (savedData) {
-                    scannedData = JSON.parse(savedData);
-                    populateFilterDropdowns();
-                    updateTotalContainer();
-                }
-                
-                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    console.warn('Konfigurasi GitHub belum lengkap, muat data dari local storage');
-                    updateGitHubStatus(false, 'Tidak terkoneksi');
-                    return false;
-                }
-                
-                try {
-                    const { data, sha } = await getGitHubData();
-                    
-                    if (data !== null) {
-                        // Simpan data yang masih pending
-                        const pendingData = scannedData.filter(item => item.syncStatus === 'pending');
-                        
-                        scannedData = data;
-                        
-                        // Tambahkan kembali data yang masih pending
-                        pendingData.forEach(item => {
-                            scannedData.push(item);
-                        });
-                        
-                        populateFilterDropdowns();
-                        updateTotalContainer();
-                        
-                        localStorage.setItem('scannedData', JSON.stringify(scannedData));
-                        githubConfig.lastSync = new Date();
-                        localStorage.setItem('githubLastSync', githubConfig.lastSync.toISOString());
-                        lastSyncSHA = sha;
-                        
-                        updateGitHubStatus(true, 'Terkoneksi');
-                        showNotification('Data berhasil disinkronisasi dari GitHub');
-                        
-                        // Sembunyikan peringatan konflik jika berhasil sinkronisasi
-                        conflictWarning.style.display = 'none';
-                        
-                        return true;
-                    } else {
-                        updateGitHubStatus(false, 'Error memuat data');
-                        return false;
-                    }
-                } catch (error) {
-                    console.error('Error memuat data dari GitHub:', error);
-                    updateGitHubStatus(false, 'Error koneksi');
                     return false;
                 }
             }
@@ -1866,6 +1701,153 @@
                 showNotification('Data berhasil diekspor ke Excel!');
             }
             
+            // Fungsi untuk mendapatkan data dari GitHub termasuk SHA
+            async function getGitHubData() {
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    return { data: null, sha: null };
+                }
+                
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const decodedData = atob(data.content);
+                        return {
+                            data: JSON.parse(decodedData),
+                            sha: data.sha
+                        };
+                    } else if (response.status === 404) {
+                        return { data: [], sha: null };
+                    } else {
+                        const errorText = await response.text();
+                        console.error('Gagal memuat data dari GitHub:', errorText);
+                        return { data: null, sha: null };
+                    }
+                } catch (error) {
+                    console.error('Error memuat data dari GitHub:', error);
+                    return { data: null, sha: null };
+                }
+            }
+            
+            // Fungsi untuk menyimpan data ke GitHub
+            async function saveToGitHub(data, sha) {
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    console.warn('Konfigurasi GitHub belum lengkap, data disimpan di local storage');
+                    localStorage.setItem('scannedData', JSON.stringify(data));
+                    populateFilterDropdowns();
+                    updateTotalContainer();
+                    return false;
+                }
+                
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: 'Update scanned data',
+                            content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
+                            sha: sha
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        console.log('Data berhasil disimpan ke GitHub');
+                        githubConfig.lastSync = new Date();
+                        localStorage.setItem('githubLastSync', githubConfig.lastSync.toISOString());
+                        populateFilterDropdowns();
+                        updateTotalContainer();
+                        updateGitHubStatus(true, 'Terkoneksi');
+                        return true;
+                    } else {
+                        const errorText = await response.text();
+                        console.error('Gagal menyimpan data ke GitHub:', errorText);
+                        localStorage.setItem('scannedData', JSON.stringify(data));
+                        updateGitHubStatus(false, 'Error menyimpan');
+                        
+                        // Cek jika error karena konflik
+                        if (response.status === 409) {
+                            showNotification('Konflik data terdeteksi. Silakan sinkronisasi ulang.', 'error');
+                            conflictWarning.style.display = 'flex';
+                            conflictMessage.textContent = 'Konflik data terdeteksi. Silakan sinkronisasi ulang.';
+                        } else {
+                            showNotification('Gagal menyimpan ke GitHub, data disimpan lokal', 'error');
+                        }
+                        
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Error menyimpan data ke GitHub:', error);
+                    localStorage.setItem('scannedData', JSON.stringify(data));
+                    updateGitHubStatus(false, 'Error koneksi');
+                    showNotification('Error menyimpan ke GitHub, data disimpan lokal', 'error');
+                    return false;
+                }
+            }
+            
+            // Fungsi untuk memuat data dari GitHub
+            async function loadFromGitHub() {
+                // Coba muat dari local storage terlebih dahulu
+                const savedData = localStorage.getItem('scannedData');
+                if (savedData) {
+                    scannedData = JSON.parse(savedData);
+                    populateFilterDropdowns();
+                    updateTotalContainer();
+                }
+                
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    console.warn('Konfigurasi GitHub belum lengkap, muat data dari local storage');
+                    updateGitHubStatus(false, 'Tidak terkoneksi');
+                    return false;
+                }
+                
+                try {
+                    const { data, sha } = await getGitHubData();
+                    
+                    if (data !== null) {
+                        // Simpan data yang masih pending
+                        const pendingData = scannedData.filter(item => item.syncStatus === 'pending');
+                        
+                        scannedData = data;
+                        
+                        // Tambahkan kembali data yang masih pending
+                        pendingData.forEach(item => {
+                            scannedData.push(item);
+                        });
+                        
+                        populateFilterDropdowns();
+                        updateTotalContainer();
+                        
+                        localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                        githubConfig.lastSync = new Date();
+                        localStorage.setItem('githubLastSync', githubConfig.lastSync.toISOString());
+                        lastSyncSHA = sha;
+                        
+                        updateGitHubStatus(true, 'Terkoneksi');
+                        showNotification('Data berhasil disinkronisasi dari GitHub');
+                        
+                        // Sembunyikan peringatan konflik jika berhasil sinkronisasi
+                        conflictWarning.style.display = 'none';
+                        
+                        return true;
+                    } else {
+                        updateGitHubStatus(false, 'Error memuat data');
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Error memuat data dari GitHub:', error);
+                    updateGitHubStatus(false, 'Error koneksi');
+                    return false;
+                }
+            }
+            
             // Fungsi untuk menguji koneksi GitHub
             async function testGitHubConnection() {
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
@@ -1877,8 +1859,7 @@
                 try {
                     const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}`, {
                         headers: {
-                            'Authorization': `token ${githubConfig.token}`,
-                            'Accept': 'application/vnd.github.v3+json'
+                            'Authorization': `token ${githubConfig.token}`
                         }
                     });
                     
@@ -1889,8 +1870,8 @@
                         updateGitHubStatus(true, 'Terkoneksi');
                         return true;
                     } else {
-                        const errorData = await response.json();
-                        showNotification('Gagal terhubung ke GitHub: ' + errorData.message, 'error');
+                        const errorText = await response.text();
+                        showNotification('Gagal terhubung ke GitHub: ' + errorText, 'error');
                         githubStatusSpan.textContent = 'Gagal terkoneksi';
                         githubStatusSpan.style.color = '#e74c3c';
                         updateGitHubStatus(false, 'Gagal terkoneksi');
@@ -1919,7 +1900,7 @@
                 showNotification('Konfigurasi GitHub berhasil disimpan!');
                 
                 // Test koneksi setelah menyimpan konfigurasi
-                testGithubConnection();
+                testGitHubConnection();
                 loadFromGitHub();
             }
             
@@ -2284,7 +2265,7 @@
             saveGithubConfigBtn.addEventListener('click', saveGithubConfig);
             
             // Event listener untuk tombol test koneksi GitHub
-            testGithubConnectionBtn.addEventListener('click', testGithubConnection);
+            testGithubConnectionBtn.addEventListener('click', testGitHubConnection);
             
             // Event listener untuk modal edit
             closeModalBtn.addEventListener('click', hideEditModal);
