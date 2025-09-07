@@ -843,6 +843,60 @@
                 display: none;
             }
         }
+
+        /* New styles for GitHub sync features */
+        .sync-indicator {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 10px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .sync-indicator.active {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .sync-indicator.idle {
+            background-color: #7f8c8d;
+            color: white;
+        }
+        
+        .sync-indicator.error {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .last-sync-time {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .sync-settings {
+            background-color: #fff;
+            padding: 1.25rem;
+            border-radius: var(--spark-radius);
+            box-shadow: var(--spark-shadow);
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--spark-border);
+        }
+        
+        .sync-settings h3 {
+            color: #6e5494;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sync-settings .form-group {
+            margin-bottom: 0;
+        }
     </style>
 </head>
 <body>
@@ -1034,7 +1088,14 @@
                                     <button type="button" class="btn-primary" id="finishBtn"><i class="fas fa-check"></i> Finish</button>
                                     <button type="button" class="sync-button" id="syncButton" title="Sinkronisasi Data">
                                         <i class="fas fa-sync"></i> Sync ke GitHub
+                                        <span id="pushStatusIndicator" class="sync-indicator idle">
+                                            <i class="fas fa-circle" id="pushStatusIcon"></i>
+                                            <span id="pushStatusText">Idle</span>
+                                        </span>
                                     </button>
+                                </div>
+                                <div class="last-sync-time" id="lastSyncTime">
+                                    Terakhir sync: -
                                 </div>
                             </form>
                         </div>
@@ -1054,15 +1115,27 @@
                         
                         <div class="export-controls" id="exportControls">
                             <p><i class="fas fa-download"></i> Export Data by User & Container</p>
-                            <select id="userSelect">
-                                <option value="">All Users</option>
-                            </select>
-                            <select id="containerSelect">
-                                <option value="">Pilih Container</option>
-                            </select>
-                            <input type="date" id="dateFrom" placeholder="Dari Tanggal">
-                            <input type="date" id="dateTo" placeholder="Sampai Tanggal">
-                            <button type="button" class="btn-excel" id="exportSelectedBtn"><i class="fas fa-file-excel"></i> Export Selected</button>
+                            <div class="form-group">
+                                <div>
+                                    <select id="userSelect">
+                                        <option value="">Pilih User</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <select id="containerSelect">
+                                        <option value="">Pilih Container</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <input type="date" id="dateFrom" placeholder="Dari Tanggal">
+                                </div>
+                                <div>
+                                    <input type="date" id="dateTo" placeholder="Sampai Tanggal">
+                                </div>
+                                <div>
+                                    <button type="button" class="btn-excel" id="exportSelectedBtn"><i class="fas fa-file-excel"></i> Export Selected</button>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Container untuk tombol Delete Selected -->
@@ -1128,15 +1201,35 @@
                                     </div>
                                     <div>
                                         <label for="dataFilePath"><i class="fas fa-file"></i> Data File Path</label>
-                                        <input type="text" id="dataFilePath" value="data/scannedData.json" placeholder="Path file data di repository">
+                                        <input type="text" id="dataFilePath" value="TumiData.json" placeholder="Path file data di repository">
+                                        <small>
+                                            <i class="fas fa-info-circle"></i> File data akan disimpan sebagai TumiData.json
+                                        </small>
                                     </div>
                                 </div>
                                 
                                 <div class="button-group">
                                     <button type="button" class="btn-info" id="saveGithubConfigBtn"><i class="fas fa-save"></i> Simpan Konfigurasi</button>
                                     <button type="button" class="btn-primary" id="testGithubConnectionBtn"><i class="fas fa-plug"></i> Test Koneksi</button>
+                                    <button type="button" class="sync-button" id="pullButton">
+                                        <i class="fas fa-cloud-download-alt"></i> Pull Data dari Github
+                                    </button>
                                 </div>
                             </form>
+                        </div>
+                        
+                        <div class="sync-settings">
+                            <h3><i class="fas fa-sync"></i> Pengaturan Sinkronisasi</h3>
+                            <div class="form-group">
+                                <div>
+                                    <label for="autoSyncInterval"><i class="fas fa-clock"></i> Interval Auto Sync (menit)</label>
+                                    <input type="number" id="autoSyncInterval" value="1" min="1" max="60">
+                                </div>
+                                <div>
+                                    <label for="autoSyncToggle"><i class="fas fa-power-off"></i> Auto Sync</label>
+                                    <input type="checkbox" id="autoSyncToggle" checked>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="summary">
@@ -1284,10 +1377,21 @@
             const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
             const deleteSelectedContainer = document.getElementById('deleteSelectedContainer');
             
-            // Elements untuk fitur baru: status GitHub dan sinkronisasi
+            // Elements untuk fitur GitHub sync
             const githubStatusIndicator = document.getElementById('githubStatusIndicator');
             const githubStatusText = document.getElementById('githubStatusText');
             const syncButton = document.getElementById('syncButton');
+            const pullButton = document.getElementById('pullButton');
+            
+            // Elements untuk status push
+            const pushStatusIndicator = document.getElementById('pushStatusIndicator');
+            const pushStatusIcon = document.getElementById('pushStatusIcon');
+            const pushStatusText = document.getElementById('pushStatusText');
+            const lastSyncTime = document.getElementById('lastSyncTime');
+            
+            // Elements untuk auto sync settings
+            const autoSyncInterval = document.getElementById('autoSyncInterval');
+            const autoSyncToggle = document.getElementById('autoSyncToggle');
             
             // Elements untuk status sinkronisasi
             const syncStatus = document.getElementById('syncStatus');
@@ -1304,42 +1408,24 @@
             let eanInputTimer = null;
             let currentEditingIndex = -1;
             let isSaving = false;
+            let autoSyncIntervalId = null;
+            let lastSyncTimestamp = null;
             let lastSyncSHA = null;
             let pendingChanges = [];
-            let lastSyncTime = null;
             let syncRetryCount = 0;
             const MAX_RETRY_COUNT = 3;
             
-            // Tambahan variabel untuk auto sync inactivity
-            let inactivityTimer = null;
-            const INACTIVITY_TIMEOUT = 60000; // 60 detik
-            
-            // Konfigurasi GitHub
+            // Konfigurasi GitHub - diubah path file-nya
             let githubConfig = {
                 username: '',
                 repo: '',
                 token: '',
-                dataFilePath: 'data/scannedData.json',
-                masterDataFilePath: 'data/masterData.json',
-                lastSync: null
+                dataFilePath: 'TumiData.json',
+                masterDataFilePath: 'TumiMaster.json',
+                lastSync: null,
+                autoSync: true,
+                autoSyncInterval: 1
             };
-            
-            // Fungsi untuk reset inactivity timer
-            function resetInactivityTimer() {
-                // Hapus timer yang sudah ada
-                if (inactivityTimer) {
-                    clearTimeout(inactivityTimer);
-                }
-                
-                // Set timer baru
-                inactivityTimer = setTimeout(() => {
-                    // Jika tidak ada aktivitas selama 60 detik, lakukan sinkronisasi
-                    if (pendingChanges.length > 0) {
-                        console.log('Auto sync setelah 60 detik tidak ada aktivitas');
-                        manualSync();
-                    }
-                }, INACTIVITY_TIMEOUT);
-            }
             
             // Fungsi untuk menampilkan/menyembunyikan konten utama
             function toggleMainContent(show) {
@@ -1493,6 +1579,58 @@
                 }
             }
             
+            // Fungsi untuk memperbarui status tombol push
+            function updatePushStatus(status, message) {
+                pushStatusIndicator.className = `sync-indicator ${status}`;
+                pushStatusIcon.className = status === 'active' ? 'fas fa-sync fa-spin' : 'fas fa-circle';
+                pushStatusText.textContent = message;
+            }
+            
+            // Fungsi untuk memperbarui waktu sync terakhir
+            function updateLastSyncTime() {
+                if (lastSyncTimestamp) {
+                    const timeDiff = Math.floor((Date.now() - lastSyncTimestamp) / 1000);
+                    let timeText;
+                    
+                    if (timeDiff < 60) {
+                        timeText = `${timeDiff} detik yang lalu`;
+                    } else if (timeDiff < 3600) {
+                        timeText = `${Math.floor(timeDiff / 60)} menit yang lalu`;
+                    } else {
+                        timeText = `${Math.floor(timeDiff / 3600)} jam yang lalu`;
+                    }
+                    
+                    lastSyncTime.textContent = `Terakhir sync: ${timeText}`;
+                } else {
+                    lastSyncTime.textContent = 'Terakhir sync: -';
+                }
+            }
+            
+            // Fungsi untuk setup auto sync
+            function setupAutoSync() {
+                // Hentikan interval sebelumnya jika ada
+                stopAutoSync();
+                
+                // Jika auto sync diaktifkan dan konfigurasi GitHub valid
+                if (githubConfig.autoSync && githubConfig.username && githubConfig.repo && githubConfig.token) {
+                    const intervalMs = (githubConfig.autoSyncInterval || 1) * 60 * 1000;
+                    
+                    autoSyncIntervalId = setInterval(async () => {
+                        await manualSync();
+                    }, intervalMs);
+                    
+                    showNotification(`Auto sync diaktifkan setiap ${githubConfig.autoSyncInterval} menit`);
+                }
+            }
+            
+            // Fungsi untuk menghentikan auto sync
+            function stopAutoSync() {
+                if (autoSyncIntervalId) {
+                    clearInterval(autoSyncIntervalId);
+                    autoSyncIntervalId = null;
+                }
+            }
+            
             // Fungsi untuk menyimpan data (hanya ke local storage)
             async function saveData() {
                 if (isSaving) return;
@@ -1520,7 +1658,7 @@
                 isSaving = true;
                 eanInput.classList.add('input-loading');
                 
-                // Membuat timestamp unik dengan presisi milidetik
+                // Membuat timestamp
                 const now = new Date();
                 const timestamp = now.toISOString();
                 
@@ -1541,7 +1679,7 @@
                 // Simpan data ke array sementara
                 scannedData.push(newData);
                 
-                // Simpan ke localStorage langsung untuk respons yang cepat
+                // Simpan ke localStorage
                 localStorage.setItem('scannedData', JSON.stringify(scannedData));
                 
                 // Update UI
@@ -1562,10 +1700,29 @@
                 pendingChanges.push({type: 'add', data: newData});
                 updateSyncStatusUI();
                 
-                // Reset timer inactivity
-                resetInactivityTimer();
-                
                 showNotification('Data berhasil disimpan (lokal). Gunakan Sync untuk mengirim ke GitHub.');
+            }
+            
+            // Fungsi untuk sinkronisasi manual (push)
+            async function manualSync() {
+                showNotification('Memulai sinkronisasi dengan GitHub...');
+                updatePushStatus('active', 'Syncing...');
+                
+                await loadFromGitHub();
+                const success = await syncPendingChanges();
+                renderTable();
+                updateTotalEan();
+                updateTotalContainer();
+                
+                if (success) {
+                    updatePushStatus('idle', 'Sync berhasil');
+                    lastSyncTimestamp = Date.now();
+                    updateLastSyncTime();
+                } else {
+                    updatePushStatus('error', 'Sync gagal');
+                }
+                
+                showNotification('Sinkronisasi selesai');
             }
             
             // Fungsi untuk sinkronisasi perubahan yang tertunda
@@ -1713,6 +1870,9 @@
                 isAdmin = false;
                 setUserView();
                 
+                // Hentikan auto sync
+                stopAutoSync();
+                
                 showNotification('Anda telah logout');
                 
                 // Reset form
@@ -1729,6 +1889,9 @@
                 // Update status GitHub
                 updateGitHubStatus(false, 'Tidak terkoneksi');
                 
+                // Reset status push
+                updatePushStatus('idle', 'Idle');
+                
                 // Muat data dari GitHub
                 loadFromGitHub();
                 
@@ -1739,7 +1902,7 @@
             // Fungsi untuk mengisi dropdown filter
             function populateFilterDropdowns() {
                 // Kosongkan dropdown
-                userSelect.innerHTML = '<option value="">All Users</option>';
+                userSelect.innerHTML = '<option value="">Pilih User</option>';
                 containerSelect.innerHTML = '<option value="">Pilih Container</option>';
                 
                 // Dapatkan nilai unik untuk setiap filter
@@ -1790,7 +1953,11 @@
                 // Filter data berdasarkan pilihan
                 let filteredData = scannedData;
                 
-                if (selectedUser) {
+                // Jika admin, tampilkan semua data atau data user tertentu
+                // Jika bukan admin, hanya tampilkan data user tersebut
+                if (!isAdmin) {
+                    filteredData = filteredData.filter(item => item.user === currentUser);
+                } else if (selectedUser) {
                     filteredData = filteredData.filter(item => item.user === selectedUser);
                 }
                 
@@ -1851,24 +2018,28 @@
                 }
                 
                 try {
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`, {
+                    const fileUrl = `https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`;
+                    const response = await fetch(fileUrl, {
                         headers: {
-                            'Authorization': `token ${githubConfig.token}`
+                            'Authorization': `token ${githubConfig.token}`,
+                            'Accept': 'application/vnd.github.v3+json'
                         }
                     });
                     
                     if (response.ok) {
-                        const data = await response.json();
-                        const decodedData = atob(data.content);
+                        const fileInfo = await response.json();
+                        const content = decodeURIComponent(escape(atob(fileInfo.content)));
+                        const remoteData = JSON.parse(content);
+                        
                         return {
-                            data: JSON.parse(decodedData),
-                            sha: data.sha
+                            data: remoteData,
+                            sha: fileInfo.sha
                         };
                     } else if (response.status === 404) {
                         return { data: [], sha: null };
                     } else {
-                        const errorText = await response.text();
-                        console.error('Gagal memuat data dari GitHub:', errorText);
+                        const error = await response.json();
+                        console.error('Gagal memuat data dari GitHub:', error.message);
                         return { data: null, sha: null };
                     }
                 } catch (error) {
@@ -1884,24 +2055,28 @@
                 }
                 
                 try {
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.masterDataFilePath}`, {
+                    const fileUrl = `https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.masterDataFilePath}`;
+                    const response = await fetch(fileUrl, {
                         headers: {
-                            'Authorization': `token ${githubConfig.token}`
+                            'Authorization': `token ${githubConfig.token}`,
+                            'Accept': 'application/vnd.github.v3+json'
                         }
                     });
                     
                     if (response.ok) {
-                        const data = await response.json();
-                        const decodedData = atob(data.content);
+                        const fileInfo = await response.json();
+                        const content = decodeURIComponent(escape(atob(fileInfo.content)));
+                        const remoteData = JSON.parse(content);
+                        
                         return {
-                            data: JSON.parse(decodedData),
-                            sha: data.sha
+                            data: remoteData,
+                            sha: fileInfo.sha
                         };
                     } else if (response.status === 404) {
                         return { data: [], sha: null };
                     } else {
-                        const errorText = await response.text();
-                        console.error('Gagal memuat master data dari GitHub:', errorText);
+                        const error = await response.json();
+                        console.error('Gagal memuat master data dari GitHub:', error.message);
                         return { data: null, sha: null };
                     }
                 } catch (error) {
@@ -1926,9 +2101,10 @@
                         headers: {
                             'Authorization': `token ${githubConfig.token}`,
                             'Content-Type': 'application/json',
+                            'Accept': 'application/vnd.github.v3+json'
                         },
                         body: JSON.stringify({
-                            message: 'Update scanned data',
+                            message: `Update data dari ${currentUser} pada ${new Date().toISOString()}`,
                             content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
                             sha: sha
                         })
@@ -1943,8 +2119,8 @@
                         updateGitHubStatus(true, 'Terkoneksi');
                         return true;
                     } else {
-                        const errorText = await response.text();
-                        console.error('Gagal menyimpan data ke GitHub:', errorText);
+                        const error = await response.json();
+                        console.error('Gagal menyimpan data ke GitHub:', error.message);
                         localStorage.setItem('scannedData', JSON.stringify(data));
                         updateGitHubStatus(false, 'Error menyimpan');
                         
@@ -1982,6 +2158,7 @@
                         headers: {
                             'Authorization': `token ${githubConfig.token}`,
                             'Content-Type': 'application/json',
+                            'Accept': 'application/vnd.github.v3+json'
                         },
                         body: JSON.stringify({
                             message: 'Update master data',
@@ -1996,8 +2173,8 @@
                         showNotification('Master data berhasil disimpan ke GitHub!');
                         return true;
                     } else {
-                        const errorText = await response.text();
-                        console.error('Gagal menyimpan master data ke GitHub:', errorText);
+                        const error = await response.json();
+                        console.error('Gagal menyimpan master data ke GitHub:', error.message);
                         localStorage.setItem('masterData', JSON.stringify(data));
                         showNotification('Gagal menyimpan master data ke GitHub, data disimpan lokal', 'error');
                         return false;
@@ -2098,18 +2275,42 @@
                 }
             }
             
+            // Fungsi untuk pull data dari GitHub
+            async function pullFromGithub() {
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    showNotification('Harap konfigurasi GitHub terlebih dahulu!', 'error');
+                    return;
+                }
+                
+                updatePushStatus('active', 'Pulling...');
+                
+                try {
+                    await loadFromGitHub();
+                    await loadMasterDataFromGitHub();
+                    
+                    showNotification('Data berhasil dipull dari GitHub!');
+                    updatePushStatus('idle', 'Pull berhasil');
+                    lastSyncTimestamp = Date.now();
+                    updateLastSyncTime();
+                } catch (error) {
+                    showNotification('Error pull data: ' + error.message, 'error');
+                    updatePushStatus('error', 'Error');
+                }
+            }
+            
             // Fungsi untuk menguji koneksi GitHub
             async function testGitHubConnection() {
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
                     showNotification('Harap isi semua field konfigurasi GitHub!', 'error');
                     updateGitHubStatus(false, 'Konfigurasi tidak lengkap');
-                    return;
+                    return false;
                 }
                 
                 try {
                     const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}`, {
                         headers: {
-                            'Authorization': `token ${githubConfig.token}`
+                            'Authorization': `token ${githubConfig.token}`,
+                            'Accept': 'application/vnd.github.v3+json'
                         }
                     });
                     
@@ -2120,8 +2321,8 @@
                         updateGitHubStatus(true, 'Terkoneksi');
                         return true;
                     } else {
-                        const errorText = await response.text();
-                        showNotification('Gagal terhubung ke GitHub: ' + errorText, 'error');
+                        const errorData = await response.json();
+                        showNotification('Gagal terhubung ke GitHub: ' + errorData.message, 'error');
                         githubStatusSpan.textContent = 'Gagal terkoneksi';
                         githubStatusSpan.style.color = '#e74c3c';
                         updateGitHubStatus(false, 'Gagal terkoneksi');
@@ -2142,13 +2343,18 @@
                     username: document.getElementById('githubUsername').value.trim(),
                     repo: document.getElementById('githubRepo').value.trim(),
                     token: document.getElementById('githubToken').value.trim(),
-                    dataFilePath: document.getElementById('dataFilePath').value.trim() || 'data/scannedData.json',
-                    masterDataFilePath: 'data/masterData.json',
-                    lastSync: githubConfig.lastSync
+                    dataFilePath: document.getElementById('dataFilePath').value.trim() || 'TumiData.json',
+                    masterDataFilePath: 'TumiMaster.json',
+                    lastSync: githubConfig.lastSync,
+                    autoSync: autoSyncToggle.checked,
+                    autoSyncInterval: parseInt(autoSyncInterval.value) || 1
                 };
                 
                 localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
                 showNotification('Konfigurasi GitHub berhasil disimpan!');
+                
+                // Mulai ulang auto sync jika diperlukan
+                setupAutoSync();
                 
                 // Test koneksi setelah menyimpan konfigurasi
                 testGitHubConnection();
@@ -2160,27 +2366,34 @@
             function loadGithubConfig() {
                 const savedConfig = localStorage.getItem('githubConfig');
                 if (savedConfig) {
-                    githubConfig = JSON.parse(savedConfig);
-                    
-                    document.getElementById('githubUsername').value = githubConfig.username;
-                    document.getElementById('githubRepo').value = githubConfig.repo;
-                    document.getElementById('githubToken').value = githubConfig.token;
-                    document.getElementById('dataFilePath').value = githubConfig.dataFilePath;
-                    
-                    // Load last sync time
-                    const lastSync = localStorage.getItem('githubLastSync');
-                    if (lastSync) {
-                        githubConfig.lastSync = new Date(lastSync);
-                    }
-                    
-                    if (githubConfig.username && githubConfig.repo && githubConfig.token) {
-                        githubStatusSpan.textContent = 'Terkonfigurasi';
-                        githubStatusSpan.style.color = '#27ae60';
-                        updateGitHubStatus(true, 'Terkoneksi');
-                    } else {
-                        githubStatusSpan.textContent = 'Belum dikonfigurasi';
-                        githubStatusSpan.style.color = '#7f8c8d';
-                        updateGitHubStatus(false, 'Tidak terkoneksi');
+                    try {
+                        githubConfig = JSON.parse(savedConfig);
+                        
+                        document.getElementById('githubUsername').value = githubConfig.username || '';
+                        document.getElementById('githubRepo').value = githubConfig.repo || '';
+                        document.getElementById('githubToken').value = githubConfig.token || '';
+                        document.getElementById('dataFilePath').value = githubConfig.dataFilePath || 'TumiData.json';
+                        autoSyncToggle.checked = githubConfig.autoSync !== false;
+                        autoSyncInterval.value = githubConfig.autoSyncInterval || 1;
+                        
+                        // Load last sync time
+                        const lastSync = localStorage.getItem('githubLastSync');
+                        if (lastSync) {
+                            githubConfig.lastSync = new Date(lastSync);
+                        }
+                        
+                        if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                            githubStatusSpan.textContent = 'Terkonfigurasi';
+                            githubStatusSpan.style.color = '#27ae60';
+                            updateGitHubStatus(true, 'Terkoneksi');
+                        } else {
+                            githubStatusSpan.textContent = 'Belum dikonfigurasi';
+                            githubStatusSpan.style.color = '#7f8c8d';
+                            updateGitHubStatus(false, 'Tidak terkoneksi');
+                        }
+                    } catch (e) {
+                        console.error('Error parsing GitHub config:', e);
+                        showNotification('Error memuat konfigurasi GitHub', 'error');
                     }
                 }
             }
@@ -2313,23 +2526,6 @@
                 }
             }
             
-            // Fungsi untuk sinkronisasi manual
-            async function manualSync() {
-                showNotification('Memulai sinkronisasi dengan GitHub...');
-                syncButton.innerHTML = '<i class="fas fa-sync fa-spin"></i> Syncing...';
-                syncButton.disabled = true;
-                
-                await loadFromGitHub();
-                await syncPendingChanges();
-                renderTable();
-                updateTotalEan();
-                updateTotalContainer();
-                
-                syncButton.innerHTML = '<i class="fas fa-sync"></i> Sync';
-                syncButton.disabled = false;
-                showNotification('Sinkronisasi selesai');
-            }
-            
             // Fungsi untuk sinkronisasi master data
             async function syncMasterData() {
                 showNotification('Memulai sinkronisasi master data dengan GitHub...');
@@ -2372,6 +2568,14 @@
                 
                 // Perbarui status sinkronisasi
                 updateSyncStatusUI();
+                updatePushStatus('idle', 'Idle');
+                updateLastSyncTime();
+                
+                // Setup auto sync
+                setupAutoSync();
+                
+                // Update waktu sync terakhir setiap menit
+                setInterval(updateLastSyncTime, 60000);
                 
                 // Fokuskan ke input EAN jika sudah diaktifkan
                 if (!eanInput.disabled) {
@@ -2678,7 +2882,6 @@
             // Event listener untuk auto save pada input EAN dengan delay 100ms
             eanInput.addEventListener('input', function() {
                 clearTimeout(eanInputTimer);
-                resetInactivityTimer(); // Reset timer inactivity
                 
                 // Cari data master berdasarkan EAN
                 const eanValue = eanInput.value.trim();
@@ -2834,6 +3037,9 @@
             // Event listener untuk tombol sinkronisasi manual
             syncButton.addEventListener('click', manualSync);
             
+            // Event listener untuk tombol pull
+            pullButton.addEventListener('click', pullFromGithub);
+            
             // Event listener untuk master data form
             masterDataForm.addEventListener('submit', addMasterData);
             
@@ -2858,6 +3064,29 @@
             editMasterModal.addEventListener('click', function(e) {
                 if (e.target === editMasterModal) {
                     hideEditMasterModal();
+                }
+            });
+            
+            // Event listener untuk toggle auto sync
+            autoSyncToggle.addEventListener('change', function() {
+                githubConfig.autoSync = this.checked;
+                localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
+                
+                if (this.checked) {
+                    setupAutoSync();
+                } else {
+                    stopAutoSync();
+                    showNotification('Auto sync dinonaktifkan');
+                }
+            });
+            
+            // Event listener untuk perubahan interval auto sync
+            autoSyncInterval.addEventListener('change', function() {
+                githubConfig.autoSyncInterval = parseInt(this.value) || 1;
+                localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
+                
+                if (githubConfig.autoSync) {
+                    setupAutoSync();
                 }
             });
             
@@ -3024,9 +3253,14 @@
             updateTotalContainer();
             toggleEanInput();
             updateSyncStatusUI();
+            updatePushStatus('idle', 'Idle');
+            updateLastSyncTime();
             
-            // Mulai timer inactivity
-            resetInactivityTimer();
+            // Setup auto sync
+            setupAutoSync();
+            
+            // Update waktu sync terakhir setiap menit
+            setInterval(updateLastSyncTime, 60000);
             
             // Tampilkan form login pertama kali
             toggleMainContent(false);
