@@ -296,7 +296,7 @@
             display: flex;
             flex-direction: column;
             flex: 1;
-            minimal-width: 250px;
+            min-width: 250px;
         }
 
         label {
@@ -533,30 +533,6 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.25rem;
-            position: relative;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--spark-dark);
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f8f9fa;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .close-modal:hover {
-            background-color: #e9ecef;
         }
 
         .modal-form-group {
@@ -1695,13 +1671,7 @@
                 // Coba muat dari local storage terlebih dahulu
                 const savedData = localStorage.getItem('scannedData');
                 if (savedData) {
-                    try {
-                        scannedData = JSON.parse(savedData);
-                    } catch (e) {
-                        console.error('Error parsing data from localStorage:', e);
-                        scannedData = [];
-                        localStorage.setItem('scannedData', JSON.stringify([]));
-                    }
+                    scannedData = JSON.parse(savedData);
                     populateFilterDropdowns();
                     updateTotalContainer();
                 }
@@ -1716,11 +1686,6 @@
                     const { data, sha } = await getGitHubData();
                     
                     if (data !== null) {
-                        // Pastikan data adalah array
-                        if (!Array.isArray(data)) {
-                            throw new Error('Data dari GitHub bukan array');
-                        }
-                        
                         // Simpan data yang masih pending
                         const pendingData = scannedData.filter(item => item.syncStatus === 'pending');
                         
@@ -1753,7 +1718,6 @@
                 } catch (error) {
                     console.error('Error memuat data dari GitHub:', error);
                     updateGitHubStatus(false, 'Error koneksi');
-                    showNotification('Error memuat data dari GitHub: ' + error.message, 'error');
                     return false;
                 }
             }
@@ -1941,7 +1905,7 @@
                 }
             }
             
-            // Fungsi untuk menyimpan konfigurasi GitHub (diperbaiki)
+            // Fungsi untuk menyimpan konfigurasi GitHub
             function saveGithubConfig() {
                 githubConfig = {
                     username: document.getElementById('githubUsername').value.trim(),
@@ -1955,40 +1919,35 @@
                 showNotification('Konfigurasi GitHub berhasil disimpan!');
                 
                 // Test koneksi setelah menyimpan konfigurasi
-                testGitHubConnection();
+                testGithubConnection();
                 loadFromGitHub();
             }
             
-            // Fungsi untuk memuat konfigurasi GitHub dari local storage (diperbaiki)
+            // Fungsi untuk memuat konfigurasi GitHub dari local storage
             function loadGithubConfig() {
                 const savedConfig = localStorage.getItem('githubConfig');
                 if (savedConfig) {
-                    try {
-                        githubConfig = JSON.parse(savedConfig);
-                        
-                        document.getElementById('githubUsername').value = githubConfig.username || '';
-                        document.getElementById('githubRepo').value = githubConfig.repo || '';
-                        document.getElementById('githubToken').value = githubConfig.token || '';
-                        document.getElementById('dataFilePath').value = githubConfig.dataFilePath || 'data/scannedData.json';
-                        
-                        // Load last sync time
-                        const lastSync = localStorage.getItem('githubLastSync');
-                        if (lastSync) {
-                            githubConfig.lastSync = new Date(lastSync);
-                        }
-                        
-                        if (githubConfig.username && githubConfig.repo && githubConfig.token) {
-                            githubStatusSpan.textContent = 'Terkonfigurasi';
-                            githubStatusSpan.style.color = '#27ae60';
-                            updateGitHubStatus(true, 'Terkoneksi');
-                        } else {
-                            githubStatusSpan.textContent = 'Belum dikonfigurasi';
-                            githubStatusSpan.style.color = '#7f8c8d';
-                            updateGitHubStatus(false, 'Tidak terkoneksi');
-                        }
-                    } catch (e) {
-                        console.error('Error parsing GitHub config:', e);
-                        showNotification('Error memuat konfigurasi GitHub', 'error');
+                    githubConfig = JSON.parse(savedConfig);
+                    
+                    document.getElementById('githubUsername').value = githubConfig.username;
+                    document.getElementById('githubRepo').value = githubConfig.repo;
+                    document.getElementById('githubToken').value = githubConfig.token;
+                    document.getElementById('dataFilePath').value = githubConfig.dataFilePath;
+                    
+                    // Load last sync time
+                    const lastSync = localStorage.getItem('githubLastSync');
+                    if (lastSync) {
+                        githubConfig.lastSync = new Date(lastSync);
+                    }
+                    
+                    if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                        githubStatusSpan.textContent = 'Terkonfigurasi';
+                        githubStatusSpan.style.color = '#27ae60';
+                        updateGitHubStatus(true, 'Terkoneksi');
+                    } else {
+                        githubStatusSpan.textContent = 'Belum dikonfigurasi';
+                        githubStatusSpan.style.color = '#7f8c8d';
+                        updateGitHubStatus(false, 'Tidak terkoneksi');
                     }
                 }
             }
@@ -2325,7 +2284,7 @@
             saveGithubConfigBtn.addEventListener('click', saveGithubConfig);
             
             // Event listener untuk tombol test koneksi GitHub
-            testGithubConnectionBtn.addEventListener('click', testGitHubConnection);
+            testGithubConnectionBtn.addEventListener('click', testGithubConnection);
             
             // Event listener untuk modal edit
             closeModalBtn.addEventListener('click', hideEditModal);
