@@ -1,14 +1,5 @@
 [
   {
-    "pallet": "C",
-    "container": "B",
-    "ean": "1234567890123",
-    "qty": "1",
-    "timestamp": "2025-09-07T17:33:13.537Z",
-    "user": "Admin",
-    "date": "2025-09-07"
-  },
-  {
     "pallet": "D",
     "container": "B",
     "ean": "22222",
@@ -17,7 +8,7 @@
     "user": "Admin",
     "date": "2025-09-07"
   },
-    {
+  {
     "pallet": "DID2507181804",
     "container": "B 9477 AX",
     "ean": "5400520277305",
@@ -40400,5 +40391,4 @@
     "user": "Gawung",
     "date": "2025-09-04"
   }
-
 ]
