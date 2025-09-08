@@ -40759,5 +40759,32 @@
     "timestamp": "2025-09-08T02:27:41.100Z",
     "user": "Nana M",
     "date": "2025-09-08"
+  },
+  {
+    "pallet": "DID2509040248",
+    "container": "B 9530 JK",
+    "ean": "5400520384072",
+    "qty": "1",
+    "timestamp": "2025-09-08T02:28:31.928Z",
+    "user": "Nana M",
+    "date": "2025-09-08"
+  },
+  {
+    "pallet": "DID2509040248",
+    "container": "B 9530 JK",
+    "ean": "5400520384072",
+    "qty": "1",
+    "timestamp": "2025-09-08T02:28:38.909Z",
+    "user": "Nana M",
+    "date": "2025-09-08"
+  },
+  {
+    "pallet": "DID2509040248",
+    "container": "B 9530 JK",
+    "ean": "5400520384072",
+    "qty": "1",
+    "timestamp": "2025-09-08T02:28:39.879Z",
+    "user": "Nana M",
+    "date": "2025-09-08"
   }
 ]
