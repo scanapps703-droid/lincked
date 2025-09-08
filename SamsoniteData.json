@@ -2194,5 +2194,50 @@
     "timestamp": "2025-09-08T07:14:02.701Z",
     "user": "Muhdi",
     "date": "2025-09-08"
+  },
+  {
+    "pallet": "DID2509040252",
+    "container": "B 9530 JK",
+    "ean": "5400520384119",
+    "qty": "1",
+    "timestamp": "2025-09-08T08:50:22.146Z",
+    "user": "Nana M",
+    "date": "2025-09-08"
+  },
+  {
+    "pallet": "DID2509040252",
+    "container": "B 9530 JK",
+    "ean": "5400520384119",
+    "qty": "1",
+    "timestamp": "2025-09-08T08:50:24.129Z",
+    "user": "Nana M",
+    "date": "2025-09-08"
+  },
+  {
+    "pallet": "DID2509040252",
+    "container": "B 9530 JK",
+    "ean": "5400810384119",
+    "qty": "1",
+    "timestamp": "2025-09-08T08:50:25.948Z",
+    "user": "Nana M",
+    "date": "2025-09-08"
+  },
+  {
+    "pallet": "DID2509040252",
+    "container": "B 9530 JK",
+    "ean": "5400520384119",
+    "qty": "1",
+    "timestamp": "2025-09-08T08:50:27.949Z",
+    "user": "Nana M",
+    "date": "2025-09-08"
+  },
+  {
+    "pallet": "DID2509040252",
+    "container": "B 9530 JK",
+    "ean": "5400520384119",
+    "qty": "1",
+    "timestamp": "2025-09-08T08:50:31.758Z",
+    "user": "Nana M",
+    "date": "2025-09-08"
   }
 ]
