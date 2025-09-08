@@ -1273,6 +1273,7 @@
             let isSaving = false;
             let autoSyncIntervalId = null;
             let lastSyncTimestamp = null;
+            let isSyncing = false; // Flag untuk mencegah multiple sync bersamaan
             
             // Konfigurasi GitHub
             let githubConfig = {
@@ -1809,21 +1810,37 @@
                 }
             }
             
-            // Fungsi untuk push data ke GitHub
-            async function pushToGithub() {
+            // Fungsi untuk merge data lokal dan data dari GitHub
+            function mergeData(localData, remoteData) {
+                // Gabungkan kedua array data
+                const combinedData = [...localData, ...remoteData];
+                
+                // Buat Map untuk menyimpan data unik berdasarkan kunci tertentu
+                const dataMap = new Map();
+                
+                // Gunakan kombinasi container, pallet, ean, dan timestamp sebagai kunci unik
+                combinedData.forEach(item => {
+                    const key = `${item.container}-${item.pallet}-${item.ean}-${item.timestamp}`;
+                    
+                    // Jika kunci belum ada di Map, atau jika item ini lebih baru (berdasarkan timestamp)
+                    if (!dataMap.has(key) || new Date(item.timestamp) > new Date(dataMap.get(key).timestamp)) {
+                        dataMap.set(key, item);
+                    }
+                });
+                
+                // Konversi Map kembali ke array
+                return Array.from(dataMap.values());
+            }
+            
+            // Fungsi untuk push data ke GitHub (tanpa update UI)
+            async function pushToGithubForSync(dataToPush) {
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    showNotification('Harap konfigurasi GitHub terlebih dahulu!', 'error');
-                    return;
+                    throw new Error('GitHub configuration is incomplete');
                 }
                 
-                updatePushStatus('active', 'Pushing...');
-                
                 try {
-                    // Ambil data dari localStorage
-                    const localData = JSON.parse(localStorage.getItem('scannedData') || '[]');
-                    
                     // Konversi data ke format string
-                    const content = JSON.stringify(localData, null, 2);
+                    const content = JSON.stringify(dataToPush, null, 2);
                     const contentEncoded = btoa(unescape(encodeURIComponent(content)));
                     
                     // Cek apakah file sudah ada di GitHub
@@ -1849,36 +1866,28 @@
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            message: `Update data dari ${currentUser} pada ${new Date().toISOString()}`,
+                            message: `Auto sync data dari ${currentUser} pada ${new Date().toISOString()}`,
                             content: contentEncoded,
                             sha: sha
                         })
                     });
                     
-                    if (response.ok) {
-                        showNotification('Data berhasil dipush ke GitHub!');
-                        updatePushStatus('idle', 'Push berhasil');
-                        lastSyncTimestamp = Date.now();
-                        updateLastSyncTime();
-                    } else {
+                    if (!response.ok) {
                         const error = await response.json();
-                        showNotification('Gagal push data: ' + error.message, 'error');
-                        updatePushStatus('error', 'Gagal push');
+                        throw new Error(error.message || 'Gagal push data');
                     }
+                    
+                    return true;
                 } catch (error) {
-                    showNotification('Error push data: ' + error.message, 'error');
-                    updatePushStatus('error', 'Error');
+                    throw error;
                 }
             }
             
-            // Fungsi untuk pull data dari GitHub
-            async function pullFromGithub() {
+            // Fungsi untuk pull data dari GitHub (tanpa update UI)
+            async function pullFromGithubForSync() {
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    showNotification('Harap konfigurasi GitHub terlebih dahulu!', 'error');
-                    return;
+                    throw new Error('GitHub configuration is incomplete');
                 }
-                
-                updatePushStatus('active', 'Pulling...');
                 
                 try {
                     const fileUrl = `https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`;
@@ -1892,31 +1901,91 @@
                     if (response.ok) {
                         const fileInfo = await response.json();
                         const content = decodeURIComponent(escape(atob(fileInfo.content)));
-                        const remoteData = JSON.parse(content);
-                        
-                        // Simpan data yang diambil dari GitHub
-                        localStorage.setItem('scannedData', JSON.stringify(remoteData));
-                        scannedData = remoteData;
-                        
-                        // Perbarui UI
-                        renderTable();
-                        updateTotalEan();
-                        updateTotalContainer();
-                        populateFilterDropdowns();
-                        
-                        showNotification('Data berhasil dipull dari GitHub!');
-                        updatePushStatus('idle', 'Pull berhasil');
-                        lastSyncTimestamp = Date.now();
-                        updateLastSyncTime();
+                        return JSON.parse(content);
                     } else {
+                        // Jika file tidak ditemukan, kembalikan array kosong
+                        if (response.status === 404) {
+                            return [];
+                        }
+                        
                         const error = await response.json();
-                        showNotification('Gagal pull data: ' + error.message, 'error');
-                        updatePushStatus('error', 'Gagal pull');
+                        throw new Error(error.message || 'Gagal pull data');
                     }
                 } catch (error) {
-                    showNotification('Error pull data: ' + error.message, 'error');
-                    updatePushStatus('error', 'Error');
+                    throw error;
                 }
+            }
+            
+            // Fungsi untuk melakukan sinkronisasi data (push lalu pull)
+            async function performSync() {
+                if (isSyncing) {
+                    console.log('Sync already in progress');
+                    return;
+                }
+                
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    showNotification('Harap konfigurasi GitHub terlebih dahulu!', 'error');
+                    return;
+                }
+                
+                isSyncing = true;
+                updatePushStatus('active', 'Syncing...');
+                
+                try {
+                    // 1. Ambil data lokal
+                    const localData = JSON.parse(localStorage.getItem('scannedData') || '[]');
+                    
+                    // 2. Pull data dari GitHub untuk mendapatkan data terbaru
+                    let remoteData = [];
+                    try {
+                        remoteData = await pullFromGithubForSync();
+                    } catch (error) {
+                        // Jika file belum ada di GitHub, lanjutkan dengan data lokal saja
+                        if (error.message.includes('404') || error.message.includes('Not Found')) {
+                            console.log('File not found on GitHub, creating new file');
+                            remoteData = [];
+                        } else {
+                            throw error;
+                        }
+                    }
+                    
+                    // 3. Merge data lokal dan data dari GitHub
+                    const mergedData = mergeData(localData, remoteData);
+                    
+                    // 4. Push data yang sudah di-merge ke GitHub
+                    await pushToGithubForSync(mergedData);
+                    
+                    // 5. Simpan data yang sudah di-merge ke local storage
+                    localStorage.setItem('scannedData', JSON.stringify(mergedData));
+                    scannedData = mergedData;
+                    
+                    // 6. Update UI
+                    renderTable();
+                    updateTotalEan();
+                    updateTotalContainer();
+                    populateFilterDropdowns();
+                    
+                    showNotification('Sinkronisasi berhasil!');
+                    updatePushStatus('idle', 'Sync berhasil');
+                    lastSyncTimestamp = Date.now();
+                    updateLastSyncTime();
+                } catch (error) {
+                    console.error('Error during sync:', error);
+                    showNotification('Sinkronisasi gagal: ' + error.message, 'error');
+                    updatePushStatus('error', 'Sync gagal');
+                } finally {
+                    isSyncing = false;
+                }
+            }
+            
+            // Fungsi untuk push data ke GitHub (manual)
+            async function pushToGithub() {
+                await performSync();
+            }
+            
+            // Fungsi untuk pull data dari GitHub (manual)
+            async function pullFromGithub() {
+                await performSync();
             }
             
             // Fungsi untuk setup auto sync
@@ -1929,7 +1998,7 @@
                     const intervalMs = (githubConfig.autoSyncInterval || 1) * 60 * 1000;
                     
                     autoSyncIntervalId = setInterval(async () => {
-                        await pullFromGithub();
+                        await performSync();
                     }, intervalMs);
                     
                     showNotification(`Auto sync diaktifkan setiap ${githubConfig.autoSyncInterval} menit`);
