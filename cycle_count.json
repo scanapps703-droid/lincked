@@ -53,5 +53,16 @@
     "countValue": "9",
     "remark": "",
     "timestamp": "2025-09-08T01:28:59.443Z"
+  },
+  {
+    "location": "GA05A001",
+    "ean": "5400520300584",
+    "sku": "0000000000001532671388",
+    "description": "RELYON BACKPACK M 15.6\"+FLAP-GREEN",
+    "traceId": "2505140233-A",
+    "countType": "1stCount",
+    "countValue": "1",
+    "remark": "",
+    "timestamp": "2025-09-08T01:29:08.629Z"
   }
 ]
