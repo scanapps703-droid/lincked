@@ -476,6 +476,20 @@
             margin-bottom: 0;
             padding-left: 20px;
         }
+
+        /* Inventory Balanced Table */
+        .inventory-table-container {
+            overflow-x: auto;
+            max-width: 100%;
+        }
+        
+        .inventory-table {
+            min-width: 2000px;
+        }
+        
+        .inventory-table th, .inventory-table td {
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -548,6 +562,12 @@
                     <a href="#master-data" data-tab="master-data">
                         <i class="fas fa-database"></i>
                         <span class="menu-text">Master Data</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#inventory-balanced" data-tab="inventory-balanced">
+                        <i class="fas fa-cubes"></i>
+                        <span class="menu-text">Inventory Balanced</span>
                     </a>
                 </li>
                 <li>
@@ -786,6 +806,101 @@
                 </div>
             </div>
             
+            <!-- Inventory Balanced Tab -->
+            <div class="tab-content" id="inventory-balanced-tab" style="display: none;">
+                <div class="section-card">
+                    <h2 class="section-title">
+                        <i class="fas fa-cubes"></i> Inventory Balanced Management
+                    </h2>
+                    
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        <button id="upload-inventory-btn" class="btn btn-success">
+                            <i class="fas fa-upload"></i> Upload Excel
+                        </button>
+                        <button id="download-inventory-btn" class="btn btn-primary">
+                            <i class="fas fa-download"></i> Download Excel
+                        </button>
+                        <button id="clear-inventory-btn" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Hapus Semua
+                        </button>
+                        <button id="add-inventory-btn" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Tambah Data
+                        </button>
+                    </div>
+
+                    <!-- Excel Format Info -->
+                    <div class="excel-format">
+                        <h5><i class="fas fa-info-circle"></i> Format File Excel</h5>
+                        <p>File Excel harus memiliki kolom dengan header berikut:</p>
+                        <ul>
+                            <li><strong>Warehouse ID</strong> (wajib)</li>
+                            <li><strong>Customer ID</strong> (wajib)</li>
+                            <li><strong>Location ID</strong> (wajib)</li>
+                            <li><strong>SKU</strong> (wajib)</li>
+                            <li>Dan semua kolom lainnya sesuai dengan struktur yang telah ditentukan</li>
+                        </ul>
+                    </div>
+                    
+                    <input type="file" id="inventory-file-input" accept=".xlsx, .xls" style="display: none;">
+                    
+                    <div class="inventory-table-container">
+                        <table class="table table-hover inventory-table" id="inventory-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Warehouse ID</th>
+                                    <th scope="col">Customer ID</th>
+                                    <th scope="col">Location ID</th>
+                                    <th scope="col">SKU</th>
+                                    <th scope="col">SKU Descr(L)</th>
+                                    <th scope="col">Batch Number</th>
+                                    <th scope="col">QTY On Hand</th>
+                                    <th scope="col">QTY Available</th>
+                                    <th scope="col">QTY Allocated</th>
+                                    <th scope="col">QTY On Hold</th>
+                                    <th scope="col">Whether damaged</th>
+                                    <th scope="col">SKU Descr(S)</th>
+                                    <th scope="col">packId</th>
+                                    <th scope="col">SKU Group1</th>
+                                    <th scope="col">Lot Number</th>
+                                    <th scope="col">Trace ID</th>
+                                    <th scope="col">LPN</th>
+                                    <th scope="col">UOM</th>
+                                    <th scope="col">Pending Replen IN</th>
+                                    <th scope="col">Pending Putaway IN</th>
+                                    <th scope="col">Pending Replen OUT</th>
+                                    <th scope="col">TotalCube</th>
+                                    <th scope="col">Pending Move IN</th>
+                                    <th scope="col">Pending Move OUT</th>
+                                    <th scope="col">Total Cubic</th>
+                                    <th scope="col">Total GrossWeight</th>
+                                    <th scope="col">Total NetWeight</th>
+                                    <th scope="col">Total Price</th>
+                                    <th scope="col">CBMSKU</th>
+                                    <th scope="col">QtyCBM</th>
+                                    <th scope="col">LOTATT09</th>
+                                    <th scope="col">UDF1</th>
+                                    <th scope="col">UDF2</th>
+                                    <th scope="col">UDF3</th>
+                                    <th scope="col">Warehousing Date</th>
+                                    <th scope="col">Add Who</th>
+                                    <th scope="col">Add Time</th>
+                                    <th scope="col">Pallet Type</th>
+                                    <th scope="col">Edit Who</th>
+                                    <th scope="col">PO Number</th>
+                                    <th scope="col">Edit Time</th>
+                                    <th scope="col">lotAtt12</th>
+                                    <th scope="col">PLT DESCR</th>
+                                    <th scope="col" style="width: 100px;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Data akan diisi oleh JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
             <!-- GitHub Configuration Tab -->
             <div class="tab-content" id="github-config-tab" style="display: none;">
                 <div class="section-card">
@@ -836,11 +951,17 @@
                             <button type="button" class="btn btn-primary" id="push-masterdata">
                                 <i class="fas fa-upload"></i> Push Data Master
                             </button>
+                            <button type="button" class="btn btn-primary" id="push-inventory">
+                                <i class="fas fa-upload"></i> Push Data Inventory
+                            </button>
                             <button type="button" class="btn btn-success" id="pull-cyclecount">
                                 <i class="fas fa-download"></i> Pull Data Cycle Count
                             </button>
                             <button type="button" class="btn btn-success" id="pull-masterdata">
                                 <i class="fas fa-download"></i> Pull Data Master
+                            </button>
+                            <button type="button" class="btn btn-success" id="pull-inventory">
+                                <i class="fas fa-download"></i> Pull Data Inventory
                             </button>
                         </div>
                         
@@ -849,10 +970,11 @@
                     
                     <div class="github-config">
                         <h4><i class="fas fa-info-circle"></i> Informasi</h4>
-                        <p>Fitur ini memungkinkan Anda menyimpan data Cycle Count dan Master Data ke repository GitHub.</p>
+                        <p>Fitur ini memungkinkan Anda menyimpan data Cycle Count, Master Data, dan Inventory Balanced ke repository GitHub.</p>
                         <ul>
                             <li>Data Cycle Count akan disimpan dalam file <code>cycle_count.json</code></li>
                             <li>Data Master akan disimpan dalam file <code>master_data.json</code></li>
+                            <li>Data Inventory akan disimpan dalam file <code>inventory_data.json</code></li>
                             <li>Pastikan repository sudah dibuat sebelumnya di akun GitHub Anda</li>
                             <li>Token akses harus memiliki izin untuk membaca dan menulis ke repository</li>
                         </ul>
@@ -871,6 +993,7 @@
         let currentUser = null;
         let userKey = null;
         let masterData = [];
+        let inventoryData = [];
         
         document.addEventListener('DOMContentLoaded', function() {
             // Login functionality
@@ -1018,6 +1141,8 @@
                         renderDataCountTable();
                     } else if (tabId === 'master-data') {
                         renderMasterData();
+                    } else if (tabId === 'inventory-balanced') {
+                        renderInventoryData();
                     } else if (tabId === 'github-config') {
                         loadGithubConfig();
                     }
@@ -1030,6 +1155,10 @@
                     // Initialize master data from localStorage with user-specific key
                     const masterDataStr = localStorage.getItem(`cycleCountMasterData_${userKey}`);
                     masterData = masterDataStr ? JSON.parse(masterDataStr) : [];
+                    
+                    // Initialize inventory data from localStorage with user-specific key
+                    const inventoryDataStr = localStorage.getItem(`inventoryData_${userKey}`);
+                    inventoryData = inventoryDataStr ? JSON.parse(inventoryDataStr) : [];
                     
                     // Form elements
                     const form = document.getElementById('cycleCountForm');
@@ -1064,6 +1193,14 @@
                     const fileInput = document.getElementById('file-input');
                     const masterDataTable = document.getElementById('master-data-table') ? document.getElementById('master-data-table').querySelector('tbody') : null;
                     
+                    // Inventory data elements
+                    const uploadInventoryBtn = document.getElementById('upload-inventory-btn');
+                    const downloadInventoryBtn = document.getElementById('download-inventory-btn');
+                    const clearInventoryBtn = document.getElementById('clear-inventory-btn');
+                    const addInventoryBtn = document.getElementById('add-inventory-btn');
+                    const inventoryFileInput = document.getElementById('inventory-file-input');
+                    const inventoryTable = document.getElementById('inventory-table') ? document.getElementById('inventory-table').querySelector('tbody') : null;
+                    
                     // Data count elements
                     const startDateFilter = document.getElementById('start-date');
                     const endDateFilter = document.getElementById('end-date');
@@ -1081,8 +1218,10 @@
                     const saveGithubConfigBtn = document.getElementById('save-github-config');
                     const pushCycleCountBtn = document.getElementById('push-cyclecount');
                     const pushMasterDataBtn = document.getElementById('push-masterdata');
+                    const pushInventoryBtn = document.getElementById('push-inventory');
                     const pullCycleCountBtn = document.getElementById('pull-cyclecount');
                     const pullMasterDataBtn = document.getElementById('pull-masterdata');
+                    const pullInventoryBtn = document.getElementById('pull-inventory');
                     const syncStatus = document.getElementById('sync-status');
                     
                     // Set default dates for filter
@@ -1152,6 +1291,12 @@
                         });
                     }
                     
+                    if (pushInventoryBtn) {
+                        pushInventoryBtn.addEventListener('click', function() {
+                            pushDataToGithub('inventory_data');
+                        });
+                    }
+                    
                     // Pull data from GitHub
                     if (pullCycleCountBtn) {
                         pullCycleCountBtn.addEventListener('click', function() {
@@ -1162,6 +1307,12 @@
                     if (pullMasterDataBtn) {
                         pullMasterDataBtn.addEventListener('click', function() {
                             pullDataFromGithub('master_data');
+                        });
+                    }
+                    
+                    if (pullInventoryBtn) {
+                        pullInventoryBtn.addEventListener('click', function() {
+                            pullDataFromGithub('inventory_data');
                         });
                     }
                     
@@ -1177,8 +1328,18 @@
                         showSyncStatus('Mengunggah data ke GitHub...', 'info');
                         
                         // Get data from localStorage
-                        const data = JSON.parse(localStorage.getItem(`${dataType === 'cycle_count' ? 'cycleCountData' : 'cycleCountMasterData'}_${userKey}`)) || [];
-                        const fileName = dataType === 'cycle_count' ? 'cycle_count.json' : 'master_data.json';
+                        let data, fileName;
+                        if (dataType === 'cycle_count') {
+                            data = JSON.parse(localStorage.getItem(`cycleCountData_${userKey}`)) || [];
+                            fileName = 'cycle_count.json';
+                        } else if (dataType === 'master_data') {
+                            data = JSON.parse(localStorage.getItem(`cycleCountMasterData_${userKey}`)) || [];
+                            fileName = 'master_data.json';
+                        } else if (dataType === 'inventory_data') {
+                            data = JSON.parse(localStorage.getItem(`inventoryData_${userKey}`)) || [];
+                            fileName = 'inventory_data.json';
+                        }
+                        
                         const content = JSON.stringify(data, null, 2);
                         
                         // GitHub API endpoint
@@ -1229,7 +1390,9 @@
                         })
                         .then(response => response.json())
                         .then(data => {
-                            showSyncStatus(`Data ${dataType === 'cycle_count' ? 'Cycle Count' : 'Master Data'} berhasil diunggah ke GitHub`, 'success');
+                            const dataTypeName = dataType === 'cycle_count' ? 'Cycle Count' : 
+                                              dataType === 'master_data' ? 'Master Data' : 'Inventory';
+                            showSyncStatus(`Data ${dataTypeName} berhasil diunggah ke GitHub`, 'success');
                             showToast(`Data berhasil diunggah ke GitHub`);
                         })
                         .catch(error => {
@@ -1325,7 +1488,8 @@
                         
                         showSyncStatus('Mengunduh data dari GitHub...', 'info');
                         
-                        const fileName = dataType === 'cycle_count' ? 'cycle_count.json' : 'master_data.json';
+                        const fileName = dataType === 'cycle_count' ? 'cycle_count.json' : 
+                                      dataType === 'master_data' ? 'master_data.json' : 'inventory_data.json';
                         const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${fileName}`;
                         
                         fetch(url, {
@@ -1345,18 +1509,31 @@
                             const jsonData = JSON.parse(content);
                             
                             // Save to localStorage
-                            localStorage.setItem(`${dataType === 'cycle_count' ? 'cycleCountData' : 'cycleCountMasterData'}_${userKey}`, JSON.stringify(jsonData));
+                            let dataTypeName;
+                            if (dataType === 'cycle_count') {
+                                localStorage.setItem(`cycleCountData_${userKey}`, JSON.stringify(jsonData));
+                                dataTypeName = 'Cycle Count';
+                            } else if (dataType === 'master_data') {
+                                localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(jsonData));
+                                masterData = jsonData;
+                                dataTypeName = 'Master Data';
+                            } else if (dataType === 'inventory_data') {
+                                localStorage.setItem(`inventoryData_${userKey}`, JSON.stringify(jsonData));
+                                inventoryData = jsonData;
+                                dataTypeName = 'Inventory';
+                            }
                             
-                            showSyncStatus(`Data ${dataType === 'cycle_count' ? 'Cycle Count' : 'Master Data'} berhasil diunduh dari GitHub`, 'success');
+                            showSyncStatus(`Data ${dataTypeName} berhasil diunduh dari GitHub`, 'success');
                             showToast(`Data berhasil diunduh dari GitHub`);
                             
                             // Refresh the appropriate table
                             if (dataType === 'cycle_count') {
                                 renderDataCountTable();
-                            } else {
-                                masterData = jsonData;
+                            } else if (dataType === 'master_data') {
                                 renderMasterData();
                                 renderCurrentLocationSKUCount(locationField.value.trim());
+                            } else if (dataType === 'inventory_data') {
+                                renderInventoryData();
                             }
                         })
                         .catch(error => {
@@ -1861,6 +2038,320 @@
                         });
                     }
                     
+                    // Inventory Data Functions
+                    function renderInventoryData() {
+                        if (!inventoryTable) return;
+                        
+                        inventoryTable.innerHTML = '';
+                        
+                        if (inventoryData.length === 0) {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `<td colspan="43" class="text-center py-4 text-muted">Tidak ada data inventory</td>`;
+                            inventoryTable.appendChild(row);
+                            return;
+                        }
+                        
+                        inventoryData.forEach((item, index) => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${item.warehouseId || ''}</td>
+                                <td>${item.customerId || ''}</td>
+                                <td>${item.locationId || ''}</td>
+                                <td>${item.sku || ''}</td>
+                                <td>${item.skuDescrL || ''}</td>
+                                <td>${item.batchNumber || ''}</td>
+                                <td>${item.qtyOnHand || ''}</td>
+                                <td>${item.qtyAvailable || ''}</td>
+                                <td>${item.qtyAllocated || ''}</td>
+                                <td>${item.qtyOnHold || ''}</td>
+                                <td>${item.whetherDamaged || ''}</td>
+                                <td>${item.skuDescrS || ''}</td>
+                                <td>${item.packId || ''}</td>
+                                <td>${item.skuGroup1 || ''}</td>
+                                <td>${item.lotNumber || ''}</td>
+                                <td>${item.traceId || ''}</td>
+                                <td>${item.lpn || ''}</td>
+                                <td>${item.uom || ''}</td>
+                                <td>${item.pendingReplenIN || ''}</td>
+                                <td>${item.pendingPutawayIN || ''}</td>
+                                <td>${item.pendingReplenOUT || ''}</td>
+                                <td>${item.totalCube || ''}</td>
+                                <td>${item.pendingMoveIN || ''}</td>
+                                <td>${item.pendingMoveOUT || ''}</td>
+                                <td>${item.totalCubic || ''}</td>
+                                <td>${item.totalGrossWeight || ''}</td>
+                                <td>${item.totalNetWeight || ''}</td>
+                                <td>${item.totalPrice || ''}</td>
+                                <td>${item.cbmSku || ''}</td>
+                                <td>${item.qtyCBM || ''}</td>
+                                <td>${item.lotAtt09 || ''}</td>
+                                <td>${item.udf1 || ''}</td>
+                                <td>${item.udf2 || ''}</td>
+                                <td>${item.udf3 || ''}</td>
+                                <td>${item.warehousingDate || ''}</td>
+                                <td>${item.addWho || ''}</td>
+                                <td>${item.addTime || ''}</td>
+                                <td>${item.palletType || ''}</td>
+                                <td>${item.editWho || ''}</td>
+                                <td>${item.poNumber || ''}</td>
+                                <td>${item.editTime || ''}</td>
+                                <td>${item.lotAtt12 || ''}</td>
+                                <td>${item.pltDescr || ''}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger delete-inventory-btn" data-index="${index}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            `;
+                            inventoryTable.appendChild(row);
+                        });
+                        
+                        // Add event listeners to delete buttons
+                        document.querySelectorAll('.delete-inventory-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const index = parseInt(this.getAttribute('data-index'));
+                                deleteInventoryItem(index);
+                            });
+                        });
+                    }
+                    
+                    function deleteInventoryItem(index) {
+                        if (confirm('Apakah Anda yakin ingin menghapus data inventory ini?')) {
+                            inventoryData.splice(index, 1);
+                            localStorage.setItem(`inventoryData_${userKey}`, JSON.stringify(inventoryData));
+                            renderInventoryData();
+                            showToast('Data inventory berhasil dihapus!');
+                        }
+                    }
+                    
+                    // Add new inventory data
+                    if (addInventoryBtn) {
+                        addInventoryBtn.addEventListener('click', function() {
+                            // Create a simple form to add basic inventory data
+                            // In a real application, you might want a more comprehensive form
+                            const warehouseId = prompt('Masukkan Warehouse ID:');
+                            if (!warehouseId) return;
+                            
+                            const customerId = prompt('Masukkan Customer ID:');
+                            if (!customerId) return;
+                            
+                            const locationId = prompt('Masukkan Location ID:');
+                            if (!locationId) return;
+                            
+                            const sku = prompt('Masukkan SKU:');
+                            if (!sku) return;
+                            
+                            // Check if combination already exists
+                            const exists = inventoryData.some(item => 
+                                item.warehouseId === warehouseId && 
+                                item.customerId === customerId && 
+                                item.locationId === locationId && 
+                                item.sku === sku
+                            );
+                            
+                            if (exists) {
+                                showToast('Kombinasi Warehouse ID, Customer ID, Location ID dan SKU sudah ada dalam data inventory!', 'error');
+                                return;
+                            }
+                            
+                            // Create a new inventory item with minimal data
+                            const newItem = {
+                                warehouseId,
+                                customerId,
+                                locationId,
+                                sku,
+                                skuDescrL: prompt('Masukkan SKU Description (L):') || '',
+                                batchNumber: prompt('Masukkan Batch Number:') || '',
+                                qtyOnHand: prompt('Masukkan QTY On Hand:') || '0',
+                                qtyAvailable: prompt('Masukkan QTY Available:') || '0',
+                                qtyAllocated: prompt('Masukkan QTY Allocated:') || '0',
+                                qtyOnHold: prompt('Masukkan QTY On Hold:') || '0',
+                                whetherDamaged: prompt('Whether damaged (true/false):') || 'false',
+                                // Add other fields as needed, or leave them empty
+                            };
+                            
+                            inventoryData.push(newItem);
+                            localStorage.setItem(`inventoryData_${userKey}`, JSON.stringify(inventoryData));
+                            renderInventoryData();
+                            showToast('Data inventory berhasil ditambahkan!');
+                        });
+                    }
+                    
+                    // Upload inventory data from Excel
+                    if (uploadInventoryBtn && inventoryFileInput) {
+                        uploadInventoryBtn.addEventListener('click', function() {
+                            inventoryFileInput.click();
+                        });
+                        
+                        inventoryFileInput.addEventListener('change', function(e) {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                try {
+                                    const data = new Uint8Array(e.target.result);
+                                    const workbook = XLSX.read(data, { type: 'array' });
+                                    
+                                    // Get first worksheet
+                                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                                    
+                                    // Convert to JSON
+                                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                                    
+                                    if (jsonData.length === 0) {
+                                        showToast('File Excel tidak berisi data', 'error');
+                                        return;
+                                    }
+                                    
+                                    // Validate required fields
+                                    const firstRow = jsonData[0];
+                                    const requiredFields = ['Warehouse ID', 'Customer ID', 'Location ID', 'SKU'];
+                                    const missingFields = requiredFields.filter(field => !firstRow.hasOwnProperty(field));
+                                    
+                                    if (missingFields.length > 0) {
+                                        showToast(`File Excel harus memiliki kolom: ${missingFields.join(', ')}`, 'error');
+                                        return;
+                                    }
+                                    
+                                    // Transform data to our format
+                                    const transformedData = jsonData.map(row => ({
+                                        warehouseId: row['Warehouse ID'] || '',
+                                        customerId: row['Customer ID'] || '',
+                                        locationId: row['Location ID'] || '',
+                                        sku: row['SKU'] || '',
+                                        skuDescrL: row['SKU Descr(L)'] || '',
+                                        batchNumber: row['Batch Number'] || '',
+                                        qtyOnHand: row['QTY On Hand'] || '',
+                                        qtyAvailable: row['QTY Available'] || '',
+                                        qtyAllocated: row['QTY Allocated'] || '',
+                                        qtyOnHold: row['QTY On Hold'] || '',
+                                        whetherDamaged: row['Whether damaged'] || '',
+                                        skuDescrS: row['SKU Descr(S)'] || '',
+                                        packId: row['packId'] || '',
+                                        skuGroup1: row['SKU Group1'] || '',
+                                        lotNumber: row['Lot Number'] || '',
+                                        traceId: row['Trace ID'] || '',
+                                        lpn: row['LPN'] || '',
+                                        uom: row['UOM'] || '',
+                                        pendingReplenIN: row['Pending Replen IN'] || '',
+                                        pendingPutawayIN: row['Pending Putaway IN'] || '',
+                                        pendingReplenOUT: row['Pending Replen OUT'] || '',
+                                        totalCube: row['TotalCube'] || '',
+                                        pendingMoveIN: row['Pending Move IN'] || '',
+                                        pendingMoveOUT: row['Pending Move OUT'] || '',
+                                        totalCubic: row['Total Cubic'] || '',
+                                        totalGrossWeight: row['Total GrossWeight'] || '',
+                                        totalNetWeight: row['Total NetWeight'] || '',
+                                        totalPrice: row['Total Price'] || '',
+                                        cbmSku: row['CBMSKU'] || '',
+                                        qtyCBM: row['QtyCBM'] || '',
+                                        lotAtt09: row['LOTATT09'] || '',
+                                        udf1: row['UDF1'] || '',
+                                        udf2: row['UDF2'] || '',
+                                        udf3: row['UDF3'] || '',
+                                        warehousingDate: row['Warehousing Date'] || '',
+                                        addWho: row['Add Who'] || '',
+                                        addTime: row['Add Time'] || '',
+                                        palletType: row['Pallet Type'] || '',
+                                        editWho: row['Edit Who'] || '',
+                                        poNumber: row['PO Number'] || '',
+                                        editTime: row['Edit Time'] || '',
+                                        lotAtt12: row['lotAtt12'] || '',
+                                        pltDescr: row['PLT DESCR'] || ''
+                                    }));
+                                    
+                                    // Replace inventory data
+                                    inventoryData = transformedData;
+                                    localStorage.setItem(`inventoryData_${userKey}`, JSON.stringify(inventoryData));
+                                    renderInventoryData();
+                                    showToast('Data inventory berhasil diupload dari Excel!');
+                                } catch (err) {
+                                    console.error('Error parsing Excel:', err);
+                                    showToast('Error parsing file Excel: ' + err.message, 'error');
+                                }
+                            };
+                            reader.readAsArrayBuffer(file);
+                        });
+                    }
+                    
+                    // Download inventory data to Excel
+                    if (downloadInventoryBtn) {
+                        downloadInventoryBtn.addEventListener('click', function() {
+                            if (inventoryData.length === 0) {
+                                showToast('Tidak ada data inventory untuk didownload', 'error');
+                                return;
+                            }
+                            
+                            // Prepare worksheet
+                            const ws = XLSX.utils.json_to_sheet(inventoryData.map(item => ({
+                                'Warehouse ID': item.warehouseId,
+                                'Customer ID': item.customerId,
+                                'Location ID': item.locationId,
+                                'SKU': item.sku,
+                                'SKU Descr(L)': item.skuDescrL,
+                                'Batch Number': item.batchNumber,
+                                'QTY On Hand': item.qtyOnHand,
+                                'QTY Available': item.qtyAvailable,
+                                'QTY Allocated': item.qtyAllocated,
+                                'QTY On Hold': item.qtyOnHold,
+                                'Whether damaged': item.whetherDamaged,
+                                'SKU Descr(S)': item.skuDescrS,
+                                'packId': item.packId,
+                                'SKU Group1': item.skuGroup1,
+                                'Lot Number': item.lotNumber,
+                                'Trace ID': item.traceId,
+                                'LPN': item.lpn,
+                                'UOM': item.uom,
+                                'Pending Replen IN': item.pendingReplenIN,
+                                'Pending Putaway IN': item.pendingPutawayIN,
+                                'Pending Replen OUT': item.pendingReplenOUT,
+                                'TotalCube': item.totalCube,
+                                'Pending Move IN': item.pendingMoveIN,
+                                'Pending Move OUT': item.pendingMoveOUT,
+                                'Total Cubic': item.totalCubic,
+                                'Total GrossWeight': item.totalGrossWeight,
+                                'Total NetWeight': item.totalNetWeight,
+                                'Total Price': item.totalPrice,
+                                'CBMSKU': item.cbmSku,
+                                'QtyCBM': item.qtyCBM,
+                                'LOTATT09': item.lotAtt09,
+                                'UDF1': item.udf1,
+                                'UDF2': item.udf2,
+                                'UDF3': item.udf3,
+                                'Warehousing Date': item.warehousingDate,
+                                'Add Who': item.addWho,
+                                'Add Time': item.addTime,
+                                'Pallet Type': item.palletType,
+                                'Edit Who': item.editWho,
+                                'PO Number': item.poNumber,
+                                'Edit Time': item.editTime,
+                                'lotAtt12': item.lotAtt12,
+                                'PLT DESCR': item.pltDescr
+                            })));
+                            
+                            // Create workbook
+                            const wb = XLSX.utils.book_new();
+                            XLSX.utils.book_append_sheet(wb, ws, 'Inventory Data');
+                            
+                            // Generate Excel file
+                            XLSX.writeFile(wb, 'inventory-data.xlsx');
+                            showToast('Data inventory berhasil diexport ke Excel');
+                        });
+                    }
+                    
+                    // Clear all inventory data
+                    if (clearInventoryBtn) {
+                        clearInventoryBtn.addEventListener('click', function() {
+                            if (confirm('Apakah Anda yakin ingin menghapus semua data inventory? Tindakan ini tidak dapat dibatalkan.')) {
+                                inventoryData = [];
+                                localStorage.removeItem(`inventoryData_${userKey}`);
+                                renderInventoryData();
+                                showToast('Semua data inventory berhasil dihapus!');
+                            }
+                        });
+                    }
+                    
                     // Data Count Functions
                     function renderDataCountTable() {
                         if (!dataCountTable) return;
@@ -2042,6 +2533,9 @@
                     // Initialize master data table
                     renderMasterData();
                     
+                    // Initialize inventory data table
+                    renderInventoryData();
+                    
                     // Load GitHub configuration
                     loadGithubConfig();
                     
@@ -2093,6 +2587,49 @@
                         ];
                         localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(masterData));
                         renderMasterData();
+                    }
+                    
+                    // Add some sample inventory data for demonstration if empty
+                    if (inventoryData.length === 0) {
+                        inventoryData = [
+                            {
+                                warehouseId: "WH001",
+                                customerId: "CUST001",
+                                locationId: "LOC001",
+                                sku: "SKU123",
+                                skuDescrL: "Produk Sample Panjang Deskripsi 1",
+                                qtyOnHand: "100",
+                                qtyAvailable: "80",
+                                qtyAllocated: "20",
+                                qtyOnHold: "0",
+                                whetherDamaged: "false"
+                            },
+                            {
+                                warehouseId: "WH001",
+                                customerId: "CUST001",
+                                locationId: "LOC002",
+                                sku: "SKU456",
+                                skuDescrL: "Produk Sample Panjang Deskripsi 2",
+                                qtyOnHand: "200",
+                                qtyAvailable: "150",
+                                qtyAllocated: "50",
+                                qtyOnHold: "0",
+                                whetherDamaged: "false"
+                            },
+                            {
+                                warehouseId: "WH002",
+                                customerId: "CUST002",
+                                locationId: "LOC003",
+                                sku: "SKU789",
+                                skuDescrL: "Produk Sample Panjang Deskripsi 3",
+                                qtyOnHand: "50",
+                                qtyAvailable: "40",
+                                qtyAllocated: "10",
+                                qtyOnHold: "0",
+                                whetherDamaged: "false"
+                            }
+                        ];
+                        localStorage.setItem(`inventoryData_${userKey}`, JSON.stringify(inventoryData));
                     }
                 } catch (error) {
                     console.error('Error in initApp:', error);
