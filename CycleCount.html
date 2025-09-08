@@ -34,6 +34,40 @@
             flex-direction: column;
         }
         
+        /* Logo Styles */
+        .logo {
+            display: inline-block;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary) 0%, #ea4335 100%);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+        
+        .logo::before {
+            content: "CC";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: 800;
+            font-size: 28px;
+        }
+        
+        .logo.small {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+            margin-bottom: 0;
+        }
+        
+        .logo.small::before {
+            font-size: 16px;
+        }
+        
         /* Login Styles */
         .login-container {
             display: flex;
@@ -75,11 +109,6 @@
             margin-top: 5px;
         }
         
-        .login-logo-img {
-            height: 80px;
-            margin-bottom: 15px;
-        }
-        
         /* Main App Styles */
         .app-container {
             display: none;
@@ -99,11 +128,6 @@
             font-size: 1.5rem;
             display: flex;
             align-items: center;
-        }
-        
-        .app-logo {
-            height: 40px;
-            margin-right: 10px;
         }
         
         .sidebar {
@@ -438,7 +462,7 @@
     <div id="login-container" class="login-container">
         <div class="login-card">
             <div class="login-logo">
-                <img src="https://drive.google.com/file/d/1s_Ge0prmlAUf023_-jiHZ1uUlMnOUeet" alt="Logo" class="login-logo-img">
+                <div class="logo"></div>
                 <h1>CycleCount</h1>
                 <p>Sistem Manajemen Stok</p>
             </div>
@@ -471,7 +495,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <a class="navbar-brand" href="#">
-                    <img src="https://drive.google.com/file/d/1s_Ge0prmlAUf023_-jiHZ1uUlMnOUeet" alt="Logo" class="app-logo">
+                    <div class="logo small"></div>
                     CycleCount
                 </a>
                 <div class="d-flex align-items-center">
@@ -828,7 +852,13 @@
             // Check if user is already logged in
             const savedUser = sessionStorage.getItem('currentUser');
             if (savedUser) {
-                showApp(savedUser);
+                try {
+                    showApp(savedUser);
+                } catch (error) {
+                    console.error('Error showing app:', error);
+                    sessionStorage.removeItem('currentUser');
+                    showLogin();
+                }
             }
             
             // Login form submission
@@ -841,7 +871,13 @@
                 // Simple validation - in a real app, you would verify credentials with a server
                 if (username && password) {
                     sessionStorage.setItem('currentUser', username);
-                    showApp(username);
+                    try {
+                        showApp(username);
+                    } catch (error) {
+                        console.error('Error showing app:', error);
+                        sessionStorage.removeItem('currentUser');
+                        showToast('Terjadi kesalahan saat login. Silakan coba lagi.', 'error');
+                    }
                 } else {
                     showToast('Harap isi username dan password', 'error');
                 }
@@ -854,39 +890,51 @@
             });
             
             // Toggle sidebar on mobile
-            sidebarToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('expanded');
-                mobileNavBackdrop.classList.toggle('expanded');
-            });
-            
-            // Close sidebar when clicking on backdrop
-            mobileNavBackdrop.addEventListener('click', function() {
-                sidebar.classList.remove('expanded');
-                mobileNavBackdrop.classList.remove('expanded');
-            });
+            if (sidebarToggle && sidebar && mobileNavBackdrop) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('expanded');
+                    mobileNavBackdrop.classList.toggle('expanded');
+                });
+                
+                // Close sidebar when clicking on backdrop
+                mobileNavBackdrop.addEventListener('click', function() {
+                    sidebar.classList.remove('expanded');
+                    mobileNavBackdrop.classList.remove('expanded');
+                });
+            }
             
             // Function to show the app
             function showApp(username) {
-                currentUser = username;
-                userKey = username;
-                loginContainer.style.display = 'none';
-                appContainer.style.display = 'flex';
-                userWelcome.textContent = `Halo, ${username}`;
-                
-                // Initialize the app with user-specific data
-                initApp();
+                try {
+                    currentUser = username;
+                    userKey = username;
+                    loginContainer.style.display = 'none';
+                    appContainer.style.display = 'flex';
+                    if (userWelcome) {
+                        userWelcome.textContent = `Halo, ${username}`;
+                    }
+                    
+                    // Initialize the app with user-specific data
+                    initApp();
+                } catch (error) {
+                    console.error('Error in showApp:', error);
+                    throw error;
+                }
             }
             
             // Function to show login
             function showLogin() {
                 currentUser = null;
                 userKey = null;
-                loginContainer.style.display = 'flex';
-                appContainer.style.display = 'none';
+                if (loginContainer) loginContainer.style.display = 'flex';
+                if (appContainer) appContainer.style.display = 'none';
             }
             
             // Function to show toast notification
             function showToast(message, type = 'success') {
+                const toastContainer = document.getElementById('toast-container');
+                if (!toastContainer) return;
+                
                 const toast = document.createElement('div');
                 toast.className = `toast ${type === 'error' ? 'error' : type === 'info' ? 'info' : ''}`;
                 toast.innerHTML = `
@@ -894,7 +942,6 @@
                     <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
                 `;
                 
-                const toastContainer = document.getElementById('toast-container');
                 toastContainer.appendChild(toast);
                 
                 // Remove toast after 3 seconds
@@ -921,12 +968,15 @@
                     
                     // Show active tab content
                     tabContents.forEach(content => content.style.display = 'none');
-                    document.getElementById(`${tabId}-tab`).style.display = 'block';
+                    const activeTab = document.getElementById(`${tabId}-tab`);
+                    if (activeTab) {
+                        activeTab.style.display = 'block';
+                    }
                     
                     // Close sidebar on mobile after selection
                     if (window.innerWidth < 992) {
-                        sidebar.classList.remove('expanded');
-                        mobileNavBackdrop.classList.remove('expanded');
+                        if (sidebar) sidebar.classList.remove('expanded');
+                        if (mobileNavBackdrop) mobileNavBackdrop.classList.remove('expanded');
                     }
                     
                     // If data count tab is selected, render the data
@@ -942,985 +992,1043 @@
             
             // Initialize app with user-specific data
             function initApp() {
-                // Initialize master data from localStorage with user-specific key
-                masterData = JSON.parse(localStorage.getItem(`cycleCountMasterData_${userKey}`)) || [];
-                
-                // Form elements
-                const form = document.getElementById('cycleCountForm');
-                const locationField = document.getElementById('location');
-                const eanField = document.getElementById('ean');
-                const eanLoading = document.getElementById('ean-loading');
-                const skuField = document.getElementById('sku');
-                const descriptionField = document.getElementById('description');
-                const traceIdField = document.getElementById('traceId');
-                const countTypeField = document.getElementById('countType');
-                const countValueField = document.getElementById('countValue');
-                const remarkField = document.getElementById('remark');
-                const notification = document.getElementById('notification');
-                const countSavedNotification = document.getElementById('count-saved');
-                const saveLocationBtn = document.getElementById('save-location-btn');
-                const currentLocationDisplay = document.getElementById('current-location-display');
-                const currentLocationName = document.getElementById('current-location-name');
-                const currentLocationSkuCount = document.getElementById('current-location-sku-count');
-                const autoSyncToggle = document.getElementById('auto-sync-toggle');
-                
-                // Navigation elements
-                const navigationContainer = document.getElementById('navigation-container');
-                const prevBtn = document.getElementById('prev-btn');
-                const nextBtn = document.getElementById('next-btn');
-                const navInfo = document.getElementById('nav-info');
-                
-                // Master data elements
-                const uploadBtn = document.getElementById('upload-btn');
-                const downloadBtn = document.getElementById('download-btn');
-                const clearBtn = document.getElementById('clear-btn');
-                const addBtn = document.getElementById('add-btn');
-                const fileInput = document.getElementById('file-input');
-                const masterDataTable = document.getElementById('master-data-table').querySelector('tbody');
-                
-                // Data count elements
-                const startDateFilter = document.getElementById('start-date');
-                const endDateFilter = document.getElementById('end-date');
-                const filterBtn = document.getElementById('filter-btn');
-                const exportBtn = document.getElementById('export-btn');
-                const deleteSelectedBtn = document.getElementById('delete-selected-btn');
-                const selectAllCheckbox = document.getElementById('select-all');
-                const dataCountTable = document.getElementById('data-count-table').querySelector('tbody');
-                
-                // GitHub configuration elements
-                const githubToken = document.getElementById('github-token');
-                const githubOwner = document.getElementById('github-owner');
-                const githubRepo = document.getElementById('github-repo');
-                const githubBranch = document.getElementById('github-branch');
-                const saveGithubConfigBtn = document.getElementById('save-github-config');
-                const pushCycleCountBtn = document.getElementById('push-cyclecount');
-                const pushMasterDataBtn = document.getElementById('push-masterdata');
-                const pullCycleCountBtn = document.getElementById('pull-cyclecount');
-                const pullMasterDataBtn = document.getElementById('pull-masterdata');
-                const syncStatus = document.getElementById('sync-status');
-                
-                // Set default dates for filter
-                const today = new Date();
-                const oneWeekAgo = new Date();
-                oneWeekAgo.setDate(today.getDate() - 7);
-                
-                startDateFilter.value = oneWeekAgo.toISOString().split('T')[0];
-                endDateFilter.value = today.toISOString().split('T')[0];
-                
-                // Variables for navigation
-                let currentLocationItems = [];
-                let currentItemIndex = 0;
-                let eanInputTimeout;
-                
-                // Load auto-sync preference
-                const autoSyncEnabled = localStorage.getItem(`autoSyncEnabled_${userKey}`);
-                if (autoSyncEnabled !== null) {
-                    autoSyncToggle.checked = autoSyncEnabled === 'true';
-                }
-                
-                // Save auto-sync preference when changed
-                autoSyncToggle.addEventListener('change', function() {
-                    localStorage.setItem(`autoSyncEnabled_${userKey}`, this.checked);
-                });
-                
-                // Function to load GitHub configuration
-                function loadGithubConfig() {
-                    const config = JSON.parse(localStorage.getItem(`githubConfig_${userKey}`)) || {};
-                    githubToken.value = config.token || '';
-                    githubOwner.value = config.owner || '';
-                    githubRepo.value = config.repo || '';
-                    githubBranch.value = config.branch || 'main';
-                }
-                
-                // Save GitHub configuration
-                saveGithubConfigBtn.addEventListener('click', function() {
-                    const config = {
-                        token: githubToken.value,
-                        owner: githubOwner.value,
-                        repo: githubRepo.value,
-                        branch: githubBranch.value
-                    };
+                try {
+                    // Initialize master data from localStorage with user-specific key
+                    const masterDataStr = localStorage.getItem(`cycleCountMasterData_${userKey}`);
+                    masterData = masterDataStr ? JSON.parse(masterDataStr) : [];
                     
-                    localStorage.setItem(`githubConfig_${userKey}`, JSON.stringify(config));
-                    showToast('Konfigurasi GitHub berhasil disimpan!');
-                });
-                
-                // Push data to GitHub
-                pushCycleCountBtn.addEventListener('click', function() {
-                    pushDataToGithub('cycle_count');
-                });
-                
-                pushMasterDataBtn.addEventListener('click', function() {
-                    pushDataToGithub('master_data');
-                });
-                
-                // Pull data from GitHub
-                pullCycleCountBtn.addEventListener('click', function() {
-                    pullDataFromGithub('cycle_count');
-                });
-                
-                pullMasterDataBtn.addEventListener('click', function() {
-                    pullDataFromGithub('master_data');
-                });
-                
-                // Function to push data to GitHub
-                function pushDataToGithub(dataType) {
-                    const config = JSON.parse(localStorage.getItem(`githubConfig_${userKey}`)) || {};
+                    // Form elements
+                    const form = document.getElementById('cycleCountForm');
+                    const locationField = document.getElementById('location');
+                    const eanField = document.getElementById('ean');
+                    const eanLoading = document.getElementById('ean-loading');
+                    const skuField = document.getElementById('sku');
+                    const descriptionField = document.getElementById('description');
+                    const traceIdField = document.getElementById('traceId');
+                    const countTypeField = document.getElementById('countType');
+                    const countValueField = document.getElementById('countValue');
+                    const remarkField = document.getElementById('remark');
+                    const notification = document.getElementById('notification');
+                    const countSavedNotification = document.getElementById('count-saved');
+                    const saveLocationBtn = document.getElementById('save-location-btn');
+                    const currentLocationDisplay = document.getElementById('current-location-display');
+                    const currentLocationName = document.getElementById('current-location-name');
+                    const currentLocationSkuCount = document.getElementById('current-location-sku-count');
+                    const autoSyncToggle = document.getElementById('auto-sync-toggle');
                     
-                    if (!config.token || !config.owner || !config.repo) {
-                        showSyncStatus('Harap lengkapi konfigurasi GitHub terlebih dahulu', 'error');
-                        return;
+                    // Navigation elements
+                    const navigationContainer = document.getElementById('navigation-container');
+                    const prevBtn = document.getElementById('prev-btn');
+                    const nextBtn = document.getElementById('next-btn');
+                    const navInfo = document.getElementById('nav-info');
+                    
+                    // Master data elements
+                    const uploadBtn = document.getElementById('upload-btn');
+                    const downloadBtn = document.getElementById('download-btn');
+                    const clearBtn = document.getElementById('clear-btn');
+                    const addBtn = document.getElementById('add-btn');
+                    const fileInput = document.getElementById('file-input');
+                    const masterDataTable = document.getElementById('master-data-table') ? document.getElementById('master-data-table').querySelector('tbody') : null;
+                    
+                    // Data count elements
+                    const startDateFilter = document.getElementById('start-date');
+                    const endDateFilter = document.getElementById('end-date');
+                    const filterBtn = document.getElementById('filter-btn');
+                    const exportBtn = document.getElementById('export-btn');
+                    const deleteSelectedBtn = document.getElementById('delete-selected-btn');
+                    const selectAllCheckbox = document.getElementById('select-all');
+                    const dataCountTable = document.getElementById('data-count-table') ? document.getElementById('data-count-table').querySelector('tbody') : null;
+                    
+                    // GitHub configuration elements
+                    const githubToken = document.getElementById('github-token');
+                    const githubOwner = document.getElementById('github-owner');
+                    const githubRepo = document.getElementById('github-repo');
+                    const githubBranch = document.getElementById('github-branch');
+                    const saveGithubConfigBtn = document.getElementById('save-github-config');
+                    const pushCycleCountBtn = document.getElementById('push-cyclecount');
+                    const pushMasterDataBtn = document.getElementById('push-masterdata');
+                    const pullCycleCountBtn = document.getElementById('pull-cyclecount');
+                    const pullMasterDataBtn = document.getElementById('pull-masterdata');
+                    const syncStatus = document.getElementById('sync-status');
+                    
+                    // Set default dates for filter
+                    const today = new Date();
+                    const oneWeekAgo = new Date();
+                    oneWeekAgo.setDate(today.getDate() - 7);
+                    
+                    if (startDateFilter && endDateFilter) {
+                        startDateFilter.value = oneWeekAgo.toISOString().split('T')[0];
+                        endDateFilter.value = today.toISOString().split('T')[0];
                     }
                     
-                    showSyncStatus('Mengunggah data ke GitHub...', 'info');
+                    // Variables for navigation
+                    let currentLocationItems = [];
+                    let currentItemIndex = 0;
+                    let eanInputTimeout;
                     
-                    // Get data from localStorage
-                    const data = JSON.parse(localStorage.getItem(`${dataType === 'cycle_count' ? 'cycleCountData' : 'cycleCountMasterData'}_${userKey}`)) || [];
-                    const fileName = dataType === 'cycle_count' ? 'cycle_count.json' : 'master_data.json';
-                    const content = JSON.stringify(data, null, 2);
-                    
-                    // GitHub API endpoint
-                    const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${fileName}`;
-                    
-                    // Check if file exists to get SHA for update
-                    fetch(url, {
-                        headers: {
-                            'Authorization': `token ${config.token}`,
-                            'Accept': 'application/vnd.github.v3+json'
+                    // Load auto-sync preference
+                    if (autoSyncToggle) {
+                        const autoSyncEnabled = localStorage.getItem(`autoSyncEnabled_${userKey}`);
+                        if (autoSyncEnabled !== null) {
+                            autoSyncToggle.checked = autoSyncEnabled === 'true';
                         }
-                    })
-                    .then(response => response.json())
-                    .then(fileInfo => {
-                        const sha = fileInfo.sha;
                         
-                        // Update existing file
-                        return fetch(url, {
-                            method: 'PUT',
+                        // Save auto-sync preference when changed
+                        autoSyncToggle.addEventListener('change', function() {
+                            localStorage.setItem(`autoSyncEnabled_${userKey}`, this.checked);
+                        });
+                    }
+                    
+                    // Function to load GitHub configuration
+                    function loadGithubConfig() {
+                        if (!githubToken || !githubOwner || !githubRepo || !githubBranch) return;
+                        
+                        const config = JSON.parse(localStorage.getItem(`githubConfig_${userKey}`)) || {};
+                        githubToken.value = config.token || '';
+                        githubOwner.value = config.owner || '';
+                        githubRepo.value = config.repo || '';
+                        githubBranch.value = config.branch || 'main';
+                    }
+                    
+                    // Save GitHub configuration
+                    if (saveGithubConfigBtn) {
+                        saveGithubConfigBtn.addEventListener('click', function() {
+                            const config = {
+                                token: githubToken.value,
+                                owner: githubOwner.value,
+                                repo: githubRepo.value,
+                                branch: githubBranch.value
+                            };
+                            
+                            localStorage.setItem(`githubConfig_${userKey}`, JSON.stringify(config));
+                            showToast('Konfigurasi GitHub berhasil disimpan!');
+                        });
+                    }
+                    
+                    // Push data to GitHub
+                    if (pushCycleCountBtn) {
+                        pushCycleCountBtn.addEventListener('click', function() {
+                            pushDataToGithub('cycle_count');
+                        });
+                    }
+                    
+                    if (pushMasterDataBtn) {
+                        pushMasterDataBtn.addEventListener('click', function() {
+                            pushDataToGithub('master_data');
+                        });
+                    }
+                    
+                    // Pull data from GitHub
+                    if (pullCycleCountBtn) {
+                        pullCycleCountBtn.addEventListener('click', function() {
+                            pullDataFromGithub('cycle_count');
+                        });
+                    }
+                    
+                    if (pullMasterDataBtn) {
+                        pullMasterDataBtn.addEventListener('click', function() {
+                            pullDataFromGithub('master_data');
+                        });
+                    }
+                    
+                    // Function to push data to GitHub
+                    function pushDataToGithub(dataType) {
+                        const config = JSON.parse(localStorage.getItem(`githubConfig_${userKey}`)) || {};
+                        
+                        if (!config.token || !config.owner || !config.repo) {
+                            showSyncStatus('Harap lengkapi konfigurasi GitHub terlebih dahulu', 'error');
+                            return;
+                        }
+                        
+                        showSyncStatus('Mengunggah data ke GitHub...', 'info');
+                        
+                        // Get data from localStorage
+                        const data = JSON.parse(localStorage.getItem(`${dataType === 'cycle_count' ? 'cycleCountData' : 'cycleCountMasterData'}_${userKey}`)) || [];
+                        const fileName = dataType === 'cycle_count' ? 'cycle_count.json' : 'master_data.json';
+                        const content = JSON.stringify(data, null, 2);
+                        
+                        // GitHub API endpoint
+                        const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${fileName}`;
+                        
+                        // Check if file exists to get SHA for update
+                        fetch(url, {
                             headers: {
                                 'Authorization': `token ${config.token}`,
-                                'Content-Type': 'application/json',
                                 'Accept': 'application/vnd.github.v3+json'
-                            },
-                            body: JSON.stringify({
-                                message: `Update ${fileName}`,
-                                content: btoa(unescape(encodeURIComponent(content))),
-                                sha: sha,
-                                branch: config.branch
-                            })
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(fileInfo => {
+                            const sha = fileInfo.sha;
+                            
+                            // Update existing file
+                            return fetch(url, {
+                                method: 'PUT',
+                                headers: {
+                                    'Authorization': `token ${config.token}`,
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/vnd.github.v3+json'
+                                },
+                                body: JSON.stringify({
+                                    message: `Update ${fileName}`,
+                                    content: btoa(unescape(encodeURIComponent(content))),
+                                    sha: sha,
+                                    branch: config.branch
+                                })
+                            });
+                        })
+                        .catch(() => {
+                            // Create new file if it doesn't exist
+                            return fetch(url, {
+                                method: 'PUT',
+                                headers: {
+                                    'Authorization': `token ${config.token}`,
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/vnd.github.v3+json'
+                                },
+                                body: JSON.stringify({
+                                    message: `Create ${fileName}`,
+                                    content: btoa(unescape(encodeURIComponent(content))),
+                                    branch: config.branch
+                                })
+                            });
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            showSyncStatus(`Data ${dataType === 'cycle_count' ? 'Cycle Count' : 'Master Data'} berhasil diunggah ke GitHub`, 'success');
+                            showToast(`Data berhasil diunggah ke GitHub`);
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showSyncStatus('Gagal mengunggah data ke GitHub: ' + error.message, 'error');
                         });
-                    })
-                    .catch(() => {
-                        // Create new file if it doesn't exist
-                        return fetch(url, {
-                            method: 'PUT',
+                    }
+                    
+                    // Function to auto-sync data to GitHub
+                    function autoSyncToGitHub() {
+                        // Check if auto-sync is enabled
+                        if (!autoSyncToggle || !autoSyncToggle.checked) {
+                            return;
+                        }
+                        
+                        const config = JSON.parse(localStorage.getItem(`githubConfig_${userKey}`)) || {};
+                        
+                        // Only sync if GitHub is configured
+                        if (!config.token || !config.owner || !config.repo) {
+                            return;
+                        }
+                        
+                        showToast('Menyinkronkan data ke GitHub...', 'info');
+                        
+                        // Get data from localStorage
+                        const cycleCountData = JSON.parse(localStorage.getItem(`cycleCountData_${userKey}`)) || [];
+                        const content = JSON.stringify(cycleCountData, null, 2);
+                        
+                        // GitHub API endpoint
+                        const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/cycle_count.json`;
+                        
+                        // Check if file exists to get SHA for update
+                        fetch(url, {
                             headers: {
                                 'Authorization': `token ${config.token}`,
-                                'Content-Type': 'application/json',
                                 'Accept': 'application/vnd.github.v3+json'
-                            },
-                            body: JSON.stringify({
-                                message: `Create ${fileName}`,
-                                content: btoa(unescape(encodeURIComponent(content))),
-                                branch: config.branch
-                            })
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(fileInfo => {
+                            const sha = fileInfo.sha;
+                            
+                            // Update existing file
+                            return fetch(url, {
+                                method: 'PUT',
+                                headers: {
+                                    'Authorization': `token ${config.token}`,
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/vnd.github.v3+json'
+                                },
+                                body: JSON.stringify({
+                                    message: `Auto-sync: Update cycle_count.json`,
+                                    content: btoa(unescape(encodeURIComponent(content))),
+                                    sha: sha,
+                                    branch: config.branch || 'main'
+                                })
+                            });
+                        })
+                        .catch(() => {
+                            // Create new file if it doesn't exist
+                            return fetch(url, {
+                                method: 'PUT',
+                                headers: {
+                                    'Authorization': `token ${config.token}`,
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/vnd.github.v3+json'
+                                },
+                                body: JSON.stringify({
+                                    message: `Auto-sync: Create cycle_count.json`,
+                                    content: btoa(unescape(encodeURIComponent(content))),
+                                    branch: config.branch || 'main'
+                                })
+                            });
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            showToast('Data berhasil disinkronkan ke GitHub');
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showToast('Gagal menyinkronkan ke GitHub: ' + error.message, 'error');
                         });
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        showSyncStatus(`Data ${dataType === 'cycle_count' ? 'Cycle Count' : 'Master Data'} berhasil diunggah ke GitHub`, 'success');
-                        showToast(`Data berhasil diunggah ke GitHub`);
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showSyncStatus('Gagal mengunggah data ke GitHub: ' + error.message, 'error');
-                    });
-                }
-                
-                // Function to auto-sync data to GitHub
-                function autoSyncToGitHub() {
-                    // Check if auto-sync is enabled
-                    if (!autoSyncToggle.checked) {
-                        return;
                     }
                     
-                    const config = JSON.parse(localStorage.getItem(`githubConfig_${userKey}`)) || {};
-                    
-                    // Only sync if GitHub is configured
-                    if (!config.token || !config.owner || !config.repo) {
-                        return;
-                    }
-                    
-                    showToast('Menyinkronkan data ke GitHub...', 'info');
-                    
-                    // Get data from localStorage
-                    const cycleCountData = JSON.parse(localStorage.getItem(`cycleCountData_${userKey}`)) || [];
-                    const content = JSON.stringify(cycleCountData, null, 2);
-                    
-                    // GitHub API endpoint
-                    const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/cycle_count.json`;
-                    
-                    // Check if file exists to get SHA for update
-                    fetch(url, {
-                        headers: {
-                            'Authorization': `token ${config.token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(fileInfo => {
-                        const sha = fileInfo.sha;
+                    // Function to pull data from GitHub
+                    function pullDataFromGithub(dataType) {
+                        const config = JSON.parse(localStorage.getItem(`githubConfig_${userKey}`)) || {};
                         
-                        // Update existing file
-                        return fetch(url, {
-                            method: 'PUT',
+                        if (!config.token || !config.owner || !config.repo) {
+                            showSyncStatus('Harap lengkapi konfigurasi GitHub terlebih dahulu', 'error');
+                            return;
+                        }
+                        
+                        showSyncStatus('Mengunduh data dari GitHub...', 'info');
+                        
+                        const fileName = dataType === 'cycle_count' ? 'cycle_count.json' : 'master_data.json';
+                        const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${fileName}`;
+                        
+                        fetch(url, {
                             headers: {
                                 'Authorization': `token ${config.token}`,
-                                'Content-Type': 'application/json',
                                 'Accept': 'application/vnd.github.v3+json'
-                            },
-                            body: JSON.stringify({
-                                message: `Auto-sync: Update cycle_count.json`,
-                                content: btoa(unescape(encodeURIComponent(content))),
-                                sha: sha,
-                                branch: config.branch || 'main'
-                            })
-                        });
-                    })
-                    .catch(() => {
-                        // Create new file if it doesn't exist
-                        return fetch(url, {
-                            method: 'PUT',
-                            headers: {
-                                'Authorization': `token ${config.token}`,
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/vnd.github.v3+json'
-                            },
-                            body: JSON.stringify({
-                                message: `Auto-sync: Create cycle_count.json`,
-                                content: btoa(unescape(encodeURIComponent(content))),
-                                branch: config.branch || 'main'
-                            })
-                        });
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        showToast('Data berhasil disinkronkan ke GitHub');
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showToast('Gagal menyinkronkan ke GitHub: ' + error.message, 'error');
-                    });
-                }
-                
-                // Function to pull data from GitHub
-                function pullDataFromGithub(dataType) {
-                    const config = JSON.parse(localStorage.getItem(`githubConfig_${userKey}`)) || {};
-                    
-                    if (!config.token || !config.owner || !config.repo) {
-                        showSyncStatus('Harap lengkapi konfigurasi GitHub terlebih dahulu', 'error');
-                        return;
-                    }
-                    
-                    showSyncStatus('Mengunduh data dari GitHub...', 'info');
-                    
-                    const fileName = dataType === 'cycle_count' ? 'cycle_count.json' : 'master_data.json';
-                    const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${fileName}`;
-                    
-                    fetch(url, {
-                        headers: {
-                            'Authorization': `token ${config.token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('File tidak ditemukan di repository');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        const content = atob(data.content);
-                        const jsonData = JSON.parse(content);
-                        
-                        // Save to localStorage
-                        localStorage.setItem(`${dataType === 'cycle_count' ? 'cycleCountData' : 'cycleCountMasterData'}_${userKey}`, JSON.stringify(jsonData));
-                        
-                        showSyncStatus(`Data ${dataType === 'cycle_count' ? 'Cycle Count' : 'Master Data'} berhasil diunduh dari GitHub`, 'success');
-                        showToast(`Data berhasil diunduh dari GitHub`);
-                        
-                        // Refresh the appropriate table
-                        if (dataType === 'cycle_count') {
-                            renderDataCountTable();
-                        } else {
-                            masterData = jsonData;
-                            renderMasterData();
-                            renderCurrentLocationSKUCount(locationField.value.trim());
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showSyncStatus('Gagla mengunduh data dari GitHub: ' + error.message, 'error');
-                    });
-                }
-                
-                // Function to show sync status
-                function showSyncStatus(message, type) {
-                    syncStatus.textContent = message;
-                    syncStatus.className = 'sync-status ' + type;
-                    syncStatus.style.display = 'block';
-                    
-                    // Auto hide after 5 seconds
-                    setTimeout(() => {
-                        syncStatus.style.display = 'none';
-                    }, 5000);
-                }
-                
-                // Function to display current location SKU count
-                function renderCurrentLocationSKUCount(location) {
-                    if (!location) {
-                        currentLocationDisplay.style.display = 'none';
-                        return;
-                    }
-                    
-                    // Calculate SKU count for the current location
-                    const skuSet = new Set();
-                    masterData.forEach(item => {
-                        if (item.location === location) {
-                            skuSet.add(item.sku);
-                        }
-                    });
-                    
-                    const skuCount = skuSet.size;
-                    
-                    // Update display
-                    currentLocationName.textContent = location;
-                    currentLocationSkuCount.textContent = skuCount;
-                    currentLocationDisplay.style.display = 'block';
-                }
-                
-                // Save location and load related data
-                saveLocationBtn.addEventListener('click', function() {
-                    const location = locationField.value.trim();
-                    if (!location) {
-                        showToast('Harap masukkan kode lokasi!', 'error');
-                        return;
-                    }
-                    
-                    // Update current location display
-                    renderCurrentLocationSKUCount(location);
-                    
-                    showToast('Lokasi berhasil disimpan!');
-                });
-                
-                // EAN input event listener for real-time search
-                eanField.addEventListener('input', function() {
-                    // Clear previous timeout
-                    clearTimeout(eanInputTimeout);
-                    
-                    // Show loading indicator
-                    eanLoading.style.display = 'block';
-                    
-                    // Set timeout to delay the search
-                    eanInputTimeout = setTimeout(() => {
-                        handleLocationAndEANCheck();
-                        eanLoading.style.display = 'none';
-                    }, 500); // 500ms delay after typing stops
-                });
-                
-                function handleLocationAndEANCheck() {
-                    const location = locationField.value.trim();
-                    const ean = eanField.value.trim();
-                    
-                    if (!location) {
-                        showToast('Harap masukkan kode lokasi!', 'error');
-                        return;
-                    }
-                    
-                    if (!ean) {
-                        // Reset fields if EAN is empty
-                        skuField.value = '';
-                        descriptionField.value = '';
-                        traceIdField.value = '';
-                        return;
-                    }
-                    
-                    // Update current location display
-                    renderCurrentLocationSKUCount(location);
-                    
-                    // Look up in master data based on location and EAN
-                    currentLocationItems = masterData.filter(item => item.location === location && item.ean === ean);
-                    
-                    if (currentLocationItems.length > 0) {
-                        // If found, show the first item
-                        currentItemIndex = 0;
-                        displayCurrentItem();
-                        
-                        // Hide notification if shown
-                        notification.style.display = 'none';
-                        
-                        // Show navigation if multiple items
-                        if (currentLocationItems.length > 1) {
-                            navigationContainer.style.display = 'block';
-                            updateNavigationButtons();
-                        } else {
-                            navigationContainer.style.display = 'none';
-                        }
-                    } else {
-                        // If not found, show notification
-                        notification.style.display = 'block';
-                        
-                        // Clear other fields
-                        skuField.value = '';
-                        descriptionField.value = '';
-                        traceIdField.value = '';
-                        
-                        // Hide navigation
-                        navigationContainer.style.display = 'none';
-                    }
-                    
-                    // Check for existing count data
-                    checkExistingCountData();
-                }
-                
-                // Check if count data already exists for this location, EAN, and Trace ID
-                function checkExistingCountData() {
-                    const location = locationField.value.trim();
-                    const ean = eanField.value.trim();
-                    const traceId = traceIdField.value;
-                    const countType = countTypeField.value;
-                    
-                    if (!location || !ean || !traceId) return;
-                    
-                    const cycleCountData = JSON.parse(localStorage.getItem(`cycleCountData_${userKey}`)) || [];
-                    
-                    // Find existing count for this location, EAN, traceId and count type
-                    const existingCount = cycleCountData.find(item => 
-                        item.location === location && 
-                        item.ean === ean && 
-                        item.traceId === traceId && 
-                        item.countType === countType
-                    );
-                    
-                    if (existingCount) {
-                        countValueField.value = existingCount.countValue;
-                        countValueField.setAttribute('readonly', true);
-                        countSavedNotification.style.display = 'block';
-                    } else {
-                        countValueField.value = '';
-                        countValueField.removeAttribute('readonly');
-                        countSavedNotification.style.display = 'none';
-                    }
-                }
-                
-                // Display current item based on currentItemIndex
-                function displayCurrentItem() {
-                    if (currentLocationItems.length === 0) return;
-                    
-                    const item = currentLocationItems[currentItemIndex];
-                    skuField.value = item.sku || '';
-                    descriptionField.value = item.description || '';
-                    traceIdField.value = item.traceId || '';
-                    
-                    // Update navigation info
-                    navInfo.textContent = `Item ${currentItemIndex + 1} of ${currentLocationItems.length}`;
-                    
-                    // Check if count already exists for this specific item
-                    checkExistingCountData();
-                }
-                
-                // Update navigation buttons state
-                function updateNavigationButtons() {
-                    prevBtn.disabled = currentItemIndex === 0;
-                    nextBtn.disabled = currentItemIndex === currentLocationItems.length - 1;
-                }
-                
-                // Previous button event
-                prevBtn.addEventListener('click', function() {
-                    if (currentItemIndex > 0) {
-                        currentItemIndex--;
-                        displayCurrentItem();
-                        updateNavigationButtons();
-                    }
-                });
-                
-                // Next button event
-                nextBtn.addEventListener('click', function() {
-                    if (currentItemIndex < currentLocationItems.length - 1) {
-                        currentItemIndex++;
-                        displayCurrentItem();
-                        updateNavigationButtons();
-                    }
-                });
-                
-                // Count type change event
-                countTypeField.addEventListener('change', function() {
-                    checkExistingCountData();
-                });
-                
-                // Form submission
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    // Validate form
-                    if (!locationField.value) {
-                        showToast('Harap masukkan lokasi!', 'error');
-                        return;
-                    }
-                    
-                    if (!eanField.value) {
-                        showToast('Harap masukkan EAN!', 'error');
-                        return;
-                    }
-                    
-                    if (!countValueField.value) {
-                        showToast('Harap isi nilai count!', 'error');
-                        return;
-                    }
-                    
-                    // Check if data exists in master data
-                    const location = locationField.value;
-                    const ean = eanField.value;
-                    const traceId = traceIdField.value;
-                    const existsInMaster = masterData.some(item => 
-                        item.location === location && 
-                        item.ean === ean && 
-                        item.traceId === traceId
-                    );
-                    
-                    if (!existsInMaster && !remarkField.value) {
-                        showToast('Data tidak ditemukan di master data. Harap isi remark sebagai temuan.', 'error');
-                        return;
-                    }
-                    
-                    // Check if count already exists for this type
-                    const countType = countTypeField.value;
-                    let cycleCountData = JSON.parse(localStorage.getItem(`cycleCountData_${userKey}`)) || [];
-                    
-                    const existingCountIndex = cycleCountData.findIndex(item => 
-                        item.location === location && 
-                        item.ean === ean && 
-                        item.traceId === traceId && 
-                        item.countType === countType
-                    );
-                    
-                    // Create form data object
-                    const formData = {
-                        location: location,
-                        ean: ean,
-                        sku: skuField.value,
-                        description: descriptionField.value,
-                        traceId: traceId,
-                        countType: countType,
-                        countValue: countValueField.value,
-                        remark: remarkField.value,
-                        timestamp: new Date().toISOString()
-                    };
-                    
-                    if (existingCountIndex !== -1) {
-                        // Update existing count
-                        cycleCountData[existingCountIndex] = formData;
-                    } else {
-                        // Add new count
-                        cycleCountData.push(formData);
-                    }
-                    
-                    // Save to localStorage
-                    localStorage.setItem(`cycleCountData_${userKey}`, JSON.stringify(cycleCountData));
-                    
-                    // Show success notification
-                    showToast('Data cycle count berhasil disimpan!');
-                    
-                    // Auto-sync to GitHub after saving
-                    autoSyncToGitHub();
-                    
-                    // Reset form but keep location
-                    const currentLocation = locationField.value;
-                    form.reset();
-                    locationField.value = currentLocation;
-                    
-                    // Clear EAN and count value fields specifically
-                    eanField.value = '';
-                    countValueField.value = '';
-                    
-                    // Remove readonly attribute if it was set
-                    countValueField.removeAttribute('readonly');
-                    
-                    notification.style.display = 'none';
-                    countSavedNotification.style.display = 'none';
-                    
-                    // Set focus back to EAN field for next input
-                    eanField.focus();
-                    
-                    // Clear current items
-                    currentLocationItems = [];
-                    navigationContainer.style.display = 'none';
-                    
-                    // Update current location display
-                    renderCurrentLocationSKUCount(currentLocation);
-                });
-                
-                // Master Data Functions
-                function renderMasterData() {
-                    if (!masterDataTable) return;
-                    
-                    masterDataTable.innerHTML = '';
-                    
-                    if (masterData.length === 0) {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `<td colspan="6" class="text-center py-4 text-muted">Tidak ada data master</td>`;
-                        masterDataTable.appendChild(row);
-                        return;
-                    }
-                    
-                    masterData.forEach((item, index) => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${item.location}</td>
-                            <td>${item.ean}</td>
-                            <td>${item.sku}</td>
-                            <td>${item.description}</td>
-                            <td>${item.traceId}</td>
-                            <td>
-                                <button class="btn btn-sm btn-danger delete-btn" data-index="${index}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        `;
-                        masterDataTable.appendChild(row);
-                    });
-                    
-                    // Add event listeners to delete buttons
-                    document.querySelectorAll('.delete-btn').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const index = parseInt(this.getAttribute('data-index'));
-                            deleteMasterDataItem(index);
-                        });
-                    });
-                }
-                
-                function deleteMasterDataItem(index) {
-                    if (confirm('Apakah Anda yakin ingin menghapus data master ini?')) {
-                        masterData.splice(index, 1);
-                        localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(masterData));
-                        renderMasterData();
-                        renderCurrentLocationSKUCount(locationField.value.trim());
-                        showToast('Data master berhasil dihapus!');
-                    }
-                }
-                
-                // Add new master data
-                addBtn.addEventListener('click', function() {
-                    const location = prompt('Masukkan Lokasi:');
-                    if (!location) return;
-                    
-                    const ean = prompt('Masukkan EAN:');
-                    if (!ean) return;
-                    
-                    const sku = prompt('Masukkan SKU:');
-                    const description = prompt('Masukkan Description:');
-                    const traceId = prompt('Masukkan Trace ID:');
-                    
-                    // Check if combination already exists
-                    const exists = masterData.some(item => item.location === location && item.ean === ean && item.traceId === traceId);
-                    if (exists) {
-                        showToast('Kombinasi Lokasi, EAN dan Trace ID sudah ada dalam master data!', 'error');
-                        return;
-                    }
-                    
-                    masterData.push({
-                        location,
-                        ean,
-                        sku: sku || '',
-                        description: description || '',
-                        traceId: traceId || ''
-                    });
-                    
-                    localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(masterData));
-                    renderMasterData();
-                    renderCurrentLocationSKUCount(locationField.value.trim());
-                    showToast('Data master berhasil ditambahkan!');
-                });
-                
-                // Upload master data
-                uploadBtn.addEventListener('click', function() {
-                    fileInput.click();
-                });
-                
-                fileInput.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        try {
-                            const data = JSON.parse(e.target.result);
-                            if (Array.isArray(data)) {
-                                masterData = data;
-                                localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(masterData));
+                            }
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('File tidak ditemukan di repository');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            const content = atob(data.content);
+                            const jsonData = JSON.parse(content);
+                            
+                            // Save to localStorage
+                            localStorage.setItem(`${dataType === 'cycle_count' ? 'cycleCountData' : 'cycleCountMasterData'}_${userKey}`, JSON.stringify(jsonData));
+                            
+                            showSyncStatus(`Data ${dataType === 'cycle_count' ? 'Cycle Count' : 'Master Data'} berhasil diunduh dari GitHub`, 'success');
+                            showToast(`Data berhasil diunduh dari GitHub`);
+                            
+                            // Refresh the appropriate table
+                            if (dataType === 'cycle_count') {
+                                renderDataCountTable();
+                            } else {
+                                masterData = jsonData;
                                 renderMasterData();
                                 renderCurrentLocationSKUCount(locationField.value.trim());
-                                showToast('Master data berhasil diupload!');
-                            } else {
-                                throw new Error('Format file tidak valid');
                             }
-                        } catch (err) {
-                            showToast('Error parsing file: ' + err.message, 'error');
-                        }
-                    };
-                    reader.readAsText(file);
-                });
-                
-                // Download master data
-                downloadBtn.addEventListener('click', function() {
-                    if (masterData.length === 0) {
-                        showToast('Tidak ada data master untuk didownload', 'error');
-                        return;
-                    }
-                    
-                    const dataStr = JSON.stringify(masterData, null, 2);
-                    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-                    
-                    const exportFileDefaultName = 'master-data.json';
-                    
-                    const linkElement = document.createElement('a');
-                    linkElement.setAttribute('href', dataUri);
-                    linkElement.setAttribute('download', exportFileDefaultName);
-                    linkElement.click();
-                });
-                
-                // Clear all master data
-                clearBtn.addEventListener('click', function() {
-                    if (confirm('Apakah Anda yakin ingin menghapus semua data master? Tindakan ini tidak dapat dibatalkan.')) {
-                        masterData = [];
-                        localStorage.removeItem(`cycleCountMasterData_${userKey}`);
-                        renderMasterData();
-                        renderCurrentLocationSKUCount(locationField.value.trim());
-                        showToast('Semua data master berhasil dihapus!');
-                    }
-                });
-                
-                // Data Count Functions
-                function renderDataCountTable() {
-                    if (!dataCountTable) return;
-                    
-                    const startDate = new Date(startDateFilter.value);
-                    const endDate = new Date(endDateFilter.value);
-                    endDate.setHours(23, 59, 59, 999); // Set to end of day
-                    
-                    let cycleCountData = JSON.parse(localStorage.getItem(`cycleCountData_${userKey}`)) || [];
-                    
-                    // Filter data by date range
-                    const filteredData = cycleCountData.filter(item => {
-                        const itemDate = new Date(item.timestamp);
-                        return itemDate >= startDate && itemDate <= endDate;
-                    });
-                    
-                    dataCountTable.innerHTML = '';
-                    
-                    if (filteredData.length === 0) {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `<td colspan="8" class="text-center py-4 text-muted">Tidak ada data count</td>`;
-                        dataCountTable.appendChild(row);
-                        return;
-                    }
-                    
-                    filteredData.forEach((item, index) => {
-                        const row = document.createElement('tr');
-                        const date = new Date(item.timestamp);
-                        const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-                        
-                        row.innerHTML = `
-                            <td>
-                                <input type="checkbox" class="form-check-input data-checkbox" data-index="${index}">
-                            </td>
-                            <td>${formattedDate}</td>
-                            <td>${item.location}</td>
-                            <td>${item.ean}</td>
-                            <td>${item.sku}</td>
-                            <td>${item.countType}</td>
-                            <td>${item.countValue}</td>
-                            <td>
-                                <button class="btn btn-sm btn-danger delete-data-btn" data-index="${index}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        `;
-                        dataCountTable.appendChild(row);
-                    });
-                    
-                    // Add event listeners to checkboxes
-                    document.querySelectorAll('.data-checkbox').forEach(checkbox => {
-                        checkbox.addEventListener('change', updateSelectAllCheckbox);
-                    });
-                    
-                    // Add event listeners to delete buttons
-                    document.querySelectorAll('.delete-data-btn').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const index = parseInt(this.getAttribute('data-index'));
-                            deleteDataCountItem(index);
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showSyncStatus('Gagal mengunduh data dari GitHub: ' + error.message, 'error');
                         });
-                    });
-                }
-                
-                function updateSelectAllCheckbox() {
-                    const allCheckboxes = document.querySelectorAll('.data-checkbox');
-                    const checkedCheckboxes = document.querySelectorAll('.data-checkbox:checked');
-                    
-                    selectAllCheckbox.checked = allCheckboxes.length > 0 && allCheckboxes.length === checkedCheckboxes.length;
-                }
-                
-                // Select all checkbox event
-                selectAllCheckbox.addEventListener('change', function() {
-                    const checkboxes = document.querySelectorAll('.data-checkbox');
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = selectAllCheckbox.checked;
-                    });
-                });
-                
-                // Filter button event
-                filterBtn.addEventListener('click', renderDataCountTable);
-                
-                // Delete single data count item
-                function deleteDataCountItem(index) {
-                    if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                        return;
                     }
                     
-                    let cycleCountData = JSON.parse(localStorage.getItem(`cycleCountData_${userKey}`)) || [];
-                    cycleCountData.splice(index, 1);
-                    localStorage.setItem(`cycleCountData_${userKey}`, JSON.stringify(cycleCountData));
-                    renderDataCountTable();
-                    showToast('Data berhasil dihapus');
-                }
-                
-                // Delete selected data
-                deleteSelectedBtn.addEventListener('click', function() {
-                    const selectedCheckboxes = document.querySelectorAll('.data-checkbox:checked');
-                    
-                    if (selectedCheckboxes.length === 0) {
-                        showToast('Pilih data yang akan dihapus', 'error');
-                        return;
-                    }
-                    
-                    if (!confirm(`Apakah Anda yakin ingin menghapus ${selectedCheckboxes.length} data terpilih?`)) {
-                        return;
-                    }
-                    
-                    let cycleCountData = JSON.parse(localStorage.getItem(`cycleCountData_${userKey}`)) || [];
-                    
-                    // Get indices of selected items (reverse order to avoid index shifting during deletion)
-                    const indicesToDelete = Array.from(selectedCheckboxes)
-                        .map(checkbox => parseInt(checkbox.getAttribute('data-index')))
-                        .sort((a, b) => b - a); // Sort descending
-                    
-                    // Remove items from array
-                    indicesToDelete.forEach(index => {
-                        cycleCountData.splice(index, 1);
-                    });
-                    
-                    // Save updated data
-                    localStorage.setItem(`cycleCountData_${userKey}`, JSON.stringify(cycleCountData));
-                    
-                    // Refresh table
-                    renderDataCountTable();
-                    showToast('Data terpilih berhasil dihapus');
-                });
-                
-                // Export to Excel (CSV) function
-                exportBtn.addEventListener('click', function() {
-                    const startDate = new Date(startDateFilter.value);
-                    const endDate = new Date(endDateFilter.value);
-                    endDate.setHours(23, 59, 59, 999);
-                    
-                    let cycleCountData = JSON.parse(localStorage.getItem(`cycleCountData_${userKey}`)) || [];
-                    
-                    // Filter data by date range
-                    const filteredData = cycleCountData.filter(item => {
-                        const itemDate = new Date(item.timestamp);
-                        return itemDate >= startDate && itemDate <= endDate;
-                    });
-                    
-                    if (filteredData.length === 0) {
-                        showToast('Tidak ada data untuk diexport', 'error');
-                        return;
-                    }
-                    
-                    // Create CSV content
-                    let csvContent = "Tanggal,Lokasi,EAN,SKU,Description,Count Type,Count Value,Remark\n";
-                    
-                    filteredData.forEach(item => {
-                        const date = new Date(item.timestamp);
-                        const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+                    // Function to show sync status
+                    function showSyncStatus(message, type) {
+                        if (!syncStatus) return;
                         
-                        csvContent += `"${formattedDate}","${item.location}","${item.ean}","${item.sku}","${item.description}","${item.countType}","${item.countValue}","${item.remark}"\n`;
-                    });
+                        syncStatus.textContent = message;
+                        syncStatus.className = 'sync-status ' + type;
+                        syncStatus.style.display = 'block';
+                        
+                        // Auto hide after 5 seconds
+                        setTimeout(() => {
+                            syncStatus.style.display = 'none';
+                        }, 5000);
+                    }
                     
-                    // Create download link
-                    const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
-                    const link = document.createElement("a");
-                    link.setAttribute("href", encodedUri);
-                    link.setAttribute("download", `cycle_count_data_${new Date().toISOString().slice(0, 10)}.csv`);
-                    document.body.appendChild(link);
-                    
-                    link.click();
-                    document.body.removeChild(link);
-                    showToast('Data berhasil diexport');
-                });
-                
-                // Initialize master data table
-                renderMasterData();
-                
-                // Load GitHub configuration
-                loadGithubConfig();
-                
-                // Add some sample data for demonstration if empty
-                if (masterData.length === 0) {
-                    masterData = [
-                        {
-                            location: "GUDANG-A",
-                            ean: "1234567890123",
-                            sku: "SKU123",
-                            description: "Produk Sample 1",
-                            traceId: "TRACE001"
-                        },
-                        {
-                            location: "GUDANG-A",
-                            ean: "1234567890123",
-                            sku: "SKU123-A",
-                            description: "Produk Sample 1 - Varian A",
-                            traceId: "TRACE002"
-                        },
-                        {
-                            location: "GUDANG-A",
-                            ean: "1234567890124",
-                            sku: "SKU456",
-                            description: "Produk Sample 2",
-                            traceId: "TRACE003"
-                        },
-                        {
-                            location: "GUDANG-A",
-                            ean: "1234567890125",
-                            sku: "SKU789",
-                            description: "Produk Sample 3",
-                            traceId: "TRACE004"
-                        },
-                        {
-                            location: "GUDANG-B",
-                            ean: "1234567890126",
-                            sku: "SKU101",
-                            description: "Produk Sample 4",
-                            traceId: "TRACE005"
-                        },
-                        {
-                            location: "RAK-01",
-                            ean: "1234567890127",
-                            sku: "SKU202",
-                            description: "Produk Sample 5",
-                            traceId: "TRACE006"
+                    // Function to display current location SKU count
+                    function renderCurrentLocationSKUCount(location) {
+                        if (!currentLocationDisplay || !currentLocationName || !currentLocationSkuCount) return;
+                        
+                        if (!location) {
+                            currentLocationDisplay.style.display = 'none';
+                            return;
                         }
-                    ];
-                    localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(masterData));
+                        
+                        // Calculate SKU count for the current location
+                        const skuSet = new Set();
+                        masterData.forEach(item => {
+                            if (item.location === location) {
+                                skuSet.add(item.sku);
+                            }
+                        });
+                        
+                        const skuCount = skuSet.size;
+                        
+                        // Update display
+                        currentLocationName.textContent = location;
+                        currentLocationSkuCount.textContent = skuCount;
+                        currentLocationDisplay.style.display = 'block';
+                    }
+                    
+                    // Save location and load related data
+                    if (saveLocationBtn && locationField) {
+                        saveLocationBtn.addEventListener('click', function() {
+                            const location = locationField.value.trim();
+                            if (!location) {
+                                showToast('Harap masukkan kode lokasi!', 'error');
+                                return;
+                            }
+                            
+                            // Update current location display
+                            renderCurrentLocationSKUCount(location);
+                            
+                            showToast('Lokasi berhasil disimpan!');
+                        });
+                    }
+                    
+                    // EAN input event listener for real-time search
+                    if (eanField) {
+                        eanField.addEventListener('input', function() {
+                            // Clear previous timeout
+                            clearTimeout(eanInputTimeout);
+                            
+                            // Show loading indicator
+                            if (eanLoading) eanLoading.style.display = 'block';
+                            
+                            // Set timeout to delay the search
+                            eanInputTimeout = setTimeout(() => {
+                                handleLocationAndEANCheck();
+                                if (eanLoading) eanLoading.style.display = 'none';
+                            }, 500); // 500ms delay after typing stops
+                        });
+                    }
+                    
+                    function handleLocationAndEANCheck() {
+                        const location = locationField ? locationField.value.trim() : '';
+                        const ean = eanField ? eanField.value.trim() : '';
+                        
+                        if (!location) {
+                            showToast('Harap masukkan kode lokasi!', 'error');
+                            return;
+                        }
+                        
+                        if (!ean) {
+                            // Reset fields if EAN is empty
+                            if (skuField) skuField.value = '';
+                            if (descriptionField) descriptionField.value = '';
+                            if (traceIdField) traceIdField.value = '';
+                            return;
+                        }
+                        
+                        // Update current location display
+                        renderCurrentLocationSKUCount(location);
+                        
+                        // Look up in master data based on location and EAN
+                        currentLocationItems = masterData.filter(item => item.location === location && item.ean === ean);
+                        
+                        if (currentLocationItems.length > 0) {
+                            // If found, show the first item
+                            currentItemIndex = 0;
+                            displayCurrentItem();
+                            
+                            // Hide notification if shown
+                            if (notification) notification.style.display = 'none';
+                            
+                            // Show navigation if multiple items
+                            if (navigationContainer && currentLocationItems.length > 1) {
+                                navigationContainer.style.display = 'block';
+                                updateNavigationButtons();
+                            } else if (navigationContainer) {
+                                navigationContainer.style.display = 'none';
+                            }
+                        } else {
+                            // If not found, show notification
+                            if (notification) notification.style.display = 'block';
+                            
+                            // Clear other fields
+                            if (skuField) skuField.value = '';
+                            if (descriptionField) descriptionField.value = '';
+                            if (traceIdField) traceIdField.value = '';
+                            
+                            // Hide navigation
+                            if (navigationContainer) navigationContainer.style.display = 'none';
+                        }
+                        
+                        // Check for existing count data
+                        checkExistingCountData();
+                    }
+                    
+                    // Check if count data already exists for this location, EAN, and Trace ID
+                    function checkExistingCountData() {
+                        const location = locationField ? locationField.value.trim() : '';
+                        const ean = eanField ? eanField.value.trim() : '';
+                        const traceId = traceIdField ? traceIdField.value : '';
+                        const countType = countTypeField ? countTypeField.value : '';
+                        
+                        if (!location || !ean || !traceId) return;
+                        
+                        const cycleCountData = JSON.parse(localStorage.getItem(`cycleCountData_${userKey}`)) || [];
+                        
+                        // Find existing count for this location, EAN, traceId and count type
+                        const existingCount = cycleCountData.find(item => 
+                            item.location === location && 
+                            item.ean === ean && 
+                            item.traceId === traceId && 
+                            item.countType === countType
+                        );
+                        
+                        if (existingCount && countValueField) {
+                            countValueField.value = existingCount.countValue;
+                            countValueField.setAttribute('readonly', true);
+                            if (countSavedNotification) countSavedNotification.style.display = 'block';
+                        } else if (countValueField) {
+                            countValueField.value = '';
+                            countValueField.removeAttribute('readonly');
+                            if (countSavedNotification) countSavedNotification.style.display = 'none';
+                        }
+                    }
+                    
+                    // Display current item based on currentItemIndex
+                    function displayCurrentItem() {
+                        if (currentLocationItems.length === 0) return;
+                        
+                        const item = currentLocationItems[currentItemIndex];
+                        if (skuField) skuField.value = item.sku || '';
+                        if (descriptionField) descriptionField.value = item.description || '';
+                        if (traceIdField) traceIdField.value = item.traceId || '';
+                        
+                        // Update navigation info
+                        if (navInfo) navInfo.textContent = `Item ${currentItemIndex + 1} of ${currentLocationItems.length}`;
+                        
+                        // Check if count already exists for this specific item
+                        checkExistingCountData();
+                    }
+                    
+                    // Update navigation buttons state
+                    function updateNavigationButtons() {
+                        if (!prevBtn || !nextBtn) return;
+                        
+                        prevBtn.disabled = currentItemIndex === 0;
+                        nextBtn.disabled = currentItemIndex === currentLocationItems.length - 1;
+                    }
+                    
+                    // Previous button event
+                    if (prevBtn) {
+                        prevBtn.addEventListener('click', function() {
+                            if (currentItemIndex > 0) {
+                                currentItemIndex--;
+                                displayCurrentItem();
+                                updateNavigationButtons();
+                            }
+                        });
+                    }
+                    
+                    // Next button event
+                    if (nextBtn) {
+                        nextBtn.addEventListener('click', function() {
+                            if (currentItemIndex < currentLocationItems.length - 1) {
+                                currentItemIndex++;
+                                displayCurrentItem();
+                                updateNavigationButtons();
+                            }
+                        });
+                    }
+                    
+                    // Count type change event
+                    if (countTypeField) {
+                        countTypeField.addEventListener('change', function() {
+                            checkExistingCountData();
+                        });
+                    }
+                    
+                    // Form submission
+                    if (form) {
+                        form.addEventListener('submit', function(e) {
+                            e.preventDefault();
+                            
+                            // Validate form
+                            if (!locationField || !locationField.value) {
+                                showToast('Harap masukkan lokasi!', 'error');
+                                return;
+                            }
+                            
+                            if (!eanField || !eanField.value) {
+                                showToast('Harap masukkan EAN!', 'error');
+                                return;
+                            }
+                            
+                            if (!countValueField || !countValueField.value) {
+                                showToast('Harap isi nilai count!', 'error');
+                                return;
+                            }
+                            
+                            // Check if data exists in master data
+                            const location = locationField.value;
+                            const ean = eanField.value;
+                            const traceId = traceIdField ? traceIdField.value : '';
+                            const existsInMaster = masterData.some(item => 
+                                item.location === location && 
+                                item.ean === ean && 
+                                item.traceId === traceId
+                            );
+                            
+                            if (!existsInMaster && (!remarkField || !remarkField.value)) {
+                                showToast('Data tidak ditemukan di master data. Harap isi remark sebagai temuan.', 'error');
+                                return;
+                            }
+                            
+                            // Check if count already exists for this type
+                            const countType = countTypeField ? countTypeField.value : '';
+                            let cycleCountData = JSON.parse(localStorage.getItem(`cycleCountData_${userKey}`)) || [];
+                            
+                            const existingCountIndex = cycleCountData.findIndex(item => 
+                                item.location === location && 
+                                item.ean === ean && 
+                                item.traceId === traceId && 
+                                item.countType === countType
+                            );
+                            
+                            // Create form data object
+                            const formData = {
+                                location: location,
+                                ean: ean,
+                                sku: skuField ? skuField.value : '',
+                                description: descriptionField ? descriptionField.value : '',
+                                traceId: traceId,
+                                countType: countType,
+                                countValue: countValueField ? countValueField.value : '',
+                                remark: remarkField ? remarkField.value : '',
+                                timestamp: new Date().toISOString()
+                            };
+                            
+                            if (existingCountIndex !== -1) {
+                                // Update existing count
+                                cycleCountData[existingCountIndex] = formData;
+                            } else {
+                                // Add new count
+                                cycleCountData.push(formData);
+                            }
+                            
+                            // Save to localStorage
+                            localStorage.setItem(`cycleCountData_${userKey}`, JSON.stringify(cycleCountData));
+                            
+                            // Show success notification
+                            showToast('Data cycle count berhasil disimpan!');
+                            
+                            // Auto-sync to GitHub after saving
+                            autoSyncToGitHub();
+                            
+                            // Reset form but keep location
+                            const currentLocation = locationField.value;
+                            form.reset();
+                            locationField.value = currentLocation;
+                            
+                            // Clear EAN and count value fields specifically
+                            if (eanField) eanField.value = '';
+                            if (countValueField) countValueField.value = '';
+                            
+                            // Remove readonly attribute if it was set
+                            if (countValueField) countValueField.removeAttribute('readonly');
+                            
+                            if (notification) notification.style.display = 'none';
+                            if (countSavedNotification) countSavedNotification.style.display = 'none';
+                            
+                            // Set focus back to EAN field for next input
+                            if (eanField) eanField.focus();
+                            
+                            // Clear current items
+                            currentLocationItems = [];
+                            if (navigationContainer) navigationContainer.style.display = 'none';
+                            
+                            // Update current location display
+                            renderCurrentLocationSKUCount(currentLocation);
+                        });
+                    }
+                    
+                    // Master Data Functions
+                    function renderMasterData() {
+                        if (!masterDataTable) return;
+                        
+                        masterDataTable.innerHTML = '';
+                        
+                        if (masterData.length === 0) {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `<td colspan="6" class="text-center py-4 text-muted">Tidak ada data master</td>`;
+                            masterDataTable.appendChild(row);
+                            return;
+                        }
+                        
+                        masterData.forEach((item, index) => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${item.location}</td>
+                                <td>${item.ean}</td>
+                                <td>${item.sku}</td>
+                                <td>${item.description}</td>
+                                <td>${item.traceId}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger delete-btn" data-index="${index}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            `;
+                            masterDataTable.appendChild(row);
+                        });
+                        
+                        // Add event listeners to delete buttons
+                        document.querySelectorAll('.delete-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const index = parseInt(this.getAttribute('data-index'));
+                                deleteMasterDataItem(index);
+                            });
+                        });
+                    }
+                    
+                    function deleteMasterDataItem(index) {
+                        if (confirm('Apakah Anda yakin ingin menghapus data master ini?')) {
+                            masterData.splice(index, 1);
+                            localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(masterData));
+                            renderMasterData();
+                            renderCurrentLocationSKUCount(locationField.value.trim());
+                            showToast('Data master berhasil dihapus!');
+                        }
+                    }
+                    
+                    // Add new master data
+                    if (addBtn) {
+                        addBtn.addEventListener('click', function() {
+                            const location = prompt('Masukkan Lokasi:');
+                            if (!location) return;
+                            
+                            const ean = prompt('Masukkan EAN:');
+                            if (!ean) return;
+                            
+                            const sku = prompt('Masukkan SKU:');
+                            const description = prompt('Masukkan Description:');
+                            const traceId = prompt('Masukkan Trace ID:');
+                            
+                            // Check if combination already exists
+                            const exists = masterData.some(item => item.location === location && item.ean === ean && item.traceId === traceId);
+                            if (exists) {
+                                showToast('Kombinasi Lokasi, EAN dan Trace ID sudah ada dalam master data!', 'error');
+                                return;
+                            }
+                            
+                            masterData.push({
+                                location,
+                                ean,
+                                sku: sku || '',
+                                description: description || '',
+                                traceId: traceId || ''
+                            });
+                            
+                            localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(masterData));
+                            renderMasterData();
+                            renderCurrentLocationSKUCount(locationField.value.trim());
+                            showToast('Data master berhasil ditambahkan!');
+                        });
+                    }
+                    
+                    // Upload master data
+                    if (uploadBtn && fileInput) {
+                        uploadBtn.addEventListener('click', function() {
+                            fileInput.click();
+                        });
+                        
+                        fileInput.addEventListener('change', function(e) {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                try {
+                                    const data = JSON.parse(e.target.result);
+                                    if (Array.isArray(data)) {
+                                        masterData = data;
+                                        localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(masterData));
+                                        renderMasterData();
+                                        renderCurrentLocationSKUCount(locationField.value.trim());
+                                        showToast('Master data berhasil diupload!');
+                                    } else {
+                                        throw new Error('Format file tidak valid');
+                                    }
+                                } catch (err) {
+                                    showToast('Error parsing file: ' + err.message, 'error');
+                                }
+                            };
+                            reader.readAsText(file);
+                        });
+                    }
+                    
+                    // Download master data
+                    if (downloadBtn) {
+                        downloadBtn.addEventListener('click', function() {
+                            if (masterData.length === 0) {
+                                showToast('Tidak ada data master untuk didownload', 'error');
+                                return;
+                            }
+                            
+                            const dataStr = JSON.stringify(masterData, null, 2);
+                            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                            
+                            const exportFileDefaultName = 'master-data.json';
+                            
+                            const linkElement = document.createElement('a');
+                            linkElement.setAttribute('href', dataUri);
+                            linkElement.setAttribute('download', exportFileDefaultName);
+                            linkElement.click();
+                        });
+                    }
+                    
+                    // Clear all master data
+                    if (clearBtn) {
+                        clearBtn.addEventListener('click', function() {
+                            if (confirm('Apakah Anda yakin ingin menghapus semua data master? Tindakan ini tidak dapat dibatalkan.')) {
+                                masterData = [];
+                                localStorage.removeItem(`cycleCountMasterData_${userKey}`);
+                                renderMasterData();
+                                renderCurrentLocationSKUCount(locationField.value.trim());
+                                showToast('Semua data master berhasil dihapus!');
+                            }
+                        });
+                    }
+                    
+                    // Data Count Functions
+                    function renderDataCountTable() {
+                        if (!dataCountTable) return;
+                        
+                        const startDate = new Date(startDateFilter.value);
+                        const endDate = new Date(endDateFilter.value);
+                        endDate.setHours(23, 59, 59, 999); // Set to end of day
+                        
+                        let cycleCountData = JSON.parse(localStorage.getItem(`cycleCountData_${userKey}`)) || [];
+                        
+                        // Filter data by date range
+                        const filteredData = cycleCountData.filter(item => {
+                            const itemDate = new Date(item.timestamp);
+                            return itemDate >= startDate && itemDate <= endDate;
+                        });
+                        
+                        dataCountTable.innerHTML = '';
+                        
+                        if (filteredData.length === 0) {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `<td colspan="8" class="text-center py-4 text-muted">Tidak ada data count</td>`;
+                            dataCountTable.appendChild(row);
+                            return;
+                        }
+                        
+                        filteredData.forEach((item, index) => {
+                            const row = document.createElement('tr');
+                            const date = new Date(item.timestamp);
+                            const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+                            
+                            row.innerHTML = `
+                                <td>
+                                    <input type="checkbox" class="form-check-input data-checkbox" data-index="${index}">
+                                </td>
+                                <td>${formattedDate}</td>
+                                <td>${item.location}</td>
+                                <td>${item.ean}</td>
+                                <td>${item.sku}</td>
+                                <td>${item.countType}</td>
+                                <td>${item.countValue}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger delete-data-btn" data-index="${index}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            `;
+                            dataCountTable.appendChild(row);
+                        });
+                        
+                        // Add event listeners to checkboxes
+                        document.querySelectorAll('.data-checkbox').forEach(checkbox => {
+                            checkbox.addEventListener('change', updateSelectAllCheckbox);
+                        });
+                        
+                        // Add event listeners to delete buttons
+                        document.querySelectorAll('.delete-data-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const index = parseInt(this.getAttribute('data-index'));
+                                deleteDataCountItem(index);
+                            });
+                        });
+                    }
+                    
+                    function updateSelectAllCheckbox() {
+                        const allCheckboxes = document.querySelectorAll('.data-checkbox');
+                        const checkedCheckboxes = document.querySelectorAll('.data-checkbox:checked');
+                        
+                        if (selectAllCheckbox) {
+                            selectAllCheckbox.checked = allCheckboxes.length > 0 && allCheckboxes.length === checkedCheckboxes.length;
+                        }
+                    }
+                    
+                    // Select all checkbox event
+                    if (selectAllCheckbox) {
+                        selectAllCheckbox.addEventListener('change', function() {
+                            const checkboxes = document.querySelectorAll('.data-checkbox');
+                            checkboxes.forEach(checkbox => {
+                                checkbox.checked = selectAllCheckbox.checked;
+                            });
+                        });
+                    }
+                    
+                    // Filter button event
+                    if (filterBtn) {
+                        filterBtn.addEventListener('click', renderDataCountTable);
+                    }
+                    
+                    // Delete single data count item
+                    function deleteDataCountItem(index) {
+                        if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                            return;
+                        }
+                        
+                        let cycleCountData = JSON.parse(localStorage.getItem(`cycleCountData_${userKey}`)) || [];
+                        cycleCountData.splice(index, 1);
+                        localStorage.setItem(`cycleCountData_${userKey}`, JSON.stringify(cycleCountData));
+                        renderDataCountTable();
+                        showToast('Data berhasil dihapus');
+                    }
+                    
+                    // Delete selected data
+                    if (deleteSelectedBtn) {
+                        deleteSelectedBtn.addEventListener('click', function() {
+                            const selectedCheckboxes = document.querySelectorAll('.data-checkbox:checked');
+                            
+                            if (selectedCheckboxes.length === 0) {
+                                showToast('Pilih data yang akan dihapus', 'error');
+                                return;
+                            }
+                            
+                            if (!confirm(`Apakah Anda yakin ingin menghapus ${selectedCheckboxes.length} data terpilih?`)) {
+                                return;
+                            }
+                            
+                            let cycleCountData = JSON.parse(localStorage.getItem(`cycleCountData_${userKey}`)) || [];
+                            
+                            // Get indices of selected items (reverse order to avoid index shifting during deletion)
+                            const indicesToDelete = Array.from(selectedCheckboxes)
+                                .map(checkbox => parseInt(checkbox.getAttribute('data-index')))
+                                .sort((a, b) => b - a); // Sort descending
+                            
+                            // Remove items from array
+                            indicesToDelete.forEach(index => {
+                                cycleCountData.splice(index, 1);
+                            });
+                            
+                            // Save updated data
+                            localStorage.setItem(`cycleCountData_${userKey}`, JSON.stringify(cycleCountData));
+                            
+                            // Refresh table
+                            renderDataCountTable();
+                            showToast('Data terpilih berhasil dihapus');
+                        });
+                    }
+                    
+                    // Export to Excel (CSV) function
+                    if (exportBtn) {
+                        exportBtn.addEventListener('click', function() {
+                            const startDate = new Date(startDateFilter.value);
+                            const endDate = new Date(endDateFilter.value);
+                            endDate.setHours(23, 59, 59, 999);
+                            
+                            let cycleCountData = JSON.parse(localStorage.getItem(`cycleCountData_${userKey}`)) || [];
+                            
+                            // Filter data by date range
+                            const filteredData = cycleCountData.filter(item => {
+                                const itemDate = new Date(item.timestamp);
+                                return itemDate >= startDate && itemDate <= endDate;
+                            });
+                            
+                            if (filteredData.length === 0) {
+                                showToast('Tidak ada data untuk diexport', 'error');
+                                return;
+                            }
+                            
+                            // Create CSV content
+                            let csvContent = "Tanggal,Lokasi,EAN,SKU,Description,Count Type,Count Value,Remark\n";
+                            
+                            filteredData.forEach(item => {
+                                const date = new Date(item.timestamp);
+                                const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+                                
+                                csvContent += `"${formattedDate}","${item.location}","${item.ean}","${item.sku}","${item.description}","${item.countType}","${item.countValue}","${item.remark}"\n`;
+                            });
+                            
+                            // Create download link
+                            const encodedUri = encodeURI("data:text/csv;charset=utf-8," + csvContent);
+                            const link = document.createElement("a");
+                            link.setAttribute("href", encodedUri);
+                            link.setAttribute("download", `cycle_count_data_${new Date().toISOString().slice(0, 10)}.csv`);
+                            document.body.appendChild(link);
+                            
+                            link.click();
+                            document.body.removeChild(link);
+                            showToast('Data berhasil diexport');
+                        });
+                    }
+                    
+                    // Initialize master data table
                     renderMasterData();
+                    
+                    // Load GitHub configuration
+                    loadGithubConfig();
+                    
+                    // Add some sample data for demonstration if empty
+                    if (masterData.length === 0) {
+                        masterData = [
+                            {
+                                location: "GUDANG-A",
+                                ean: "1234567890123",
+                                sku: "SKU123",
+                                description: "Produk Sample 1",
+                                traceId: "TRACE001"
+                            },
+                            {
+                                location: "GUDANG-A",
+                                ean: "1234567890123",
+                                sku: "SKU123-A",
+                                description: "Produk Sample 1 - Varian A",
+                                traceId: "TRACE002"
+                            },
+                            {
+                                location: "GUDANG-A",
+                                ean: "1234567890124",
+                                sku: "SKU456",
+                                description: "Produk Sample 2",
+                                traceId: "TRACE003"
+                            },
+                            {
+                                location: "GUDANG-A",
+                                ean: "1234567890125",
+                                sku: "SKU789",
+                                description: "Produk Sample 3",
+                                traceId: "TRACE004"
+                            },
+                            {
+                                location: "GUDANG-B",
+                                ean: "1234567890126",
+                                sku: "SKU101",
+                                description: "Produk Sample 4",
+                                traceId: "TRACE005"
+                            },
+                            {
+                                location: "RAK-01",
+                                ean: "1234567890127",
+                                sku: "SKU202",
+                                description: "Produk Sample 5",
+                                traceId: "TRACE006"
+                            }
+                        ];
+                        localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(masterData));
+                        renderMasterData();
+                    }
+                } catch (error) {
+                    console.error('Error in initApp:', error);
+                    showToast('Terjadi kesalahan dalam inisialisasi aplikasi: ' + error.message, 'error');
                 }
             }
         });
