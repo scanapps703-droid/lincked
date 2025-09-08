@@ -42,5 +42,16 @@
     "countValue": "9",
     "remark": "",
     "timestamp": "2025-09-08T01:28:50.793Z"
+  },
+  {
+    "location": "GA05A001",
+    "ean": "5400520293886",
+    "sku": "0000000000001528201041",
+    "description": "VARENA HOBO BAG-BLACK",
+    "traceId": "2505200503-A",
+    "countType": "1stCount",
+    "countValue": "9",
+    "remark": "",
+    "timestamp": "2025-09-08T01:28:59.443Z"
   }
 ]
