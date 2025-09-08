@@ -9,5 +9,16 @@
     "countValue": "2",
     "remark": "",
     "timestamp": "2025-09-08T01:28:04.286Z"
+  },
+  {
+    "location": "GA05A001",
+    "ean": "5400520185662",
+    "sku": "0000000000001450281041",
+    "description": "ARGYLE SPINNER 68/25 EXP TSA-BLACK",
+    "traceId": "KED2508250214",
+    "countType": "1stCount",
+    "countValue": "3",
+    "remark": "",
+    "timestamp": "2025-09-08T01:28:16.439Z"
   }
 ]
