@@ -31,5 +31,16 @@
     "countValue": "7",
     "remark": "",
     "timestamp": "2025-09-08T01:28:42.080Z"
+  },
+  {
+    "location": "GA05A001",
+    "ean": "5400520284396",
+    "sku": "0000000000001519081041",
+    "description": "TRAVEL ESSENTIALS 3.DIAL CABLE LOCK TSA-BLACK",
+    "traceId": "DID2411070655-1",
+    "countType": "1stCount",
+    "countValue": "9",
+    "remark": "",
+    "timestamp": "2025-09-08T01:28:50.793Z"
   }
 ]
