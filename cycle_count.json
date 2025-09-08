@@ -75,5 +75,16 @@
     "countValue": "50",
     "remark": "",
     "timestamp": "2025-09-08T01:29:19.618Z"
+  },
+  {
+    "location": "GA05A001",
+    "ean": "5400520310644",
+    "sku": "0000000000001539081475",
+    "description": "AT ACCESSORIES TPU STRETCHABLE COVER - L KHAKI",
+    "traceId": "KED2508250222",
+    "countType": "1stCount",
+    "countValue": "15",
+    "remark": "",
+    "timestamp": "2025-09-08T01:29:31.456Z"
   }
 ]
