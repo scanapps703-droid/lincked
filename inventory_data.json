@@ -1,0 +1,38 @@
+[
+  {
+    "warehouseId": "WH001",
+    "customerId": "CUST001",
+    "locationId": "LOC001",
+    "sku": "SKU123",
+    "skuDescrL": "Produk Sample Panjang Deskripsi 1",
+    "qtyOnHand": "100",
+    "qtyAvailable": "80",
+    "qtyAllocated": "20",
+    "qtyOnHold": "0",
+    "whetherDamaged": "false"
+  },
+  {
+    "warehouseId": "WH001",
+    "customerId": "CUST001",
+    "locationId": "LOC002",
+    "sku": "SKU456",
+    "skuDescrL": "Produk Sample Panjang Deskripsi 2",
+    "qtyOnHand": "200",
+    "qtyAvailable": "150",
+    "qtyAllocated": "50",
+    "qtyOnHold": "0",
+    "whetherDamaged": "false"
+  },
+  {
+    "warehouseId": "WH002",
+    "customerId": "CUST002",
+    "locationId": "LOC003",
+    "sku": "SKU789",
+    "skuDescrL": "Produk Sample Panjang Deskripsi 3",
+    "qtyOnHand": "50",
+    "qtyAvailable": "40",
+    "qtyAllocated": "10",
+    "qtyOnHold": "0",
+    "whetherDamaged": "false"
+  }
+]
