@@ -493,6 +493,39 @@
             color: #6c757d;
             margin-top: 10px;
         }
+        
+        /* Progress bar */
+        .progress {
+            height: 8px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: #e9ecef;
+        }
+        
+        .progress-bar {
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        /* Master Data Tabs */
+        .master-data-tabs {
+            margin-bottom: 20px;
+        }
+        
+        /* Sync animation */
+        .sync-animation {
+            display: inline-block;
+        }
+        
+        @keyframes syncSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .syncing {
+            animation: syncSpin 1.5s linear infinite;
+        }
     </style>
 </head>
 <body>
@@ -568,9 +601,9 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#inventory-balanced" data-tab="inventory-balanced">
+                    <a href="#inventory-balance" data-tab="inventory-balance">
                         <i class="fas fa-cubes"></i>
-                        <span class="menu-text">Inventory Balanced</span>
+                        <span class="menu-text">Inventory Balance (IB)</span>
                     </a>
                 </li>
                 <li>
@@ -706,12 +739,12 @@
                     
                     <!-- GitHub Sync Buttons for Data Count -->
                     <div class="sync-buttons">
-                        <button type="button" class="btn btn-primary" id="push-cyclecount">
-                            <i class="fas fa-upload"></i> Push Data Cycle Count
+                        <button type="button" class="btn btn-primary" id="sync-cyclecount">
+                            <i class="fas fa-sync-alt"></i> Sync Data Cycle Count
                         </button>
-                        <button type="button" class="btn btn-success" id="pull-cyclecount">
-                            <i class="fas fa-download"></i> Pull Data Cycle Count
-                        </button>
+                    </div>
+                    <div class="progress" id="sync-cyclecount-progress" style="display: none;">
+                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
                     </div>
                     <div class="sync-info">
                         <i class="fas fa-info-circle"></i> Terakhir sinkronisasi: <span id="last-sync-cyclecount">Belum pernah</span>
@@ -772,84 +805,151 @@
                         <i class="fas fa-database"></i> Master Data Management
                     </h2>
                     
-                    <!-- GitHub Sync Buttons for Master Data -->
-                    <div class="sync-buttons">
-                        <button type="button" class="btn btn-primary" id="push-masterdata">
-                            <i class="fas fa-upload"></i> Push Data Master
-                        </button>
-                        <button type="button" class="btn btn-success" id="pull-masterdata">
-                            <i class="fas fa-download"></i> Pull Data Master
-                        </button>
-                    </div>
-                    <div class="sync-info">
-                        <i class="fas fa-info-circle"></i> Terakhir sinkronisasi: <span id="last-sync-masterdata">Belum pernah</span>
-                    </div>
+                    <!-- Master Data Tabs -->
+                    <ul class="nav nav-tabs master-data-tabs" id="masterDataTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="master-location-tab" data-bs-toggle="tab" data-bs-target="#master-location" type="button" role="tab">Master Lokasi</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="master-ean-tab" data-bs-toggle="tab" data-bs-target="#master-ean" type="button" role="tab">Master EAN</button>
+                        </li>
+                    </ul>
                     
-                    <div class="d-flex flex-wrap gap-2 mb-4">
-                        <button id="upload-btn" class="btn btn-success">
-                            <i class="fas fa-upload"></i> Upload Excel
-                        </button>
-                        <button id="download-btn" class="btn btn-primary">
-                            <i class="fas fa-download"></i> Download Excel
-                        </button>
-                        <button id="clear-btn" class="btn btn-danger">
-                            <i class="fas fa-trash"></i> Hapus Semua
-                        </button>
-                        <button id="add-btn" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Tambah Data
-                        </button>
-                    </div>
+                    <div class="tab-content" id="masterDataTabsContent">
+                        <!-- Master Lokasi Tab -->
+                        <div class="tab-pane fade show active" id="master-location" role="tabpanel">
+                            <!-- GitHub Sync Buttons for Master Data Lokasi -->
+                            <div class="sync-buttons">
+                                <button type="button" class="btn btn-primary" id="sync-master-location">
+                                    <i class="fas fa-sync-alt"></i> Sync Data Master Lokasi
+                                </button>
+                            </div>
+                            <div class="progress" id="sync-master-location-progress" style="display: none;">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div class="sync-info">
+                                <i class="fas fa-info-circle"></i> Terakhir sinkronisasi: <span id="last-sync-master-location">Belum pernah</span>
+                            </div>
+                            
+                            <div class="d-flex flex-wrap gap-2 mb-4">
+                                <button id="upload-master-location-btn" class="btn btn-success">
+                                    <i class="fas fa-upload"></i> Upload Excel
+                                </button>
+                                <button id="download-master-location-btn" class="btn btn-primary">
+                                    <i class="fas fa-download"></i> Download Excel
+                                </button>
+                                <button id="clear-master-location-btn" class="btn btn-danger">
+                                    <i class="fas fa-trash"></i> Hapus Semua
+                                </button>
+                                <button id="add-master-location-btn" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Tambah Data
+                                </button>
+                            </div>
 
-                    <!-- Excel Format Info -->
-                    <div class="excel-format">
-                        <h5><i class="fas fa-info-circle"></i> Format File Excel</h5>
-                        <p>File Excel harus memiliki kolom dengan header berikut:</p>
-                        <ul>
-                            <li><strong>Lokasi</strong> (wajib)</li>
-                            <li><strong>EAN</strong> (wajib)</li>
-                            <li><strong>SKU</strong></li>
-                            <li><strong>Description</strong></li>
-                            <li><strong>Trace ID</strong></li>
-                        </ul>
-                    </div>
-                    
-                    <input type="file" id="file-input" accept=".xlsx, .xls" style="display: none;">
-                    
-                    <div class="table-responsive">
-                        <table class="table table-hover" id="master-data-table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Lokasi</th>
-                                    <th scope="col">EAN</th>
-                                    <th scope="col">SKU</th>
-                                    <th scope="col">Description</th>
-                                    <th scope="col">Trace ID</th>
-                                    <th scope="col" style="width: 100px;">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Data akan diisi oleh JavaScript -->
-                            </tbody>
-                        </table>
+                            <!-- Excel Format Info -->
+                            <div class="excel-format">
+                                <h5><i class="fas fa-info-circle"></i> Format File Excel</h5>
+                                <p>File Excel harus memiliki kolom dengan header berikut:</p>
+                                <ul>
+                                    <li><strong>Validation Code</strong> (wajib)</li>
+                                    <li><strong>Location</strong> (wajib)</li>
+                                </ul>
+                            </div>
+                            
+                            <input type="file" id="master-location-file-input" accept=".xlsx, .xls" style="display: none;">
+                            
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="master-location-table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Validation Code</th>
+                                            <th scope="col">Location</th>
+                                            <th scope="col" style="width: 100px;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data akan diisi oleh JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Master EAN Tab -->
+                        <div class="tab-pane fade" id="master-ean" role="tabpanel">
+                            <!-- GitHub Sync Buttons for Master Data EAN -->
+                            <div class="sync-buttons">
+                                <button type="button" class="btn btn-primary" id="sync-master-ean">
+                                    <i class="fas fa-sync-alt"></i> Sync Data Master EAN
+                                </button>
+                            </div>
+                            <div class="progress" id="sync-master-ean-progress" style="display: none;">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div class="sync-info">
+                                <i class="fas fa-info-circle"></i> Terakhir sinkronisasi: <span id="last-sync-master-ean">Belum pernah</span>
+                            </div>
+                            
+                            <div class="d-flex flex-wrap gap-2 mb-4">
+                                <button id="upload-master-ean-btn" class="btn btn-success">
+                                    <i class="fas fa-upload"></i> Upload Excel
+                                </button>
+                                <button id="download-master-ean-btn" class="btn btn-primary">
+                                    <i class="fas fa-download"></i> Download Excel
+                                </button>
+                                <button id="clear-master-ean-btn" class="btn btn-danger">
+                                    <i class="fas fa-trash"></i> Hapus Semua
+                                </button>
+                                <button id="add-master-ean-btn" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Tambah Data
+                                </button>
+                            </div>
+
+                            <!-- Excel Format Info -->
+                            <div class="excel-format">
+                                <h5><i class="fas fa-info-circle"></i> Format File Excel</h5>
+                                <p>File Excel harus memiliki kolom dengan header berikut:</p>
+                                <ul>
+                                    <li><strong>EAN</strong> (wajib)</li>
+                                    <li><strong>SKU</strong> (wajib)</li>
+                                </ul>
+                            </div>
+                            
+                            <input type="file" id="master-ean-file-input" accept=".xlsx, .xls" style="display: none;">
+                            
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="master-ean-table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">EAN</th>
+                                            <th scope="col">SKU</th>
+                                            <th scope="col" style="width: 100px;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Data akan diisi oleh JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Inventory Balanced Tab -->
-            <div class="tab-content" id="inventory-balanced-tab" style="display: none;">
+            <!-- Inventory Balance Tab -->
+            <div class="tab-content" id="inventory-balance-tab" style="display: none;">
                 <div class="section-card">
                     <h2 class="section-title">
-                        <i class="fas fa-cubes"></i> Inventory Balanced Management
+                        <i class="fas fa-cubes"></i> Inventory Balance (IB) Management
                     </h2>
                     
                     <!-- GitHub Sync Buttons for Inventory Data -->
                     <div class="sync-buttons">
-                        <button type="button" class="btn btn-primary" id="push-inventory">
-                            <i class="fas fa-upload"></i> Push Data Inventory
+                        <button type="button" class="btn btn-primary" id="sync-inventory">
+                            <i class="fas fa-sync-alt"></i> Sync Data Inventory
                         </button>
-                        <button type="button" class="btn btn-success" id="pull-inventory">
-                            <i class="fas fa-download"></i> Pull Data Inventory
-                        </button>
+                    </div>
+                    <div class="progress" id="sync-inventory-progress" style="display: none;">
+                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
                     </div>
                     <div class="sync-info">
                         <i class="fas fa-info-circle"></i> Terakhir sinkronisasi: <span id="last-sync-inventory">Belum pernah</span>
@@ -876,7 +976,6 @@
                         <p>File Excel harus memiliki kolom dengan header berikut:</p>
                         <ul>
                             <li><strong>Location ID</strong> (wajib)</li>
-                            <li><strong>EAN</strong> (wajib)</li>
                             <li><strong>SKU</strong> (wajib)</li>
                             <li><strong>SKU Descr(L)</strong></li>
                             <li><strong>Trace ID</strong></li>
@@ -891,7 +990,6 @@
                             <thead>
                                 <tr>
                                     <th scope="col">Location ID</th>
-                                    <th scope="col">EAN</th>
                                     <th scope="col">SKU</th>
                                     <th scope="col">SKU Descr(L)</th>
                                     <th scope="col">Trace ID</th>
@@ -964,10 +1062,11 @@
                     
                     <div class="github-config">
                         <h4><i class="fas fa-info-circle"></i> Informasi</h4>
-                        <p>Fitur ini memungkinkan Anda menyimpan data Cycle Count, Master Data, dan Inventory Balanced ke repository GitHub.</p>
+                        <p>Fitur ini memungkinkan Anda menyimpan data Cycle Count, Master Data, dan Inventory Balance ke repository GitHub.</p>
                         <ul>
                             <li>Data Cycle Count akan disimpan dalam file <code>cycle_count.json</code></li>
-                            <li>Data Master akan disimpan dalam file <code>master_data.json</code></li>
+                            <li>Data Master Lokasi akan disimpan dalam file <code>master_location.json</code></li>
+                            <li>Data Master EAN akan disimpan dalam file <code>master_ean.json</code></li>
                             <li>Data Inventory akan disimpan dalam file <code>inventory_data.json</code></li>
                             <li>Pastikan repository sudah dibuat sebelumnya di akun GitHub Anda</li>
                             <li>Token akses harus memiliki izin untuk membaca dan menulis ke repository</li>
@@ -986,7 +1085,8 @@
         // Variabel global untuk menyimpan state aplikasi
         let currentUser = null;
         let userKey = null;
-        let masterData = [];
+        let masterLocationData = [];
+        let masterEanData = [];
         let inventoryData = [];
         let autoSyncInterval = null;
         
@@ -1141,8 +1241,9 @@
                     if (tabId === 'data-count') {
                         renderDataCountTable();
                     } else if (tabId === 'master-data') {
-                        renderMasterData();
-                    } else if (tabId === 'inventory-balanced') {
+                        renderMasterLocationData();
+                        renderMasterEanData();
+                    } else if (tabId === 'inventory-balance') {
                         renderInventoryData();
                     } else if (tabId === 'github-config') {
                         loadGithubConfig();
@@ -1153,9 +1254,13 @@
             // Initialize app with user-specific data
             function initApp() {
                 try {
-                    // Initialize master data from localStorage with user-specific key
-                    const masterDataStr = localStorage.getItem(`cycleCountMasterData_${userKey}`);
-                    masterData = masterDataStr ? JSON.parse(masterDataStr) : [];
+                    // Initialize master location data from localStorage with user-specific key
+                    const masterLocationDataStr = localStorage.getItem(`masterLocationData_${userKey}`);
+                    masterLocationData = masterLocationDataStr ? JSON.parse(masterLocationDataStr) : [];
+                    
+                    // Initialize master EAN data from localStorage with user-specific key
+                    const masterEanDataStr = localStorage.getItem(`masterEanData_${userKey}`);
+                    masterEanData = masterEanDataStr ? JSON.parse(masterEanDataStr) : [];
                     
                     // Initialize inventory data from localStorage with user-specific key
                     const inventoryDataStr = localStorage.getItem(`inventoryData_${userKey}`);
@@ -1187,12 +1292,19 @@
                     const navInfo = document.getElementById('nav-info');
                     
                     // Master data elements
-                    const uploadBtn = document.getElementById('upload-btn');
-                    const downloadBtn = document.getElementById('download-btn');
-                    const clearBtn = document.getElementById('clear-btn');
-                    const addBtn = document.getElementById('add-btn');
-                    const fileInput = document.getElementById('file-input');
-                    const masterDataTable = document.getElementById('master-data-table') ? document.getElementById('master-data-table').querySelector('tbody') : null;
+                    const uploadMasterLocationBtn = document.getElementById('upload-master-location-btn');
+                    const downloadMasterLocationBtn = document.getElementById('download-master-location-btn');
+                    const clearMasterLocationBtn = document.getElementById('clear-master-location-btn');
+                    const addMasterLocationBtn = document.getElementById('add-master-location-btn');
+                    const masterLocationFileInput = document.getElementById('master-location-file-input');
+                    const masterLocationTable = document.getElementById('master-location-table') ? document.getElementById('master-location-table').querySelector('tbody') : null;
+                    
+                    const uploadMasterEanBtn = document.getElementById('upload-master-ean-btn');
+                    const downloadMasterEanBtn = document.getElementById('download-master-ean-btn');
+                    const clearMasterEanBtn = document.getElementById('clear-master-ean-btn');
+                    const addMasterEanBtn = document.getElementById('add-master-ean-btn');
+                    const masterEanFileInput = document.getElementById('master-ean-file-input');
+                    const masterEanTable = document.getElementById('master-ean-table') ? document.getElementById('master-ean-table').querySelector('tbody') : null;
                     
                     // Inventory data elements
                     const uploadInventoryBtn = document.getElementById('upload-inventory-btn');
@@ -1221,16 +1333,21 @@
                     const saveGithubConfigBtn = document.getElementById('save-github-config');
                     
                     // Sync buttons
-                    const pushCycleCountBtn = document.getElementById('push-cyclecount');
-                    const pushMasterDataBtn = document.getElementById('push-masterdata');
-                    const pushInventoryBtn = document.getElementById('push-inventory');
-                    const pullCycleCountBtn = document.getElementById('pull-cyclecount');
-                    const pullMasterDataBtn = document.getElementById('pull-masterdata');
-                    const pullInventoryBtn = document.getElementById('pull-inventory');
+                    const syncCycleCountBtn = document.getElementById('sync-cyclecount');
+                    const syncMasterLocationBtn = document.getElementById('sync-master-location');
+                    const syncMasterEanBtn = document.getElementById('sync-master-ean');
+                    const syncInventoryBtn = document.getElementById('sync-inventory');
+                    
+                    // Progress bars
+                    const syncCycleCountProgress = document.getElementById('sync-cyclecount-progress');
+                    const syncMasterLocationProgress = document.getElementById('sync-master-location-progress');
+                    const syncMasterEanProgress = document.getElementById('sync-master-ean-progress');
+                    const syncInventoryProgress = document.getElementById('sync-inventory-progress');
                     
                     // Last sync info
                     const lastSyncCycleCount = document.getElementById('last-sync-cyclecount');
-                    const lastSyncMasterData = document.getElementById('last-sync-masterdata');
+                    const lastSyncMasterLocation = document.getElementById('last-sync-master-location');
+                    const lastSyncMasterEan = document.getElementById('last-sync-master-ean');
                     const lastSyncInventory = document.getElementById('last-sync-inventory');
                     
                     // Set default dates for filter
@@ -1257,10 +1374,17 @@
                             }
                         }
                         
-                        if (lastSyncMasterData) {
-                            const lastSync = localStorage.getItem(`lastSync_masterData_${userKey}`);
+                        if (lastSyncMasterLocation) {
+                            const lastSync = localStorage.getItem(`lastSync_masterLocation_${userKey}`);
                             if (lastSync) {
-                                lastSyncMasterData.textContent = new Date(parseInt(lastSync)).toLocaleString();
+                                lastSyncMasterLocation.textContent = new Date(parseInt(lastSync)).toLocaleString();
+                            }
+                        }
+                        
+                        if (lastSyncMasterEan) {
+                            const lastSync = localStorage.getItem(`lastSync_masterEan_${userKey}`);
+                            if (lastSync) {
+                                lastSyncMasterEan.textContent = new Date(parseInt(lastSync)).toLocaleString();
                             }
                         }
                         
@@ -1342,46 +1466,33 @@
                         }, intervalMinutes * 60 * 1000);
                     }
                     
-                    // Push data to GitHub
-                    if (pushCycleCountBtn) {
-                        pushCycleCountBtn.addEventListener('click', function() {
-                            pushDataToGithub('cycle_count', 'cycleCount');
+                    // Sync data to GitHub (push and pull)
+                    if (syncCycleCountBtn) {
+                        syncCycleCountBtn.addEventListener('click', function() {
+                            syncDataWithGithub('cycle_count', 'cycleCount', syncCycleCountProgress, syncCycleCountBtn);
                         });
                     }
                     
-                    if (pushMasterDataBtn) {
-                        pushMasterDataBtn.addEventListener('click', function() {
-                            pushDataToGithub('master_data', 'masterData');
+                    if (syncMasterLocationBtn) {
+                        syncMasterLocationBtn.addEventListener('click', function() {
+                            syncDataWithGithub('master_location', 'masterLocation', syncMasterLocationProgress, syncMasterLocationBtn);
                         });
                     }
                     
-                    if (pushInventoryBtn) {
-                        pushInventoryBtn.addEventListener('click', function() {
-                            pushDataToGithub('inventory_data', 'inventory');
+                    if (syncMasterEanBtn) {
+                        syncMasterEanBtn.addEventListener('click', function() {
+                            syncDataWithGithub('master_ean', 'masterEan', syncMasterEanProgress, syncMasterEanBtn);
                         });
                     }
                     
-                    // Pull data from GitHub
-                    if (pullCycleCountBtn) {
-                        pullCycleCountBtn.addEventListener('click', function() {
-                            pullDataFromGithub('cycle_count', 'cycleCount');
+                    if (syncInventoryBtn) {
+                        syncInventoryBtn.addEventListener('click', function() {
+                            syncDataWithGithub('inventory_data', 'inventory', syncInventoryProgress, syncInventoryBtn);
                         });
                     }
                     
-                    if (pullMasterDataBtn) {
-                        pullMasterDataBtn.addEventListener('click', function() {
-                            pullDataFromGithub('master_data', 'masterData');
-                        });
-                    }
-                    
-                    if (pullInventoryBtn) {
-                        pullInventoryBtn.addEventListener('click', function() {
-                            pullDataFromGithub('inventory_data', 'inventory');
-                        });
-                    }
-                    
-                    // Function to push data to GitHub
-                    function pushDataToGithub(dataType, dataTypeName) {
+                    // Function to sync data with GitHub (push then pull)
+                    function syncDataWithGithub(dataType, dataTypeName, progressBar, button) {
                         const config = JSON.parse(localStorage.getItem(`githubConfig_${userKey}`)) || {};
                         
                         if (!config.token || !config.owner || !config.repo) {
@@ -1389,16 +1500,29 @@
                             return;
                         }
                         
-                        showToast(`Mengunggah data ${dataTypeName} ke GitHub...`, 'info');
+                        // Show progress bar and disable button
+                        if (progressBar) {
+                            progressBar.style.display = 'block';
+                            progressBar.querySelector('.progress-bar').style.width = '0%';
+                        }
+                        
+                        if (button) {
+                            button.disabled = true;
+                            const icon = button.querySelector('i');
+                            icon.classList.add('syncing');
+                        }
                         
                         // Get data from localStorage
                         let data, fileName;
                         if (dataType === 'cycle_count') {
                             data = JSON.parse(localStorage.getItem(`cycleCountData_${userKey}`)) || [];
                             fileName = 'cycle_count.json';
-                        } else if (dataType === 'master_data') {
-                            data = JSON.parse(localStorage.getItem(`cycleCountMasterData_${userKey}`)) || [];
-                            fileName = 'master_data.json';
+                        } else if (dataType === 'master_location') {
+                            data = JSON.parse(localStorage.getItem(`masterLocationData_${userKey}`)) || [];
+                            fileName = 'master_location.json';
+                        } else if (dataType === 'master_ean') {
+                            data = JSON.parse(localStorage.getItem(`masterEanData_${userKey}`)) || [];
+                            fileName = 'master_ean.json';
                         } else if (dataType === 'inventory_data') {
                             data = JSON.parse(localStorage.getItem(`inventoryData_${userKey}`)) || [];
                             fileName = 'inventory_data.json';
@@ -1406,64 +1530,174 @@
                         
                         const content = JSON.stringify(data, null, 2);
                         
-                        // GitHub API endpoint
-                        const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${fileName}`;
+                        // Check if data is larger than 1MB
+                        const contentSize = new Blob([content]).size;
+                        const isLargeData = contentSize > 1e6; // 1MB
                         
-                        // Check if file exists to get SHA for update
-                        fetch(url, {
-                            headers: {
-                                'Authorization': `token ${config.token}`,
-                                'Accept': 'application/vnd.github.v3+json'
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(fileInfo => {
-                            const sha = fileInfo.sha;
-                            
-                            // Update existing file
-                            return fetch(url, {
-                                method: 'PUT',
-                                headers: {
-                                    'Authorization': `token ${config.token}`,
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/vnd.github.v3+json'
-                                },
-                                body: JSON.stringify({
-                                    message: `Update ${fileName}`,
-                                    content: btoa(unescape(encodeURIComponent(content))),
-                                    sha: sha,
-                                    branch: config.branch
+                        showToast(`Menyinkronkan data ${dataTypeName} dengan GitHub...`, 'info');
+                        
+                        // Update progress
+                        if (progressBar) {
+                            progressBar.querySelector('.progress-bar').style.width = '30%';
+                        }
+                        
+                        // Function to push data to GitHub
+                        function pushData() {
+                            return new Promise((resolve, reject) => {
+                                // GitHub API endpoint
+                                const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${fileName}`;
+                                
+                                // Check if file exists to get SHA for update
+                                fetch(url, {
+                                    headers: {
+                                        'Authorization': `token ${config.token}`,
+                                        'Accept': 'application/vnd.github.v3+json'
+                                    }
                                 })
-                            });
-                        })
-                        .catch(() => {
-                            // Create new file if it doesn't exist
-                            return fetch(url, {
-                                method: 'PUT',
-                                headers: {
-                                    'Authorization': `token ${config.token}`,
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/vnd.github.v3+json'
-                                },
-                                body: JSON.stringify({
-                                    message: `Create ${fileName}`,
-                                    content: btoa(unescape(encodeURIComponent(content))),
-                                    branch: config.branch
+                                .then(response => response.json())
+                                .then(fileInfo => {
+                                    const sha = fileInfo.sha;
+                                    
+                                    // Update existing file
+                                    return fetch(url, {
+                                        method: 'PUT',
+                                        headers: {
+                                            'Authorization': `token ${config.token}`,
+                                            'Content-Type': 'application/json',
+                                            'Accept': 'application/vnd.github.v3+json'
+                                        },
+                                        body: JSON.stringify({
+                                            message: `Update ${fileName}`,
+                                            content: btoa(unescape(encodeURIComponent(content))),
+                                            sha: sha,
+                                            branch: config.branch
+                                        })
+                                    });
                                 })
+                                .catch(() => {
+                                    // Create new file if it doesn't exist
+                                    return fetch(url, {
+                                        method: 'PUT',
+                                        headers: {
+                                            'Authorization': `token ${config.token}`,
+                                            'Content-Type': 'application/json',
+                                            'Accept': 'application/vnd.github.v3+json'
+                                        },
+                                        body: JSON.stringify({
+                                            message: `Create ${fileName}`,
+                                            content: btoa(unescape(encodeURIComponent(content))),
+                                            branch: config.branch
+                                        })
+                                    });
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    // Update progress
+                                    if (progressBar) {
+                                        progressBar.querySelector('.progress-bar').style.width = '60%';
+                                    }
+                                    
+                                    resolve();
+                                })
+                                .catch(error => {
+                                    reject(error);
+                                });
                             });
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            showToast(`Data ${dataTypeName} berhasil diunggah ke GitHub`);
-                            
-                            // Update last sync time
-                            localStorage.setItem(`lastSync_${dataType}_${userKey}`, Date.now().toString());
-                            loadLastSyncInfo();
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            showToast('Gagal mengunggah data ke GitHub: ' + error.message, 'error');
-                        });
+                        }
+                        
+                        // Function to pull data from GitHub
+                        function pullData() {
+                            return new Promise((resolve, reject) => {
+                                const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${fileName}`;
+                                
+                                fetch(url, {
+                                    headers: {
+                                        'Authorization': `token ${config.token}`,
+                                        'Accept': 'application/vnd.github.v3+json'
+                                    }
+                                })
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error('File tidak ditemukan di repository');
+                                    }
+                                    return response.json();
+                                })
+                                .then(data => {
+                                    const content = atob(data.content);
+                                    const jsonData = JSON.parse(content);
+                                    
+                                    // Save to localStorage
+                                    if (dataType === 'cycle_count') {
+                                        localStorage.setItem(`cycleCountData_${userKey}`, JSON.stringify(jsonData));
+                                    } else if (dataType === 'master_location') {
+                                        localStorage.setItem(`masterLocationData_${userKey}`, JSON.stringify(jsonData));
+                                        masterLocationData = jsonData;
+                                    } else if (dataType === 'master_ean') {
+                                        localStorage.setItem(`masterEanData_${userKey}`, JSON.stringify(jsonData));
+                                        masterEanData = jsonData;
+                                    } else if (dataType === 'inventory_data') {
+                                        localStorage.setItem(`inventoryData_${userKey}`, JSON.stringify(jsonData));
+                                        inventoryData = jsonData;
+                                    }
+                                    
+                                    // Update progress
+                                    if (progressBar) {
+                                        progressBar.querySelector('.progress-bar').style.width = '100%';
+                                    }
+                                    
+                                    resolve();
+                                })
+                                .catch(error => {
+                                    reject(error);
+                                });
+                            });
+                        }
+                        
+                        // Execute push then pull
+                        pushData()
+                            .then(() => {
+                                return new Promise(resolve => setTimeout(resolve, 1000)); // Wait a second
+                            })
+                            .then(() => {
+                                return pullData();
+                            })
+                            .then(() => {
+                                showToast(`Data ${dataTypeName} berhasil disinkronkan dengan GitHub`);
+                                
+                                // Update last sync time
+                                localStorage.setItem(`lastSync_${dataType}_${userKey}`, Date.now().toString());
+                                loadLastSyncInfo();
+                                
+                                // Refresh the appropriate table
+                                if (dataType === 'cycle_count') {
+                                    renderDataCountTable();
+                                } else if (dataType === 'master_location') {
+                                    renderMasterLocationData();
+                                } else if (dataType === 'master_ean') {
+                                    renderMasterEanData();
+                                } else if (dataType === 'inventory_data') {
+                                    renderInventoryData();
+                                    renderCurrentLocationSKUCount(locationField.value.trim());
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                showToast('Gagal menyinkronkan data dengan GitHub: ' + error.message, 'error');
+                            })
+                            .finally(() => {
+                                // Hide progress bar and enable button
+                                if (progressBar) {
+                                    setTimeout(() => {
+                                        progressBar.style.display = 'none';
+                                    }, 1000);
+                                }
+                                
+                                if (button) {
+                                    button.disabled = false;
+                                    const icon = button.querySelector('i');
+                                    icon.classList.remove('syncing');
+                                }
+                            });
                     }
                     
                     // Function to auto-sync data to GitHub
@@ -1480,85 +1714,17 @@
                         
                         showToast('Memulai sinkronisasi otomatis...', 'info');
                         
-                        // Push all data first
-                        pushDataToGithub('cycle_count', 'cycleCount');
-                        
-                        // Then pull all data after a delay
+                        // Sync all data
+                        syncDataWithGithub('cycle_count', 'cycleCount');
                         setTimeout(() => {
-                            pullDataFromGithub('cycle_count', 'cycleCount');
+                            syncDataWithGithub('master_location', 'masterLocation');
+                        }, 1000);
+                        setTimeout(() => {
+                            syncDataWithGithub('master_ean', 'masterEan');
                         }, 2000);
-                        
                         setTimeout(() => {
-                            pullDataFromGithub('master_data', 'masterData');
-                        }, 4000);
-                        
-                        setTimeout(() => {
-                            pullDataFromGithub('inventory_data', 'inventory');
-                        }, 6000);
-                    }
-                    
-                    // Function to pull data from GitHub
-                    function pullDataFromGithub(dataType, dataTypeName) {
-                        const config = JSON.parse(localStorage.getItem(`githubConfig_${userKey}`)) || {};
-                        
-                        if (!config.token || !config.owner || !config.repo) {
-                            showToast('Harap lengkapi konfigurasi GitHub terlebih dahulu', 'error');
-                            return;
-                        }
-                        
-                        showToast(`Mengunduh data ${dataTypeName} dari GitHub...`, 'info');
-                        
-                        const fileName = dataType === 'cycle_count' ? 'cycle_count.json' : 
-                                      dataType === 'master_data' ? 'master_data.json' : 'inventory_data.json';
-                        const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${fileName}`;
-                        
-                        fetch(url, {
-                            headers: {
-                                'Authorization': `token ${config.token}`,
-                                'Accept': 'application/vnd.github.v3+json'
-                            }
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('File tidak ditemukan di repository');
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            const content = atob(data.content);
-                            const jsonData = JSON.parse(content);
-                            
-                            // Save to localStorage
-                            if (dataType === 'cycle_count') {
-                                localStorage.setItem(`cycleCountData_${userKey}`, JSON.stringify(jsonData));
-                            } else if (dataType === 'master_data') {
-                                localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(jsonData));
-                                masterData = jsonData;
-                            } else if (dataType === 'inventory_data') {
-                                localStorage.setItem(`inventoryData_${userKey}`, JSON.stringify(jsonData));
-                                inventoryData = jsonData;
-                            }
-                            
-                            showToast(`Data ${dataTypeName} berhasil diunduh dari GitHub`);
-                            
-                            // Update last sync time
-                            localStorage.setItem(`lastSync_${dataType}_${userKey}`, Date.now().toString());
-                            loadLastSyncInfo();
-                            
-                            // Refresh the appropriate table
-                            if (dataType === 'cycle_count') {
-                                renderDataCountTable();
-                            } else if (dataType === 'master_data') {
-                                renderMasterData();
-                                renderCurrentLocationSKUCount(locationField.value.trim());
-                            } else if (dataType === 'inventory_data') {
-                                renderInventoryData();
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            showToast('Gagal mengunduh data dari GitHub: ' + error.message, 'error');
-                        });
+                            syncDataWithGithub('inventory_data', 'inventory');
+                        }, 3000);
                     }
                     
                     // Function to display current location SKU count
@@ -1639,8 +1805,8 @@
                         // Update current location display
                         renderCurrentLocationSKUCount(location);
                         
-                        // Look up in inventory data based on location and EAN
-                        currentLocationItems = inventoryData.filter(item => item.locationId === location && item.ean === ean);
+                        // Look up in inventory data based on location and SKU (since EAN is removed)
+                        currentLocationItems = inventoryData.filter(item => item.locationId === location && item.sku === ean);
                         
                         if (currentLocationItems.length > 0) {
                             // If found, show the first item
@@ -1785,7 +1951,7 @@
                             const traceId = traceIdField ? traceIdField.value : '';
                             const existsInInventory = inventoryData.some(item => 
                                 item.locationId === location && 
-                                item.ean === ean && 
+                                item.sku === ean && 
                                 item.traceId === traceId
                             );
                             
@@ -1862,95 +2028,85 @@
                         });
                     }
                     
-                    // Master Data Functions
-                    function renderMasterData() {
-                        if (!masterDataTable) return;
+                    // Master Location Data Functions
+                    function renderMasterLocationData() {
+                        if (!masterLocationTable) return;
                         
-                        masterDataTable.innerHTML = '';
+                        masterLocationTable.innerHTML = '';
                         
-                        if (masterData.length === 0) {
+                        if (masterLocationData.length === 0) {
                             const row = document.createElement('tr');
-                            row.innerHTML = `<td colspan="6" class="text-center py-4 text-muted">Tidak ada data master</td>`;
-                            masterDataTable.appendChild(row);
+                            row.innerHTML = `<td colspan="3" class="text-center py-4 text-muted">Tidak ada data master lokasi</td>`;
+                            masterLocationTable.appendChild(row);
                             return;
                         }
                         
-                        masterData.forEach((item, index) => {
+                        masterLocationData.forEach((item, index) => {
                             const row = document.createElement('tr');
                             row.innerHTML = `
-                                <td>${item.location}</td>
-                                <td>${item.ean}</td>
-                                <td>${item.sku}</td>
-                                <td>${item.description}</td>
-                                <td>${item.traceId}</td>
+                                <td>${item.validationCode || ''}</td>
+                                <td>${item.location || ''}</td>
                                 <td>
-                                    <button class="btn btn-sm btn-danger delete-btn" data-index="${index}">
+                                    <button class="btn btn-sm btn-danger delete-master-location-btn" data-index="${index}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
                             `;
-                            masterDataTable.appendChild(row);
+                            masterLocationTable.appendChild(row);
                         });
                         
                         // Add event listeners to delete buttons
-                        document.querySelectorAll('.delete-btn').forEach(btn => {
+                        document.querySelectorAll('.delete-master-location-btn').forEach(btn => {
                             btn.addEventListener('click', function() {
                                 const index = parseInt(this.getAttribute('data-index'));
-                                deleteMasterDataItem(index);
+                                deleteMasterLocationItem(index);
                             });
                         });
                     }
                     
-                    function deleteMasterDataItem(index) {
-                        if (confirm('Apakah Anda yakin ingin menghapus data master ini?')) {
-                            masterData.splice(index, 1);
-                            localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(masterData));
-                            renderMasterData();
-                            showToast('Data master berhasil dihapus!');
+                    function deleteMasterLocationItem(index) {
+                        if (confirm('Apakah Anda yakin ingin menghapus data master lokasi ini?')) {
+                            masterLocationData.splice(index, 1);
+                            localStorage.setItem(`masterLocationData_${userKey}`, JSON.stringify(masterLocationData));
+                            renderMasterLocationData();
+                            showToast('Data master lokasi berhasil dihapus!');
                         }
                     }
                     
-                    // Add new master data
-                    if (addBtn) {
-                        addBtn.addEventListener('click', function() {
-                            const location = prompt('Masukkan Lokasi:');
+                    // Add new master location data
+                    if (addMasterLocationBtn) {
+                        addMasterLocationBtn.addEventListener('click', function() {
+                            const validationCode = prompt('Masukkan Validation Code:');
+                            if (!validationCode) return;
+                            
+                            const location = prompt('Masukkan Location:');
                             if (!location) return;
                             
-                            const ean = prompt('Masukkan EAN:');
-                            if (!ean) return;
-                            
-                            const sku = prompt('Masukkan SKU:');
-                            const description = prompt('Masukkan Description:');
-                            const traceId = prompt('Masukkan Trace ID:');
-                            
-                            // Check if combination already exists
-                            const exists = masterData.some(item => item.location === location && item.ean === ean && item.traceId === traceId);
+                            // Check if validation code already exists
+                            const exists = masterLocationData.some(item => item.validationCode === validationCode);
                             if (exists) {
-                                showToast('Kombinasi Lokasi, EAN dan Trace ID sudah ada dalam master data!', 'error');
+                                showToast('Validation Code sudah ada dalam master data lokasi!', 'error');
                                 return;
                             }
                             
-                            masterData.push({
-                                location,
-                                ean,
-                                sku: sku || '',
-                                description: description || '',
-                                traceId: traceId || ''
+                            masterLocationData.push({
+                                validationCode,
+                                location
                             });
                             
-                            localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(masterData));
-                            renderMasterData();
-                            showToast('Data master berhasil ditambahkan!');
+                            localStorage.setItem(`masterLocationData_${userKey}`, JSON.stringify(masterLocationData));
+                            renderMasterLocationData();
+                            showToast('Data master lokasi berhasil ditambahkan!');
                         });
                     }
                     
-                    // Upload master data from Excel
-                    if (uploadBtn && fileInput) {
-                        uploadBtn.addEventListener('click', function() {
-                            fileInput.click();
+                    // Upload master location data from Excel
+                    if (uploadMasterLocationBtn && masterLocationFileInput) {
+                        uploadMasterLocationBtn.addEventListener('click', function() {
+                            masterLocationFileInput.click();
                         });
                         
-                        fileInput.addEventListener('change', function(e) {
+                        masterLocationFileInput.addEventListener('change', function(e) {
                             const file = e.target.files[0];
                             if (!file) return;
                             
@@ -1973,25 +2129,22 @@
                                     
                                     // Validate required fields
                                     const firstRow = jsonData[0];
-                                    if (!firstRow.hasOwnProperty('Lokasi') || !firstRow.hasOwnProperty('EAN')) {
-                                        showToast('File Excel harus memiliki kolom "Lokasi" dan "EAN"', 'error');
+                                    if (!firstRow.hasOwnProperty('Validation Code') || !firstRow.hasOwnProperty('Location')) {
+                                        showToast('File Excel harus memiliki kolom "Validation Code" dan "Location"', 'error');
                                         return;
                                     }
                                     
                                     // Transform data to our format
                                     const transformedData = jsonData.map(row => ({
-                                        location: row['Lokasi'] || '',
-                                        ean: row['EAN'] || '',
-                                        sku: row['SKU'] || '',
-                                        description: row['Description'] || '',
-                                        traceId: row['Trace ID'] || ''
+                                        validationCode: row['Validation Code'] || '',
+                                        location: row['Location'] || ''
                                     }));
                                     
                                     // Replace master data
-                                    masterData = transformedData;
-                                    localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(masterData));
-                                    renderMasterData();
-                                    showToast('Master data berhasil diupload dari Excel!');
+                                    masterLocationData = transformedData;
+                                    localStorage.setItem(`masterLocationData_${userKey}`, JSON.stringify(masterLocationData));
+                                    renderMasterLocationData();
+                                    showToast('Master data lokasi berhasil diupload dari Excel!');
                                 } catch (err) {
                                     console.error('Error parsing Excel:', err);
                                     showToast('Error parsing file Excel: ' + err.message, 'error');
@@ -2001,41 +2154,200 @@
                         });
                     }
                     
-                    // Download master data to Excel
-                    if (downloadBtn) {
-                        downloadBtn.addEventListener('click', function() {
-                            if (masterData.length === 0) {
-                                showToast('Tidak ada data master untuk didownload', 'error');
+                    // Download master location data to Excel
+                    if (downloadMasterLocationBtn) {
+                        downloadMasterLocationBtn.addEventListener('click', function() {
+                            if (masterLocationData.length === 0) {
+                                showToast('Tidak ada data master lokasi untuk didownload', 'error');
                                 return;
                             }
                             
                             // Prepare worksheet
-                            const ws = XLSX.utils.json_to_sheet(masterData.map(item => ({
-                                'Lokasi': item.location,
-                                'EAN': item.ean,
-                                'SKU': item.sku,
-                                'Description': item.description,
-                                'Trace ID': item.traceId
+                            const ws = XLSX.utils.json_to_sheet(masterLocationData.map(item => ({
+                                'Validation Code': item.validationCode,
+                                'Location': item.location
                             })));
                             
                             // Create workbook
                             const wb = XLSX.utils.book_new();
-                            XLSX.utils.book_append_sheet(wb, ws, 'Master Data');
+                            XLSX.utils.book_append_sheet(wb, ws, 'Master Lokasi');
                             
                             // Generate Excel file
-                            XLSX.writeFile(wb, 'master-data.xlsx');
-                            showToast('Data master berhasil diexport ke Excel');
+                            XLSX.writeFile(wb, 'master-lokasi.xlsx');
+                            showToast('Data master lokasi berhasil diexport ke Excel');
                         });
                     }
                     
-                    // Clear all master data
-                    if (clearBtn) {
-                        clearBtn.addEventListener('click', function() {
-                            if (confirm('Apakah Anda yakin ingin menghapus semua data master? Tindakan ini tidak dapat dibatalkan.')) {
-                                masterData = [];
-                                localStorage.removeItem(`cycleCountMasterData_${userKey}`);
-                                renderMasterData();
-                                showToast('Semua data master berhasil dihapus!');
+                    // Clear all master location data
+                    if (clearMasterLocationBtn) {
+                        clearMasterLocationBtn.addEventListener('click', function() {
+                            if (confirm('Apakah Anda yakin ingin menghapus semua data master lokasi? Tindakan ini tidak dapat dibatalkan.')) {
+                                masterLocationData = [];
+                                localStorage.removeItem(`masterLocationData_${userKey}`);
+                                renderMasterLocationData();
+                                showToast('Semua data master lokasi berhasil dihapus!');
+                            }
+                        });
+                    }
+                    
+                    // Master EAN Data Functions
+                    function renderMasterEanData() {
+                        if (!masterEanTable) return;
+                        
+                        masterEanTable.innerHTML = '';
+                        
+                        if (masterEanData.length === 0) {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `<td colspan="3" class="text-center py-4 text-muted">Tidak ada data master EAN</td>`;
+                            masterEanTable.appendChild(row);
+                            return;
+                        }
+                        
+                        masterEanData.forEach((item, index) => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${item.ean || ''}</td>
+                                <td>${item.sku || ''}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger delete-master-ean-btn" data-index="${index}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            `;
+                            masterEanTable.appendChild(row);
+                        });
+                        
+                        // Add event listeners to delete buttons
+                        document.querySelectorAll('.delete-master-ean-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const index = parseInt(this.getAttribute('data-index'));
+                                deleteMasterEanItem(index);
+                            });
+                        });
+                    }
+                    
+                    function deleteMasterEanItem(index) {
+                        if (confirm('Apakah Anda yakin ingin menghapus data master EAN ini?')) {
+                            masterEanData.splice(index, 1);
+                            localStorage.setItem(`masterEanData_${userKey}`, JSON.stringify(masterEanData));
+                            renderMasterEanData();
+                            showToast('Data master EAN berhasil dihapus!');
+                        }
+                    }
+                    
+                    // Add new master EAN data
+                    if (addMasterEanBtn) {
+                        addMasterEanBtn.addEventListener('click', function() {
+                            const ean = prompt('Masukkan EAN:');
+                            if (!ean) return;
+                            
+                            const sku = prompt('Masukkan SKU:');
+                            if (!sku) return;
+                            
+                            // Check if EAN already exists
+                            const exists = masterEanData.some(item => item.ean === ean);
+                            if (exists) {
+                                showToast('EAN sudah ada dalam master data EAN!', 'error');
+                                return;
+                            }
+                            
+                            masterEanData.push({
+                                ean,
+                                sku
+                            });
+                            
+                            localStorage.setItem(`masterEanData_${userKey}`, JSON.stringify(masterEanData));
+                            renderMasterEanData();
+                            showToast('Data master EAN berhasil ditambahkan!');
+                        });
+                    }
+                    
+                    // Upload master EAN data from Excel
+                    if (uploadMasterEanBtn && masterEanFileInput) {
+                        uploadMasterEanBtn.addEventListener('click', function() {
+                            masterEanFileInput.click();
+                        });
+                        
+                        masterEanFileInput.addEventListener('change', function(e) {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                try {
+                                    const data = new Uint8Array(e.target.result);
+                                    const workbook = XLSX.read(data, { type: 'array' });
+                                    
+                                    // Get first worksheet
+                                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                                    
+                                    // Convert to JSON
+                                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                                    
+                                    if (jsonData.length === 0) {
+                                        showToast('File Excel tidak berisi data', 'error');
+                                        return;
+                                    }
+                                    
+                                    // Validate required fields
+                                    const firstRow = jsonData[0];
+                                    if (!firstRow.hasOwnProperty('EAN') || !firstRow.hasOwnProperty('SKU')) {
+                                        showToast('File Excel harus memiliki kolom "EAN" dan "SKU"', 'error');
+                                        return;
+                                    }
+                                    
+                                    // Transform data to our format
+                                    const transformedData = jsonData.map(row => ({
+                                        ean: row['EAN'] || '',
+                                        sku: row['SKU'] || ''
+                                    }));
+                                    
+                                    // Replace master data
+                                    masterEanData = transformedData;
+                                    localStorage.setItem(`masterEanData_${userKey}`, JSON.stringify(masterEanData));
+                                    renderMasterEanData();
+                                    showToast('Master data EAN berhasil diupload dari Excel!');
+                                } catch (err) {
+                                    console.error('Error parsing Excel:', err);
+                                    showToast('Error parsing file Excel: ' + err.message, 'error');
+                                }
+                            };
+                            reader.readAsArrayBuffer(file);
+                        });
+                    }
+                    
+                    // Download master EAN data to Excel
+                    if (downloadMasterEanBtn) {
+                        downloadMasterEanBtn.addEventListener('click', function() {
+                            if (masterEanData.length === 0) {
+                                showToast('Tidak ada data master EAN untuk didownload', 'error');
+                                return;
+                            }
+                            
+                            // Prepare worksheet
+                            const ws = XLSX.utils.json_to_sheet(masterEanData.map(item => ({
+                                'EAN': item.ean,
+                                'SKU': item.sku
+                            })));
+                            
+                            // Create workbook
+                            const wb = XLSX.utils.book_new();
+                            XLSX.utils.book_append_sheet(wb, ws, 'Master EAN');
+                            
+                            // Generate Excel file
+                            XLSX.writeFile(wb, 'master-ean.xlsx');
+                            showToast('Data master EAN berhasil diexport ke Excel');
+                        });
+                    }
+                    
+                    // Clear all master EAN data
+                    if (clearMasterEanBtn) {
+                        clearMasterEanBtn.addEventListener('click', function() {
+                            if (confirm('Apakah Anda yakin ingin menghapus semua data master EAN? Tindakan ini tidak dapat dibatalkan.')) {
+                                masterEanData = [];
+                                localStorage.removeItem(`masterEanData_${userKey}`);
+                                renderMasterEanData();
+                                showToast('Semua data master EAN berhasil dihapus!');
                             }
                         });
                     }
@@ -2048,7 +2360,7 @@
                         
                         if (inventoryData.length === 0) {
                             const row = document.createElement('tr');
-                            row.innerHTML = `<td colspan="7" class="text-center py-4 text-muted">Tidak ada data inventory</td>`;
+                            row.innerHTML = `<td colspan="6" class="text-center py-4 text-muted">Tidak ada data inventory</td>`;
                             inventoryTable.appendChild(row);
                             return;
                         }
@@ -2057,7 +2369,6 @@
                             const row = document.createElement('tr');
                             row.innerHTML = `
                                 <td>${item.locationId || ''}</td>
-                                <td>${item.ean || ''}</td>
                                 <td>${item.sku || ''}</td>
                                 <td>${item.skuDescrL || ''}</td>
                                 <td>${item.traceId || ''}</td>
@@ -2095,9 +2406,6 @@
                             const locationId = prompt('Masukkan Location ID:');
                             if (!locationId) return;
                             
-                            const ean = prompt('Masukkan EAN:');
-                            if (!ean) return;
-                            
                             const sku = prompt('Masukkan SKU:');
                             if (!sku) return;
                             
@@ -2108,18 +2416,17 @@
                             // Check if combination already exists
                             const exists = inventoryData.some(item => 
                                 item.locationId === locationId && 
-                                item.ean === ean
+                                item.sku === sku
                             );
                             
                             if (exists) {
-                                showToast('Kombinasi Location ID dan EAN sudah ada dalam data inventory!', 'error');
+                                showToast('Kombinasi Location ID dan SKU sudah ada dalam data inventory!', 'error');
                                 return;
                             }
                             
                             // Create a new inventory item
                             const newItem = {
                                 locationId,
-                                ean,
                                 sku,
                                 skuDescrL,
                                 traceId,
@@ -2162,7 +2469,7 @@
                                     
                                     // Validate required fields
                                     const firstRow = jsonData[0];
-                                    const requiredFields = ['Location ID', 'EAN', 'SKU'];
+                                    const requiredFields = ['Location ID', 'SKU'];
                                     const missingFields = requiredFields.filter(field => !firstRow.hasOwnProperty(field));
                                     
                                     if (missingFields.length > 0) {
@@ -2173,7 +2480,6 @@
                                     // Transform data to our format
                                     const transformedData = jsonData.map(row => ({
                                         locationId: row['Location ID'] || '',
-                                        ean: row['EAN'] || '',
                                         sku: row['SKU'] || '',
                                         skuDescrL: row['SKU Descr(L)'] || '',
                                         traceId: row['Trace ID'] || '',
@@ -2205,7 +2511,6 @@
                             // Prepare worksheet
                             const ws = XLSX.utils.json_to_sheet(inventoryData.map(item => ({
                                 'Location ID': item.locationId,
-                                'EAN': item.ean,
                                 'SKU': item.sku,
                                 'SKU Descr(L)': item.skuDescrL,
                                 'Trace ID': item.traceId,
@@ -2412,8 +2717,9 @@
                         });
                     }
                     
-                    // Initialize master data table
-                    renderMasterData();
+                    // Initialize master data tables
+                    renderMasterLocationData();
+                    renderMasterEanData();
                     
                     // Initialize inventory data table
                     renderInventoryData();
@@ -2425,53 +2731,50 @@
                     loadLastSyncInfo();
                     
                     // Add some sample data for demonstration if empty
-                    if (masterData.length === 0) {
-                        masterData = [
+                    if (masterLocationData.length === 0) {
+                        masterLocationData = [
                             {
-                                location: "GUDANG-A",
-                                ean: "1234567890123",
-                                sku: "SKU123",
-                                description: "Produk Sample 1",
-                                traceId: "TRACE001"
+                                validationCode: "VAL001",
+                                location: "GUDANG-A"
                             },
                             {
-                                location: "GUDANG-A",
-                                ean: "1234567890123",
-                                sku: "SKU123-A",
-                                description: "Produk Sample 1 - Varian A",
-                                traceId: "TRACE002"
+                                validationCode: "VAL002",
+                                location: "GUDANG-B"
                             },
                             {
-                                location: "GUDANG-A",
-                                ean: "1234567890124",
-                                sku: "SKU456",
-                                description: "Produk Sample 2",
-                                traceId: "TRACE003"
-                            },
-                            {
-                                location: "GUDANG-A",
-                                ean: "1234567890125",
-                                sku: "SKU789",
-                                description: "Produk Sample 3",
-                                traceId: "TRACE004"
-                            },
-                            {
-                                location: "GUDANG-B",
-                                ean: "1234567890126",
-                                sku: "SKU101",
-                                description: "Produk Sample 4",
-                                traceId: "TRACE005"
-                            },
-                            {
-                                location: "RAK-01",
-                                ean: "1234567890127",
-                                sku: "SKU202",
-                                description: "Produk Sample 5",
-                                traceId: "TRACE006"
+                                validationCode: "VAL003",
+                                location: "RAK-01"
                             }
                         ];
-                        localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(masterData));
-                        renderMasterData();
+                        localStorage.setItem(`masterLocationData_${userKey}`, JSON.stringify(masterLocationData));
+                        renderMasterLocationData();
+                    }
+                    
+                    if (masterEanData.length === 0) {
+                        masterEanData = [
+                            {
+                                ean: "1234567890123",
+                                sku: "SKU123"
+                            },
+                            {
+                                ean: "1234567890124",
+                                sku: "SKU456"
+                            },
+                            {
+                                ean: "1234567890125",
+                                sku: "SKU789"
+                            },
+                            {
+                                ean: "1234567890126",
+                                sku: "SKU101"
+                            },
+                            {
+                                ean: "1234567890127",
+                                sku: "SKU202"
+                            }
+                        ];
+                        localStorage.setItem(`masterEanData_${userKey}`, JSON.stringify(masterEanData));
+                        renderMasterEanData();
                     }
                     
                     // Add some sample inventory data for demonstration if empty
@@ -2479,7 +2782,6 @@
                         inventoryData = [
                             {
                                 locationId: "GUDANG-A",
-                                ean: "1234567890123",
                                 sku: "SKU123",
                                 skuDescrL: "Produk Sample Panjang Deskripsi 1",
                                 traceId: "TRACE001",
@@ -2487,7 +2789,6 @@
                             },
                             {
                                 locationId: "GUDANG-A",
-                                ean: "1234567890124",
                                 sku: "SKU456",
                                 skuDescrL: "Produk Sample Panjang Deskripsi 2",
                                 traceId: "TRACE002",
@@ -2495,7 +2796,6 @@
                             },
                             {
                                 locationId: "GUDANG-A",
-                                ean: "1234567890125",
                                 sku: "SKU789",
                                 skuDescrL: "Produk Sample Panjang Deskripsi 3",
                                 traceId: "TRACE003",
@@ -2503,7 +2803,6 @@
                             },
                             {
                                 locationId: "GUDANG-B",
-                                ean: "1234567890126",
                                 sku: "SKU101",
                                 skuDescrL: "Produk Sample Panjang Deskripsi 4",
                                 traceId: "TRACE004",
@@ -2511,7 +2810,6 @@
                             },
                             {
                                 locationId: "RAK-01",
-                                ean: "1234567890127",
                                 sku: "SKU202",
                                 skuDescrL: "Produk Sample Panjang Deskripsi 5",
                                 traceId: "TRACE005",
