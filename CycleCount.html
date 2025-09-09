@@ -476,6 +476,23 @@
             margin-bottom: 0;
             padding-left: 20px;
         }
+        
+        /* Sync buttons */
+        .sync-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .sync-buttons .btn {
+            flex: 1;
+        }
+        
+        .sync-info {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -575,7 +592,7 @@
                     </h2>
                     
                     <div class="notification" id="notification">
-                        <i class="fas fa-exclamation-circle"></i> Data tidak ditemukan di master data. Pastikan lokasi dan EAN sudah terdaftar.
+                        <i class="fas fa-exclamation-circle"></i> Data tidak ditemukan di inventory balanced. Pastikan lokasi dan EAN sudah terdaftar.
                     </div>
                     
                     <div class="count-saved" id="count-saved">
@@ -639,7 +656,7 @@
                                             </select>
                                         </div>
                                         <div class="col-7">
-                                            <input type="number" class="form-control" id="countValue" name="countValue" min="0" placeholder="Count Value">
+                                            <input type="number" class="form-control" id="qty" name="qty" min="0" placeholder="Qty">
                                         </div>
                                     </div>
                                 </div>
@@ -648,7 +665,7 @@
                         
                         <div class="mb-4">
                             <label for="remark" class="form-label">Remark</label>
-                            <textarea class="form-control" id="remark" name="remark" rows="3" placeholder="Keterangan tambahan (wajib diisi jika data tidak ada di master)"></textarea>
+                            <textarea class="form-control" id="remark" name="remark" rows="3" placeholder="Keterangan tambahan (wajib diisi jika data tidak ada di inventory)"></textarea>
                         </div>
 
                         <!-- Auto-sync Toggle -->
@@ -687,6 +704,19 @@
                         <i class="fas fa-history"></i> Data Count History
                     </h2>
                     
+                    <!-- GitHub Sync Buttons for Data Count -->
+                    <div class="sync-buttons">
+                        <button type="button" class="btn btn-primary" id="push-cyclecount">
+                            <i class="fas fa-upload"></i> Push Data Cycle Count
+                        </button>
+                        <button type="button" class="btn btn-success" id="pull-cyclecount">
+                            <i class="fas fa-download"></i> Pull Data Cycle Count
+                        </button>
+                    </div>
+                    <div class="sync-info">
+                        <i class="fas fa-info-circle"></i> Terakhir sinkronisasi: <span id="last-sync-cyclecount">Belum pernah</span>
+                    </div>
+                    
                     <div class="row mb-4">
                         <div class="col-md-8">
                             <div class="d-flex flex-wrap align-items-center gap-2">
@@ -723,7 +753,7 @@
                                     <th scope="col">EAN</th>
                                     <th scope="col">SKU</th>
                                     <th scope="col">Count Type</th>
-                                    <th scope="col">Count Value</th>
+                                    <th scope="col">Qty</th>
                                     <th scope="col" style="width: 100px;">Aksi</th>
                                 </tr>
                             </thead>
@@ -741,6 +771,19 @@
                     <h2 class="section-title">
                         <i class="fas fa-database"></i> Master Data Management
                     </h2>
+                    
+                    <!-- GitHub Sync Buttons for Master Data -->
+                    <div class="sync-buttons">
+                        <button type="button" class="btn btn-primary" id="push-masterdata">
+                            <i class="fas fa-upload"></i> Push Data Master
+                        </button>
+                        <button type="button" class="btn btn-success" id="pull-masterdata">
+                            <i class="fas fa-download"></i> Pull Data Master
+                        </button>
+                    </div>
+                    <div class="sync-info">
+                        <i class="fas fa-info-circle"></i> Terakhir sinkronisasi: <span id="last-sync-masterdata">Belum pernah</span>
+                    </div>
                     
                     <div class="d-flex flex-wrap gap-2 mb-4">
                         <button id="upload-btn" class="btn btn-success">
@@ -799,6 +842,19 @@
                         <i class="fas fa-cubes"></i> Inventory Balanced Management
                     </h2>
                     
+                    <!-- GitHub Sync Buttons for Inventory Data -->
+                    <div class="sync-buttons">
+                        <button type="button" class="btn btn-primary" id="push-inventory">
+                            <i class="fas fa-upload"></i> Push Data Inventory
+                        </button>
+                        <button type="button" class="btn btn-success" id="pull-inventory">
+                            <i class="fas fa-download"></i> Pull Data Inventory
+                        </button>
+                    </div>
+                    <div class="sync-info">
+                        <i class="fas fa-info-circle"></i> Terakhir sinkronisasi: <span id="last-sync-inventory">Belum pernah</span>
+                    </div>
+                    
                     <div class="d-flex flex-wrap gap-2 mb-4">
                         <button id="upload-inventory-btn" class="btn btn-success">
                             <i class="fas fa-upload"></i> Upload Excel
@@ -820,6 +876,7 @@
                         <p>File Excel harus memiliki kolom dengan header berikut:</p>
                         <ul>
                             <li><strong>Location ID</strong> (wajib)</li>
+                            <li><strong>EAN</strong> (wajib)</li>
                             <li><strong>SKU</strong> (wajib)</li>
                             <li><strong>SKU Descr(L)</strong></li>
                             <li><strong>Trace ID</strong></li>
@@ -834,6 +891,7 @@
                             <thead>
                                 <tr>
                                     <th scope="col">Location ID</th>
+                                    <th scope="col">EAN</th>
                                     <th scope="col">SKU</th>
                                     <th scope="col">SKU Descr(L)</th>
                                     <th scope="col">Trace ID</th>
@@ -884,36 +942,24 @@
                             <input type="text" class="form-control" id="github-branch" value="main" placeholder="Nama cabang (default: main)">
                         </div>
                         
+                        <div class="mb-3">
+                            <label for="sync-interval" class="form-label">Interval Sinkronisasi Otomatis (menit)</label>
+                            <input type="number" class="form-control" id="sync-interval" min="1" value="5" placeholder="Interval dalam menit">
+                            <div class="form-text">
+                                Setiap interval, data akan dikirim ke GitHub lalu ditarik dari GitHub
+                            </div>
+                        </div>
+                        
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="auto-sync-enabled">
+                            <label class="form-check-label" for="auto-sync-enabled">
+                                Aktifkan Sinkronisasi Otomatis
+                            </label>
+                        </div>
+                        
                         <button type="button" class="btn btn-primary" id="save-github-config">
                             <i class="fas fa-save"></i> Simpan Konfigurasi
                         </button>
-                    </div>
-                    
-                    <div class="github-config">
-                        <h4><i class="fas fa-cloud-upload-alt"></i> Sinkronisasi Data</h4>
-                        
-                        <div class="github-action-buttons">
-                            <button type="button" class="btn btn-primary" id="push-cyclecount">
-                                <i class="fas fa-upload"></i> Push Data Cycle Count
-                            </button>
-                            <button type="button" class="btn btn-primary" id="push-masterdata">
-                                <i class="fas fa-upload"></i> Push Data Master
-                            </button>
-                            <button type="button" class="btn btn-primary" id="push-inventory">
-                                <i class="fas fa-upload"></i> Push Data Inventory
-                            </button>
-                            <button type="button" class="btn btn-success" id="pull-cyclecount">
-                                <i class="fas fa-download"></i> Pull Data Cycle Count
-                            </button>
-                            <button type="button" class="btn btn-success" id="pull-masterdata">
-                                <i class="fas fa-download"></i> Pull Data Master
-                            </button>
-                            <button type="button" class="btn btn-success" id="pull-inventory">
-                                <i class="fas fa-download"></i> Pull Data Inventory
-                            </button>
-                        </div>
-                        
-                        <div class="sync-status" id="sync-status"></div>
                     </div>
                     
                     <div class="github-config">
@@ -942,6 +988,7 @@
         let userKey = null;
         let masterData = [];
         let inventoryData = [];
+        let autoSyncInterval = null;
         
         document.addEventListener('DOMContentLoaded', function() {
             // Login functionality
@@ -990,6 +1037,12 @@
             
             // Logout functionality
             logoutBtn.addEventListener('click', function() {
+                // Clear auto sync interval
+                if (autoSyncInterval) {
+                    clearInterval(autoSyncInterval);
+                    autoSyncInterval = null;
+                }
+                
                 sessionStorage.removeItem('currentUser');
                 showLogin();
             });
@@ -1117,7 +1170,7 @@
                     const descriptionField = document.getElementById('description');
                     const traceIdField = document.getElementById('traceId');
                     const countTypeField = document.getElementById('countType');
-                    const countValueField = document.getElementById('countValue');
+                    const qtyField = document.getElementById('qty');
                     const remarkField = document.getElementById('remark');
                     const notification = document.getElementById('notification');
                     const countSavedNotification = document.getElementById('count-saved');
@@ -1163,14 +1216,22 @@
                     const githubOwner = document.getElementById('github-owner');
                     const githubRepo = document.getElementById('github-repo');
                     const githubBranch = document.getElementById('github-branch');
+                    const syncInterval = document.getElementById('sync-interval');
+                    const autoSyncEnabled = document.getElementById('auto-sync-enabled');
                     const saveGithubConfigBtn = document.getElementById('save-github-config');
+                    
+                    // Sync buttons
                     const pushCycleCountBtn = document.getElementById('push-cyclecount');
                     const pushMasterDataBtn = document.getElementById('push-masterdata');
                     const pushInventoryBtn = document.getElementById('push-inventory');
                     const pullCycleCountBtn = document.getElementById('pull-cyclecount');
                     const pullMasterDataBtn = document.getElementById('pull-masterdata');
                     const pullInventoryBtn = document.getElementById('pull-inventory');
-                    const syncStatus = document.getElementById('sync-status');
+                    
+                    // Last sync info
+                    const lastSyncCycleCount = document.getElementById('last-sync-cyclecount');
+                    const lastSyncMasterData = document.getElementById('last-sync-masterdata');
+                    const lastSyncInventory = document.getElementById('last-sync-inventory');
                     
                     // Set default dates for filter
                     const today = new Date();
@@ -1187,6 +1248,30 @@
                     let currentItemIndex = 0;
                     let eanInputTimeout;
                     
+                    // Load last sync info
+                    function loadLastSyncInfo() {
+                        if (lastSyncCycleCount) {
+                            const lastSync = localStorage.getItem(`lastSync_cycleCount_${userKey}`);
+                            if (lastSync) {
+                                lastSyncCycleCount.textContent = new Date(parseInt(lastSync)).toLocaleString();
+                            }
+                        }
+                        
+                        if (lastSyncMasterData) {
+                            const lastSync = localStorage.getItem(`lastSync_masterData_${userKey}`);
+                            if (lastSync) {
+                                lastSyncMasterData.textContent = new Date(parseInt(lastSync)).toLocaleString();
+                            }
+                        }
+                        
+                        if (lastSyncInventory) {
+                            const lastSync = localStorage.getItem(`lastSync_inventory_${userKey}`);
+                            if (lastSync) {
+                                lastSyncInventory.textContent = new Date(parseInt(lastSync)).toLocaleString();
+                            }
+                        }
+                    }
+                    
                     // Load auto-sync preference
                     if (autoSyncToggle) {
                         const autoSyncEnabled = localStorage.getItem(`autoSyncEnabled_${userKey}`);
@@ -1202,13 +1287,20 @@
                     
                     // Function to load GitHub configuration
                     function loadGithubConfig() {
-                        if (!githubToken || !githubOwner || !githubRepo || !githubBranch) return;
+                        if (!githubToken || !githubOwner || !githubRepo || !githubBranch || !syncInterval || !autoSyncEnabled) return;
                         
                         const config = JSON.parse(localStorage.getItem(`githubConfig_${userKey}`)) || {};
                         githubToken.value = config.token || '';
                         githubOwner.value = config.owner || '';
                         githubRepo.value = config.repo || '';
                         githubBranch.value = config.branch || 'main';
+                        syncInterval.value = config.syncInterval || 5;
+                        autoSyncEnabled.checked = config.autoSyncEnabled || false;
+                        
+                        // Start auto sync if enabled
+                        if (config.autoSyncEnabled) {
+                            startAutoSync(config.syncInterval || 5);
+                        }
                     }
                     
                     // Save GitHub configuration
@@ -1218,62 +1310,86 @@
                                 token: githubToken.value,
                                 owner: githubOwner.value,
                                 repo: githubRepo.value,
-                                branch: githubBranch.value
+                                branch: githubBranch.value,
+                                syncInterval: parseInt(syncInterval.value) || 5,
+                                autoSyncEnabled: autoSyncEnabled.checked
                             };
                             
                             localStorage.setItem(`githubConfig_${userKey}`, JSON.stringify(config));
                             showToast('Konfigurasi GitHub berhasil disimpan!');
+                            
+                            // Start auto sync if enabled
+                            if (autoSyncInterval) {
+                                clearInterval(autoSyncInterval);
+                                autoSyncInterval = null;
+                            }
+                            
+                            if (config.autoSyncEnabled) {
+                                startAutoSync(config.syncInterval);
+                            }
                         });
+                    }
+                    
+                    // Start auto sync
+                    function startAutoSync(intervalMinutes) {
+                        if (autoSyncInterval) {
+                            clearInterval(autoSyncInterval);
+                        }
+                        
+                        autoSyncInterval = setInterval(() => {
+                            showToast('Memulai sinkronisasi otomatis...', 'info');
+                            autoSyncToGitHub();
+                        }, intervalMinutes * 60 * 1000);
                     }
                     
                     // Push data to GitHub
                     if (pushCycleCountBtn) {
                         pushCycleCountBtn.addEventListener('click', function() {
-                            pushDataToGithub('cycle_count');
+                            pushDataToGithub('cycle_count', 'cycleCount');
                         });
                     }
                     
                     if (pushMasterDataBtn) {
                         pushMasterDataBtn.addEventListener('click', function() {
-                            pushDataToGithub('master_data');
+                            pushDataToGithub('master_data', 'masterData');
                         });
                     }
                     
                     if (pushInventoryBtn) {
                         pushInventoryBtn.addEventListener('click', function() {
-                            pushDataToGithub('inventory_data');
+                            pushDataToGithub('inventory_data', 'inventory');
                         });
                     }
                     
                     // Pull data from GitHub
                     if (pullCycleCountBtn) {
                         pullCycleCountBtn.addEventListener('click', function() {
-                            pullDataFromGithub('cycle_count');
+                            pullDataFromGithub('cycle_count', 'cycleCount');
                         });
                     }
                     
                     if (pullMasterDataBtn) {
                         pullMasterDataBtn.addEventListener('click', function() {
-                            pullDataFromGithub('master_data');
+                            pullDataFromGithub('master_data', 'masterData');
                         });
                     }
                     
                     if (pullInventoryBtn) {
                         pullInventoryBtn.addEventListener('click', function() {
-                            pullDataFromGithub('inventory_data');
+                            pullDataFromGithub('inventory_data', 'inventory');
                         });
                     }
                     
                     // Function to push data to GitHub
-                    function pushDataToGithub(dataType) {
+                    function pushDataToGithub(dataType, dataTypeName) {
                         const config = JSON.parse(localStorage.getItem(`githubConfig_${userKey}`)) || {};
                         
                         if (!config.token || !config.owner || !config.repo) {
-                            showSyncStatus('Harap lengkapi konfigurasi GitHub terlebih dahulu', 'error');
+                            showToast('Harap lengkapi konfigurasi GitHub terlebih dahulu', 'error');
                             return;
                         }
                         
-                        showSyncStatus('Mengunggah data ke GitHub...', 'info');
+                        showToast(`Mengunggah data ${dataTypeName} ke GitHub...`, 'info');
                         
                         // Get data from localStorage
                         let data, fileName;
@@ -1338,103 +1454,59 @@
                         })
                         .then(response => response.json())
                         .then(data => {
-                            const dataTypeName = dataType === 'cycle_count' ? 'Cycle Count' : 
-                                              dataType === 'master_data' ? 'Master Data' : 'Inventory';
-                            showSyncStatus(`Data ${dataTypeName} berhasil diunggah ke GitHub`, 'success');
-                            showToast(`Data berhasil diunggah ke GitHub`);
+                            showToast(`Data ${dataTypeName} berhasil diunggah ke GitHub`);
+                            
+                            // Update last sync time
+                            localStorage.setItem(`lastSync_${dataType}_${userKey}`, Date.now().toString());
+                            loadLastSyncInfo();
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            showSyncStatus('Gagal mengunggah data ke GitHub: ' + error.message, 'error');
+                            showToast('Gagal mengunggah data ke GitHub: ' + error.message, 'error');
                         });
                     }
                     
                     // Function to auto-sync data to GitHub
                     function autoSyncToGitHub() {
                         // Check if auto-sync is enabled
-                        if (!autoSyncToggle || !autoSyncToggle.checked) {
+                        const config = JSON.parse(localStorage.getItem(`githubConfig_${userKey}`)) || {};
+                        if (!config.autoSyncEnabled) {
                             return;
                         }
                         
-                        const config = JSON.parse(localStorage.getItem(`githubConfig_${userKey}`)) || {};
-                        
-                        // Only sync if GitHub is configured
                         if (!config.token || !config.owner || !config.repo) {
                             return;
                         }
                         
-                        showToast('Menyinkronkan data ke GitHub...', 'info');
+                        showToast('Memulai sinkronisasi otomatis...', 'info');
                         
-                        // Get data from localStorage
-                        const cycleCountData = JSON.parse(localStorage.getItem(`cycleCountData_${userKey}`)) || [];
-                        const content = JSON.stringify(cycleCountData, null, 2);
+                        // Push all data first
+                        pushDataToGithub('cycle_count', 'cycleCount');
                         
-                        // GitHub API endpoint
-                        const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/cycle_count.json`;
+                        // Then pull all data after a delay
+                        setTimeout(() => {
+                            pullDataFromGithub('cycle_count', 'cycleCount');
+                        }, 2000);
                         
-                        // Check if file exists to get SHA for update
-                        fetch(url, {
-                            headers: {
-                                'Authorization': `token ${config.token}`,
-                                'Accept': 'application/vnd.github.v3+json'
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(fileInfo => {
-                            const sha = fileInfo.sha;
-                            
-                            // Update existing file
-                            return fetch(url, {
-                                method: 'PUT',
-                                headers: {
-                                    'Authorization': `token ${config.token}`,
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/vnd.github.v3+json'
-                                },
-                                body: JSON.stringify({
-                                    message: `Auto-sync: Update cycle_count.json`,
-                                    content: btoa(unescape(encodeURIComponent(content))),
-                                    sha: sha,
-                                    branch: config.branch || 'main'
-                                })
-                            });
-                        })
-                        .catch(() => {
-                            // Create new file if it doesn't exist
-                            return fetch(url, {
-                                method: 'PUT',
-                                headers: {
-                                    'Authorization': `token ${config.token}`,
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/vnd.github.v3+json'
-                                },
-                                body: JSON.stringify({
-                                    message: `Auto-sync: Create cycle_count.json`,
-                                    content: btoa(unescape(encodeURIComponent(content))),
-                                    branch: config.branch || 'main'
-                                })
-                            });
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            showToast('Data berhasil disinkronkan ke GitHub');
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            showToast('Gagal menyinkronkan ke GitHub: ' + error.message, 'error');
-                        });
+                        setTimeout(() => {
+                            pullDataFromGithub('master_data', 'masterData');
+                        }, 4000);
+                        
+                        setTimeout(() => {
+                            pullDataFromGithub('inventory_data', 'inventory');
+                        }, 6000);
                     }
                     
                     // Function to pull data from GitHub
-                    function pullDataFromGithub(dataType) {
+                    function pullDataFromGithub(dataType, dataTypeName) {
                         const config = JSON.parse(localStorage.getItem(`githubConfig_${userKey}`)) || {};
                         
                         if (!config.token || !config.owner || !config.repo) {
-                            showSyncStatus('Harap lengkapi konfigurasi GitHub terlebih dahulu', 'error');
+                            showToast('Harap lengkapi konfigurasi GitHub terlebih dahulu', 'error');
                             return;
                         }
                         
-                        showSyncStatus('Mengunduh data dari GitHub...', 'info');
+                        showToast(`Mengunduh data ${dataTypeName} dari GitHub...`, 'info');
                         
                         const fileName = dataType === 'cycle_count' ? 'cycle_count.json' : 
                                       dataType === 'master_data' ? 'master_data.json' : 'inventory_data.json';
@@ -1457,22 +1529,21 @@
                             const jsonData = JSON.parse(content);
                             
                             // Save to localStorage
-                            let dataTypeName;
                             if (dataType === 'cycle_count') {
                                 localStorage.setItem(`cycleCountData_${userKey}`, JSON.stringify(jsonData));
-                                dataTypeName = 'Cycle Count';
                             } else if (dataType === 'master_data') {
                                 localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(jsonData));
                                 masterData = jsonData;
-                                dataTypeName = 'Master Data';
                             } else if (dataType === 'inventory_data') {
                                 localStorage.setItem(`inventoryData_${userKey}`, JSON.stringify(jsonData));
                                 inventoryData = jsonData;
-                                dataTypeName = 'Inventory';
                             }
                             
-                            showSyncStatus(`Data ${dataTypeName} berhasil diunduh dari GitHub`, 'success');
-                            showToast(`Data berhasil diunduh dari GitHub`);
+                            showToast(`Data ${dataTypeName} berhasil diunduh dari GitHub`);
+                            
+                            // Update last sync time
+                            localStorage.setItem(`lastSync_${dataType}_${userKey}`, Date.now().toString());
+                            loadLastSyncInfo();
                             
                             // Refresh the appropriate table
                             if (dataType === 'cycle_count') {
@@ -1486,22 +1557,8 @@
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            showSyncStatus('Gagal mengunduh data dari GitHub: ' + error.message, 'error');
+                            showToast('Gagal mengunduh data dari GitHub: ' + error.message, 'error');
                         });
-                    }
-                    
-                    // Function to show sync status
-                    function showSyncStatus(message, type) {
-                        if (!syncStatus) return;
-                        
-                        syncStatus.textContent = message;
-                        syncStatus.className = 'sync-status ' + type;
-                        syncStatus.style.display = 'block';
-                        
-                        // Auto hide after 5 seconds
-                        setTimeout(() => {
-                            syncStatus.style.display = 'none';
-                        }, 5000);
                     }
                     
                     // Function to display current location SKU count
@@ -1513,10 +1570,10 @@
                             return;
                         }
                         
-                        // Calculate SKU count for the current location
+                        // Calculate SKU count for the current location from inventory data
                         const skuSet = new Set();
-                        masterData.forEach(item => {
-                            if (item.location === location) {
+                        inventoryData.forEach(item => {
+                            if (item.locationId === location) {
                                 skuSet.add(item.sku);
                             }
                         });
@@ -1582,8 +1639,8 @@
                         // Update current location display
                         renderCurrentLocationSKUCount(location);
                         
-                        // Look up in master data based on location and EAN
-                        currentLocationItems = masterData.filter(item => item.location === location && item.ean === ean);
+                        // Look up in inventory data based on location and EAN
+                        currentLocationItems = inventoryData.filter(item => item.locationId === location && item.ean === ean);
                         
                         if (currentLocationItems.length > 0) {
                             // If found, show the first item
@@ -1636,13 +1693,13 @@
                             item.countType === countType
                         );
                         
-                        if (existingCount && countValueField) {
-                            countValueField.value = existingCount.countValue;
-                            countValueField.setAttribute('readonly', true);
+                        if (existingCount && qtyField) {
+                            qtyField.value = existingCount.qty;
+                            qtyField.setAttribute('readonly', true);
                             if (countSavedNotification) countSavedNotification.style.display = 'block';
-                        } else if (countValueField) {
-                            countValueField.value = '';
-                            countValueField.removeAttribute('readonly');
+                        } else if (qtyField) {
+                            qtyField.value = '';
+                            qtyField.removeAttribute('readonly');
                             if (countSavedNotification) countSavedNotification.style.display = 'none';
                         }
                     }
@@ -1653,8 +1710,9 @@
                         
                         const item = currentLocationItems[currentItemIndex];
                         if (skuField) skuField.value = item.sku || '';
-                        if (descriptionField) descriptionField.value = item.description || '';
+                        if (descriptionField) descriptionField.value = item.skuDescrL || '';
                         if (traceIdField) traceIdField.value = item.traceId || '';
+                        if (qtyField) qtyField.value = item.qtyOnHand || '';
                         
                         // Update navigation info
                         if (navInfo) navInfo.textContent = `Item ${currentItemIndex + 1} of ${currentLocationItems.length}`;
@@ -1716,23 +1774,23 @@
                                 return;
                             }
                             
-                            if (!countValueField || !countValueField.value) {
-                                showToast('Harap isi nilai count!', 'error');
+                            if (!qtyField || !qtyField.value) {
+                                showToast('Harap isi nilai Qty!', 'error');
                                 return;
                             }
                             
-                            // Check if data exists in master data
+                            // Check if data exists in inventory data
                             const location = locationField.value;
                             const ean = eanField.value;
                             const traceId = traceIdField ? traceIdField.value : '';
-                            const existsInMaster = masterData.some(item => 
-                                item.location === location && 
+                            const existsInInventory = inventoryData.some(item => 
+                                item.locationId === location && 
                                 item.ean === ean && 
                                 item.traceId === traceId
                             );
                             
-                            if (!existsInMaster && (!remarkField || !remarkField.value)) {
-                                showToast('Data tidak ditemukan di master data. Harap isi remark sebagai temuan.', 'error');
+                            if (!existsInInventory && (!remarkField || !remarkField.value)) {
+                                showToast('Data tidak ditemukan di inventory. Harap isi remark sebagai temuan.', 'error');
                                 return;
                             }
                             
@@ -1755,7 +1813,7 @@
                                 description: descriptionField ? descriptionField.value : '',
                                 traceId: traceId,
                                 countType: countType,
-                                countValue: countValueField ? countValueField.value : '',
+                                qty: qtyField ? qtyField.value : '',
                                 remark: remarkField ? remarkField.value : '',
                                 timestamp: new Date().toISOString()
                             };
@@ -1782,12 +1840,12 @@
                             form.reset();
                             locationField.value = currentLocation;
                             
-                            // Clear EAN and count value fields specifically
+                            // Clear EAN and qty fields specifically
                             if (eanField) eanField.value = '';
-                            if (countValueField) countValueField.value = '';
+                            if (qtyField) qtyField.value = '';
                             
                             // Remove readonly attribute if it was set
-                            if (countValueField) countValueField.removeAttribute('readonly');
+                            if (qtyField) qtyField.removeAttribute('readonly');
                             
                             if (notification) notification.style.display = 'none';
                             if (countSavedNotification) countSavedNotification.style.display = 'none';
@@ -1848,7 +1906,6 @@
                             masterData.splice(index, 1);
                             localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(masterData));
                             renderMasterData();
-                            renderCurrentLocationSKUCount(locationField.value.trim());
                             showToast('Data master berhasil dihapus!');
                         }
                     }
@@ -1883,7 +1940,6 @@
                             
                             localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(masterData));
                             renderMasterData();
-                            renderCurrentLocationSKUCount(locationField.value.trim());
                             showToast('Data master berhasil ditambahkan!');
                         });
                     }
@@ -1935,7 +1991,6 @@
                                     masterData = transformedData;
                                     localStorage.setItem(`cycleCountMasterData_${userKey}`, JSON.stringify(masterData));
                                     renderMasterData();
-                                    renderCurrentLocationSKUCount(locationField.value.trim());
                                     showToast('Master data berhasil diupload dari Excel!');
                                 } catch (err) {
                                     console.error('Error parsing Excel:', err);
@@ -1980,7 +2035,6 @@
                                 masterData = [];
                                 localStorage.removeItem(`cycleCountMasterData_${userKey}`);
                                 renderMasterData();
-                                renderCurrentLocationSKUCount(locationField.value.trim());
                                 showToast('Semua data master berhasil dihapus!');
                             }
                         });
@@ -1994,7 +2048,7 @@
                         
                         if (inventoryData.length === 0) {
                             const row = document.createElement('tr');
-                            row.innerHTML = `<td colspan="6" class="text-center py-4 text-muted">Tidak ada data inventory</td>`;
+                            row.innerHTML = `<td colspan="7" class="text-center py-4 text-muted">Tidak ada data inventory</td>`;
                             inventoryTable.appendChild(row);
                             return;
                         }
@@ -2003,6 +2057,7 @@
                             const row = document.createElement('tr');
                             row.innerHTML = `
                                 <td>${item.locationId || ''}</td>
+                                <td>${item.ean || ''}</td>
                                 <td>${item.sku || ''}</td>
                                 <td>${item.skuDescrL || ''}</td>
                                 <td>${item.traceId || ''}</td>
@@ -2040,6 +2095,9 @@
                             const locationId = prompt('Masukkan Location ID:');
                             if (!locationId) return;
                             
+                            const ean = prompt('Masukkan EAN:');
+                            if (!ean) return;
+                            
                             const sku = prompt('Masukkan SKU:');
                             if (!sku) return;
                             
@@ -2050,17 +2108,18 @@
                             // Check if combination already exists
                             const exists = inventoryData.some(item => 
                                 item.locationId === locationId && 
-                                item.sku === sku
+                                item.ean === ean
                             );
                             
                             if (exists) {
-                                showToast('Kombinasi Location ID dan SKU sudah ada dalam data inventory!', 'error');
+                                showToast('Kombinasi Location ID dan EAN sudah ada dalam data inventory!', 'error');
                                 return;
                             }
                             
                             // Create a new inventory item
                             const newItem = {
                                 locationId,
+                                ean,
                                 sku,
                                 skuDescrL,
                                 traceId,
@@ -2103,7 +2162,7 @@
                                     
                                     // Validate required fields
                                     const firstRow = jsonData[0];
-                                    const requiredFields = ['Location ID', 'SKU'];
+                                    const requiredFields = ['Location ID', 'EAN', 'SKU'];
                                     const missingFields = requiredFields.filter(field => !firstRow.hasOwnProperty(field));
                                     
                                     if (missingFields.length > 0) {
@@ -2114,6 +2173,7 @@
                                     // Transform data to our format
                                     const transformedData = jsonData.map(row => ({
                                         locationId: row['Location ID'] || '',
+                                        ean: row['EAN'] || '',
                                         sku: row['SKU'] || '',
                                         skuDescrL: row['SKU Descr(L)'] || '',
                                         traceId: row['Trace ID'] || '',
@@ -2145,6 +2205,7 @@
                             // Prepare worksheet
                             const ws = XLSX.utils.json_to_sheet(inventoryData.map(item => ({
                                 'Location ID': item.locationId,
+                                'EAN': item.ean,
                                 'SKU': item.sku,
                                 'SKU Descr(L)': item.skuDescrL,
                                 'Trace ID': item.traceId,
@@ -2212,7 +2273,7 @@
                                 <td>${item.ean}</td>
                                 <td>${item.sku}</td>
                                 <td>${item.countType}</td>
-                                <td>${item.countValue}</td>
+                                <td>${item.qty}</td>
                                 <td>
                                     <button class="btn btn-sm btn-danger delete-data-btn" data-index="${index}">
                                         <i class="fas fa-trash"></i>
@@ -2329,13 +2390,13 @@
                             }
                             
                             // Create CSV content
-                            let csvContent = "Tanggal,Lokasi,EAN,SKU,Description,Count Type,Count Value,Remark\n";
+                            let csvContent = "Tanggal,Lokasi,EAN,SKU,Description,Count Type,Qty,Remark\n";
                             
                             filteredData.forEach(item => {
                                 const date = new Date(item.timestamp);
                                 const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
                                 
-                                csvContent += `"${formattedDate}","${item.location}","${item.ean}","${item.sku}","${item.description}","${item.countType}","${item.countValue}","${item.remark}"\n`;
+                                csvContent += `"${formattedDate}","${item.location}","${item.ean}","${item.sku}","${item.description}","${item.countType}","${item.qty}","${item.remark}"\n`;
                             });
                             
                             // Create download link
@@ -2359,6 +2420,9 @@
                     
                     // Load GitHub configuration
                     loadGithubConfig();
+                    
+                    // Load last sync info
+                    loadLastSyncInfo();
                     
                     // Add some sample data for demonstration if empty
                     if (masterData.length === 0) {
@@ -2414,25 +2478,44 @@
                     if (inventoryData.length === 0) {
                         inventoryData = [
                             {
-                                locationId: "LOC001",
+                                locationId: "GUDANG-A",
+                                ean: "1234567890123",
                                 sku: "SKU123",
                                 skuDescrL: "Produk Sample Panjang Deskripsi 1",
                                 traceId: "TRACE001",
                                 qtyOnHand: "100"
                             },
                             {
-                                locationId: "LOC002",
+                                locationId: "GUDANG-A",
+                                ean: "1234567890124",
                                 sku: "SKU456",
                                 skuDescrL: "Produk Sample Panjang Deskripsi 2",
                                 traceId: "TRACE002",
                                 qtyOnHand: "200"
                             },
                             {
-                                locationId: "LOC003",
+                                locationId: "GUDANG-A",
+                                ean: "1234567890125",
                                 sku: "SKU789",
                                 skuDescrL: "Produk Sample Panjang Deskripsi 3",
                                 traceId: "TRACE003",
                                 qtyOnHand: "50"
+                            },
+                            {
+                                locationId: "GUDANG-B",
+                                ean: "1234567890126",
+                                sku: "SKU101",
+                                skuDescrL: "Produk Sample Panjang Deskripsi 4",
+                                traceId: "TRACE004",
+                                qtyOnHand: "75"
+                            },
+                            {
+                                locationId: "RAK-01",
+                                ean: "1234567890127",
+                                sku: "SKU202",
+                                skuDescrL: "Produk Sample Panjang Deskripsi 5",
+                                traceId: "TRACE005",
+                                qtyOnHand: "25"
                             }
                         ];
                         localStorage.setItem(`inventoryData_${userKey}`, JSON.stringify(inventoryData));
