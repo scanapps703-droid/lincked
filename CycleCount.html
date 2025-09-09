@@ -476,20 +476,6 @@
             margin-bottom: 0;
             padding-left: 20px;
         }
-
-        /* Inventory Balanced Table */
-        .inventory-table-container {
-            overflow-x: auto;
-            max-width: 100%;
-        }
-        
-        .inventory-table {
-            min-width: 2000px;
-        }
-        
-        .inventory-table th, .inventory-table td {
-            white-space: nowrap;
-        }
     </style>
 </head>
 <body>
@@ -833,63 +819,25 @@
                         <h5><i class="fas fa-info-circle"></i> Format File Excel</h5>
                         <p>File Excel harus memiliki kolom dengan header berikut:</p>
                         <ul>
-                            <li><strong>Warehouse ID</strong> (wajib)</li>
-                            <li><strong>Customer ID</strong> (wajib)</li>
                             <li><strong>Location ID</strong> (wajib)</li>
                             <li><strong>SKU</strong> (wajib)</li>
-                            <li>Dan semua kolom lainnya sesuai dengan struktur yang telah ditentukan</li>
+                            <li><strong>SKU Descr(L)</strong></li>
+                            <li><strong>Trace ID</strong></li>
+                            <li><strong>QTY On Hand</strong></li>
                         </ul>
                     </div>
                     
                     <input type="file" id="inventory-file-input" accept=".xlsx, .xls" style="display: none;">
                     
-                    <div class="inventory-table-container">
-                        <table class="table table-hover inventory-table" id="inventory-table">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="inventory-table">
                             <thead>
                                 <tr>
-                                    <th scope="col">Warehouse ID</th>
-                                    <th scope="col">Customer ID</th>
                                     <th scope="col">Location ID</th>
                                     <th scope="col">SKU</th>
                                     <th scope="col">SKU Descr(L)</th>
-                                    <th scope="col">Batch Number</th>
-                                    <th scope="col">QTY On Hand</th>
-                                    <th scope="col">QTY Available</th>
-                                    <th scope="col">QTY Allocated</th>
-                                    <th scope="col">QTY On Hold</th>
-                                    <th scope="col">Whether damaged</th>
-                                    <th scope="col">SKU Descr(S)</th>
-                                    <th scope="col">packId</th>
-                                    <th scope="col">SKU Group1</th>
-                                    <th scope="col">Lot Number</th>
                                     <th scope="col">Trace ID</th>
-                                    <th scope="col">LPN</th>
-                                    <th scope="col">UOM</th>
-                                    <th scope="col">Pending Replen IN</th>
-                                    <th scope="col">Pending Putaway IN</th>
-                                    <th scope="col">Pending Replen OUT</th>
-                                    <th scope="col">TotalCube</th>
-                                    <th scope="col">Pending Move IN</th>
-                                    <th scope="col">Pending Move OUT</th>
-                                    <th scope="col">Total Cubic</th>
-                                    <th scope="col">Total GrossWeight</th>
-                                    <th scope="col">Total NetWeight</th>
-                                    <th scope="col">Total Price</th>
-                                    <th scope="col">CBMSKU</th>
-                                    <th scope="col">QtyCBM</th>
-                                    <th scope="col">LOTATT09</th>
-                                    <th scope="col">UDF1</th>
-                                    <th scope="col">UDF2</th>
-                                    <th scope="col">UDF3</th>
-                                    <th scope="col">Warehousing Date</th>
-                                    <th scope="col">Add Who</th>
-                                    <th scope="col">Add Time</th>
-                                    <th scope="col">Pallet Type</th>
-                                    <th scope="col">Edit Who</th>
-                                    <th scope="col">PO Number</th>
-                                    <th scope="col">Edit Time</th>
-                                    <th scope="col">lotAtt12</th>
-                                    <th scope="col">PLT DESCR</th>
+                                    <th scope="col">QTY On Hand</th>
                                     <th scope="col" style="width: 100px;">Aksi</th>
                                 </tr>
                             </thead>
@@ -2046,7 +1994,7 @@
                         
                         if (inventoryData.length === 0) {
                             const row = document.createElement('tr');
-                            row.innerHTML = `<td colspan="43" class="text-center py-4 text-muted">Tidak ada data inventory</td>`;
+                            row.innerHTML = `<td colspan="6" class="text-center py-4 text-muted">Tidak ada data inventory</td>`;
                             inventoryTable.appendChild(row);
                             return;
                         }
@@ -2054,49 +2002,11 @@
                         inventoryData.forEach((item, index) => {
                             const row = document.createElement('tr');
                             row.innerHTML = `
-                                <td>${item.warehouseId || ''}</td>
-                                <td>${item.customerId || ''}</td>
                                 <td>${item.locationId || ''}</td>
                                 <td>${item.sku || ''}</td>
                                 <td>${item.skuDescrL || ''}</td>
-                                <td>${item.batchNumber || ''}</td>
-                                <td>${item.qtyOnHand || ''}</td>
-                                <td>${item.qtyAvailable || ''}</td>
-                                <td>${item.qtyAllocated || ''}</td>
-                                <td>${item.qtyOnHold || ''}</td>
-                                <td>${item.whetherDamaged || ''}</td>
-                                <td>${item.skuDescrS || ''}</td>
-                                <td>${item.packId || ''}</td>
-                                <td>${item.skuGroup1 || ''}</td>
-                                <td>${item.lotNumber || ''}</td>
                                 <td>${item.traceId || ''}</td>
-                                <td>${item.lpn || ''}</td>
-                                <td>${item.uom || ''}</td>
-                                <td>${item.pendingReplenIN || ''}</td>
-                                <td>${item.pendingPutawayIN || ''}</td>
-                                <td>${item.pendingReplenOUT || ''}</td>
-                                <td>${item.totalCube || ''}</td>
-                                <td>${item.pendingMoveIN || ''}</td>
-                                <td>${item.pendingMoveOUT || ''}</td>
-                                <td>${item.totalCubic || ''}</td>
-                                <td>${item.totalGrossWeight || ''}</td>
-                                <td>${item.totalNetWeight || ''}</td>
-                                <td>${item.totalPrice || ''}</td>
-                                <td>${item.cbmSku || ''}</td>
-                                <td>${item.qtyCBM || ''}</td>
-                                <td>${item.lotAtt09 || ''}</td>
-                                <td>${item.udf1 || ''}</td>
-                                <td>${item.udf2 || ''}</td>
-                                <td>${item.udf3 || ''}</td>
-                                <td>${item.warehousingDate || ''}</td>
-                                <td>${item.addWho || ''}</td>
-                                <td>${item.addTime || ''}</td>
-                                <td>${item.palletType || ''}</td>
-                                <td>${item.editWho || ''}</td>
-                                <td>${item.poNumber || ''}</td>
-                                <td>${item.editTime || ''}</td>
-                                <td>${item.lotAtt12 || ''}</td>
-                                <td>${item.pltDescr || ''}</td>
+                                <td>${item.qtyOnHand || ''}</td>
                                 <td>
                                     <button class="btn btn-sm btn-danger delete-inventory-btn" data-index="${index}">
                                         <i class="fas fa-trash"></i>
@@ -2127,47 +2037,34 @@
                     // Add new inventory data
                     if (addInventoryBtn) {
                         addInventoryBtn.addEventListener('click', function() {
-                            // Create a simple form to add basic inventory data
-                            // In a real application, you might want a more comprehensive form
-                            const warehouseId = prompt('Masukkan Warehouse ID:');
-                            if (!warehouseId) return;
-                            
-                            const customerId = prompt('Masukkan Customer ID:');
-                            if (!customerId) return;
-                            
                             const locationId = prompt('Masukkan Location ID:');
                             if (!locationId) return;
                             
                             const sku = prompt('Masukkan SKU:');
                             if (!sku) return;
                             
+                            const skuDescrL = prompt('Masukkan SKU Descr(L):') || '';
+                            const traceId = prompt('Masukkan Trace ID:') || '';
+                            const qtyOnHand = prompt('Masukkan QTY On Hand:') || '0';
+                            
                             // Check if combination already exists
                             const exists = inventoryData.some(item => 
-                                item.warehouseId === warehouseId && 
-                                item.customerId === customerId && 
                                 item.locationId === locationId && 
                                 item.sku === sku
                             );
                             
                             if (exists) {
-                                showToast('Kombinasi Warehouse ID, Customer ID, Location ID dan SKU sudah ada dalam data inventory!', 'error');
+                                showToast('Kombinasi Location ID dan SKU sudah ada dalam data inventory!', 'error');
                                 return;
                             }
                             
-                            // Create a new inventory item with minimal data
+                            // Create a new inventory item
                             const newItem = {
-                                warehouseId,
-                                customerId,
                                 locationId,
                                 sku,
-                                skuDescrL: prompt('Masukkan SKU Description (L):') || '',
-                                batchNumber: prompt('Masukkan Batch Number:') || '',
-                                qtyOnHand: prompt('Masukkan QTY On Hand:') || '0',
-                                qtyAvailable: prompt('Masukkan QTY Available:') || '0',
-                                qtyAllocated: prompt('Masukkan QTY Allocated:') || '0',
-                                qtyOnHold: prompt('Masukkan QTY On Hold:') || '0',
-                                whetherDamaged: prompt('Whether damaged (true/false):') || 'false',
-                                // Add other fields as needed, or leave them empty
+                                skuDescrL,
+                                traceId,
+                                qtyOnHand
                             };
                             
                             inventoryData.push(newItem);
@@ -2206,7 +2103,7 @@
                                     
                                     // Validate required fields
                                     const firstRow = jsonData[0];
-                                    const requiredFields = ['Warehouse ID', 'Customer ID', 'Location ID', 'SKU'];
+                                    const requiredFields = ['Location ID', 'SKU'];
                                     const missingFields = requiredFields.filter(field => !firstRow.hasOwnProperty(field));
                                     
                                     if (missingFields.length > 0) {
@@ -2216,49 +2113,11 @@
                                     
                                     // Transform data to our format
                                     const transformedData = jsonData.map(row => ({
-                                        warehouseId: row['Warehouse ID'] || '',
-                                        customerId: row['Customer ID'] || '',
                                         locationId: row['Location ID'] || '',
                                         sku: row['SKU'] || '',
                                         skuDescrL: row['SKU Descr(L)'] || '',
-                                        batchNumber: row['Batch Number'] || '',
-                                        qtyOnHand: row['QTY On Hand'] || '',
-                                        qtyAvailable: row['QTY Available'] || '',
-                                        qtyAllocated: row['QTY Allocated'] || '',
-                                        qtyOnHold: row['QTY On Hold'] || '',
-                                        whetherDamaged: row['Whether damaged'] || '',
-                                        skuDescrS: row['SKU Descr(S)'] || '',
-                                        packId: row['packId'] || '',
-                                        skuGroup1: row['SKU Group1'] || '',
-                                        lotNumber: row['Lot Number'] || '',
                                         traceId: row['Trace ID'] || '',
-                                        lpn: row['LPN'] || '',
-                                        uom: row['UOM'] || '',
-                                        pendingReplenIN: row['Pending Replen IN'] || '',
-                                        pendingPutawayIN: row['Pending Putaway IN'] || '',
-                                        pendingReplenOUT: row['Pending Replen OUT'] || '',
-                                        totalCube: row['TotalCube'] || '',
-                                        pendingMoveIN: row['Pending Move IN'] || '',
-                                        pendingMoveOUT: row['Pending Move OUT'] || '',
-                                        totalCubic: row['Total Cubic'] || '',
-                                        totalGrossWeight: row['Total GrossWeight'] || '',
-                                        totalNetWeight: row['Total NetWeight'] || '',
-                                        totalPrice: row['Total Price'] || '',
-                                        cbmSku: row['CBMSKU'] || '',
-                                        qtyCBM: row['QtyCBM'] || '',
-                                        lotAtt09: row['LOTATT09'] || '',
-                                        udf1: row['UDF1'] || '',
-                                        udf2: row['UDF2'] || '',
-                                        udf3: row['UDF3'] || '',
-                                        warehousingDate: row['Warehousing Date'] || '',
-                                        addWho: row['Add Who'] || '',
-                                        addTime: row['Add Time'] || '',
-                                        palletType: row['Pallet Type'] || '',
-                                        editWho: row['Edit Who'] || '',
-                                        poNumber: row['PO Number'] || '',
-                                        editTime: row['Edit Time'] || '',
-                                        lotAtt12: row['lotAtt12'] || '',
-                                        pltDescr: row['PLT DESCR'] || ''
+                                        qtyOnHand: row['QTY On Hand'] || ''
                                     }));
                                     
                                     // Replace inventory data
@@ -2285,49 +2144,11 @@
                             
                             // Prepare worksheet
                             const ws = XLSX.utils.json_to_sheet(inventoryData.map(item => ({
-                                'Warehouse ID': item.warehouseId,
-                                'Customer ID': item.customerId,
                                 'Location ID': item.locationId,
                                 'SKU': item.sku,
                                 'SKU Descr(L)': item.skuDescrL,
-                                'Batch Number': item.batchNumber,
-                                'QTY On Hand': item.qtyOnHand,
-                                'QTY Available': item.qtyAvailable,
-                                'QTY Allocated': item.qtyAllocated,
-                                'QTY On Hold': item.qtyOnHold,
-                                'Whether damaged': item.whetherDamaged,
-                                'SKU Descr(S)': item.skuDescrS,
-                                'packId': item.packId,
-                                'SKU Group1': item.skuGroup1,
-                                'Lot Number': item.lotNumber,
                                 'Trace ID': item.traceId,
-                                'LPN': item.lpn,
-                                'UOM': item.uom,
-                                'Pending Replen IN': item.pendingReplenIN,
-                                'Pending Putaway IN': item.pendingPutawayIN,
-                                'Pending Replen OUT': item.pendingReplenOUT,
-                                'TotalCube': item.totalCube,
-                                'Pending Move IN': item.pendingMoveIN,
-                                'Pending Move OUT': item.pendingMoveOUT,
-                                'Total Cubic': item.totalCubic,
-                                'Total GrossWeight': item.totalGrossWeight,
-                                'Total NetWeight': item.totalNetWeight,
-                                'Total Price': item.totalPrice,
-                                'CBMSKU': item.cbmSku,
-                                'QtyCBM': item.qtyCBM,
-                                'LOTATT09': item.lotAtt09,
-                                'UDF1': item.udf1,
-                                'UDF2': item.udf2,
-                                'UDF3': item.udf3,
-                                'Warehousing Date': item.warehousingDate,
-                                'Add Who': item.addWho,
-                                'Add Time': item.addTime,
-                                'Pallet Type': item.palletType,
-                                'Edit Who': item.editWho,
-                                'PO Number': item.poNumber,
-                                'Edit Time': item.editTime,
-                                'lotAtt12': item.lotAtt12,
-                                'PLT DESCR': item.pltDescr
+                                'QTY On Hand': item.qtyOnHand
                             })));
                             
                             // Create workbook
@@ -2593,43 +2414,29 @@
                     if (inventoryData.length === 0) {
                         inventoryData = [
                             {
-                                warehouseId: "WH001",
-                                customerId: "CUST001",
                                 locationId: "LOC001",
                                 sku: "SKU123",
                                 skuDescrL: "Produk Sample Panjang Deskripsi 1",
-                                qtyOnHand: "100",
-                                qtyAvailable: "80",
-                                qtyAllocated: "20",
-                                qtyOnHold: "0",
-                                whetherDamaged: "false"
+                                traceId: "TRACE001",
+                                qtyOnHand: "100"
                             },
                             {
-                                warehouseId: "WH001",
-                                customerId: "CUST001",
                                 locationId: "LOC002",
                                 sku: "SKU456",
                                 skuDescrL: "Produk Sample Panjang Deskripsi 2",
-                                qtyOnHand: "200",
-                                qtyAvailable: "150",
-                                qtyAllocated: "50",
-                                qtyOnHold: "0",
-                                whetherDamaged: "false"
+                                traceId: "TRACE002",
+                                qtyOnHand: "200"
                             },
                             {
-                                warehouseId: "WH002",
-                                customerId: "CUST002",
                                 locationId: "LOC003",
                                 sku: "SKU789",
                                 skuDescrL: "Produk Sample Panjang Deskripsi 3",
-                                qtyOnHand: "50",
-                                qtyAvailable: "40",
-                                qtyAllocated: "10",
-                                qtyOnHold: "0",
-                                whetherDamaged: "false"
+                                traceId: "TRACE003",
+                                qtyOnHand: "50"
                             }
                         ];
                         localStorage.setItem(`inventoryData_${userKey}`, JSON.stringify(inventoryData));
+                        renderInventoryData();
                     }
                 } catch (error) {
                     console.error('Error in initApp:', error);
