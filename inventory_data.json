@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "locationId": "LOC001",
+    "sku": "SKU123",
+    "skuDescrL": "Produk Sample Panjang Deskripsi 1",
+    "traceId": "TRACE001",
+    "qtyOnHand": "100"
+  },
+  {
+    "locationId": "LOC002",
+    "sku": "SKU456",
+    "skuDescrL": "Produk Sample Panjang Deskripsi 2",
+    "traceId": "TRACE002",
+    "qtyOnHand": "200"
+  },
+  {
+    "locationId": "LOC003",
+    "sku": "SKU789",
+    "skuDescrL": "Produk Sample Panjang Deskripsi 3",
+    "traceId": "TRACE003",
+    "qtyOnHand": "50"
+  }
+]
