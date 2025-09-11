@@ -1,0 +1,14 @@
+[
+  {
+    "validationCode": "VAL001",
+    "location": "GUDANG-A"
+  },
+  {
+    "validationCode": "VAL002",
+    "location": "GUDANG-B"
+  },
+  {
+    "validationCode": "VAL003",
+    "location": "RAK-01"
+  }
+]
