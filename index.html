@@ -135,6 +135,7 @@
             border-radius: 8px;
             overflow: hidden;
             transition: var(--transition);
+            background-color: #f8f9fa;
         }
 
         .customer-logo img {
@@ -241,25 +242,9 @@
             background: rgba(255, 255, 255, 0.3);
         }
         
-        .back-button {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        
-        .back-button:hover {
-            background: rgba(255, 255, 255, 0.3);
+        .logo-placeholder {
+            font-size: 24px;
+            color: #aaa;
         }
     </style>
 </head>
@@ -283,14 +268,14 @@
             <div class="customer-options">
                 <div class="customer-option tumi active" data-customer="tumi">
                     <div class="customer-logo">
-                        <img src="https://drive.google.com/thumbnail?id=1fQPm1v3u1LpfR2C7bgW0S_LTPpK09OsH&sz=w200" alt="Tumi Logo" onerror="this.src='https://via.placeholder.com/80?text=Tumi'">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Tumi_logo.svg/320px-Tumi_logo.svg.png" alt="Tumi Logo" onerror="handleImageError(this, 'Tumi')">
                     </div>
                     <div class="customer-name">Tumi</div>
                     <div class="customer-desc">Akses sistem inventory Tumi</div>
                 </div>
                 <div class="customer-option samsonite" data-customer="samsonite">
                     <div class="customer-logo">
-                        <img src="https://drive.google.com/thumbnail?id=1bajVBnzN57iob98CmKYOfs8l3OOgWwOt&sz=w200" alt="Samsonite Logo" onerror="this.src='https://via.placeholder.com/80?text=Samsonite'">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Samsonite_logo.svg/320px-Samsonite_logo.svg.png" alt="Samsonite Logo" onerror="handleImageError(this, 'Samsonite')">
                     </div>
                     <div class="customer-name">Samsonite</div>
                     <div class="customer-desc">Akses sistem inventory Samsonite</div>
@@ -351,6 +336,13 @@
                 languageBtn.textContent = currentLanguage === 'id' ? 'ID | EN' : 'EN | ID';
             }
 
+            // Handle image loading errors
+            function handleImageError(img, brandName) {
+                // Replace with a placeholder div with the brand initial
+                const parent = img.parentElement;
+                parent.innerHTML = `<div class="logo-placeholder">${brandName.charAt(0)}</div>`;
+            }
+
             // Handle Customer selection and auto-redirect
             customerOptions.forEach(option => {
                 option.addEventListener('click', function() {
@@ -376,9 +368,9 @@
                         loadingSpinner.classList.remove('active');
                         
                         if (selectedCustomer === 'tumi') {
-                            window.location.href = 'Tumi.html';
+                            window.location.href = 'https://scanapps703-droid.github.io/tumi/Tumi.html';
                         } else if (selectedCustomer === 'samsonite') {
-                            window.location.href = 'Samsonite.html';
+                            window.location.href = 'https://scanapps703-droid.github.io/samsonite/Samsonite.html';
                         }
                     }, 800); // 800ms delay for visual feedback
                 });
@@ -405,17 +397,31 @@
             
             // Add keyboard navigation
             document.addEventListener('keydown', function(e) {
-                if (e.key === '1' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                if (e.key === '1') {
                     customerOptions[0].click();
-                } else if (e.key === '2' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                } else if (e.key === '2') {
                     customerOptions[1].click();
+                } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    // Toggle between options with arrow keys
+                    const currentActiveIndex = Array.from(customerOptions).findIndex(opt => opt.classList.contains('active'));
+                    const newIndex = e.key === 'ArrowDown' 
+                        ? (currentActiveIndex + 1) % customerOptions.length
+                        : (currentActiveIndex - 1 + customerOptions.length) % customerOptions.length;
+                    customerOptions[newIndex].click();
+                } else if (e.key === 'Enter') {
+                    // Redirect on enter key
+                    const activeOption = document.querySelector('.customer-option.active');
+                    if (activeOption) {
+                        activeOption.click();
+                    }
                 }
             });
             
             // Handle page navigation events
             window.addEventListener('pageshow', function(event) {
                 // Pastikan spinner non-aktif ketika kembali ke halaman
-                if (event.persisted || performance.getEntriesByType("navigation")[0].type === 'back_forward') {
+                if (event.persisted || (performance.getEntriesByType("navigation").length > 0 && 
+                    performance.getEntriesByType("navigation")[0].type === 'back_forward')) {
                     loadingSpinner.classList.remove('active');
                 }
             });
