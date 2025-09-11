@@ -962,6 +962,15 @@
             font-size: 0.875rem;
             color: var(--spark-gray);
         }
+
+        /* Finding highlight */
+        .finding-highlight {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -1226,7 +1235,7 @@
                                         <tr>
                                             <th>No. Mobil</th>
                                             <th>Qty</th>
-                                            <th>Finding</th>
+                                            <th>Jumlah Pallet</th>
                                         </tr>
                                     </thead>
                                     <tbody id="mobilTableBody">
@@ -1240,8 +1249,10 @@
                                 <table class="finding-table" id="findingTable">
                                     <thead>
                                         <tr>
-                                            <th>Trace ID</th>
-                                            <th>EAN Mix</th>
+                                            <th>Container</th>
+                                            <th>Pallet ID</th>
+                                            <th>Jumlah EAN</th>
+                                            <th>Status</th>
                                         </tr>
                                     </thead>
                                     <tbody id="findingTableBody">
@@ -1422,6 +1433,7 @@
             let currentPallet = '';
             let currentContainer = '';
             let scannedData = [];
+            let deletedDataIds = []; // Daftar ID data yang dihapus
             let currentUser = 'Guest';
             let isAdmin = false;
             let eanInputTimer = null;
@@ -1444,6 +1456,11 @@
                 autoSync: true,
                 autoSyncInterval: 1
             };
+            
+            // Fungsi untuk generate ID unik untuk setiap data
+            function generateId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+            }
             
             // Fungsi untuk menampilkan/menyembunyikan konten utama
             function toggleMainContent(show) {
@@ -1564,20 +1581,22 @@
                 const timestamp = now.toISOString();
                 
                 const newData = {
+                    id: generateId(), // ID unik untuk setiap data
                     pallet: currentPallet,
                     container: currentContainer,
                     ean,
                     qty,
                     timestamp: timestamp,
                     user: currentUser,
-                    date: now.toISOString().split('T')[0]
+                    date: now.toISOString().split('T')[0],
+                    version: 1 // Version untuk conflict resolution
                 };
                 
                 // Simpan data ke array sementara
                 scannedData.push(newData);
                 
                 // Simpan ke localStorage
-                localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                saveToLocalStorage();
                 
                 // Update UI
                 addTableRow(newData, scannedData.length - 1);
@@ -1593,16 +1612,29 @@
                 showNotification('Data berhasil disimpan!');
             }
             
+            // Fungsi untuk menyimpan data ke localStorage
+            function saveToLocalStorage() {
+                const dataToSave = {
+                    scannedData: scannedData,
+                    deletedDataIds: deletedDataIds,
+                    lastUpdated: new Date().toISOString()
+                };
+                localStorage.setItem('appData', JSON.stringify(dataToSave));
+            }
+            
             // Fungsi untuk memuat data dari local storage
             function loadFromStorage() {
-                const savedData = localStorage.getItem('scannedData');
+                const savedData = localStorage.getItem('appData');
                 if (savedData) {
                     try {
-                        scannedData = JSON.parse(savedData);
+                        const parsedData = JSON.parse(savedData);
+                        scannedData = parsedData.scannedData || [];
+                        deletedDataIds = parsedData.deletedDataIds || [];
                     } catch (e) {
                         console.error('Error parsing data from localStorage:', e);
                         scannedData = [];
-                        localStorage.setItem('scannedData', JSON.stringify([]));
+                        deletedDataIds = [];
+                        saveToLocalStorage();
                     }
                     populateFilterDropdowns();
                     updateTotalContainer();
@@ -1854,6 +1886,7 @@
                 editPalletInput.value = data.pallet;
                 editEanInput.value = data.ean;
                 editQtyInput.value = data.qty;
+                editVersionInput.value = data.version;
                 
                 editModal.style.display = 'flex';
             }
@@ -1877,12 +1910,13 @@
                     pallet: editPalletInput.value,
                     ean: editEanInput.value,
                     qty: editQtyInput.value,
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
+                    version: parseInt(editVersionInput.value) + 1
                 };
                 
                 // Update data lokal
                 scannedData[currentEditingIndex] = updatedData;
-                localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                saveToLocalStorage();
                 
                 showNotification('Data berhasil diupdate!');
                 
@@ -1908,13 +1942,18 @@
                     .map(checkbox => parseInt(checkbox.dataset.index))
                     .sort((a, b) => b - a);
                 
+                // Tambahkan ID data yang dihapus ke daftar deletedDataIds
+                for (const index of indexesToDelete) {
+                    deletedDataIds.push(scannedData[index].id);
+                }
+                
                 // Hapus data dari array
                 for (const index of indexesToDelete) {
                     scannedData.splice(index, 1);
                 }
                 
                 // Simpan perubahan lokal
-                localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                saveToLocalStorage();
                 
                 renderTable();
                 updateTotalEan();
@@ -1971,28 +2010,44 @@
             }
             
             // Fungsi untuk merge data lokal dan data dari GitHub
-            function mergeData(localData, remoteData) {
-                // Gabungkan kedua array data
-                const combinedData = [...localData, ...remoteData];
-                
-                // Buat Map untuk menyimpan data unik berdasarkan kunci tertentu
-                const dataMap = new Map();
-                
-                // Gunakan kombinasi container, pallet, ean, dan timestamp sebagai kunci unik
-                combinedData.forEach(item => {
-                    const key = `${item.container}-${item.pallet}-${item.ean}-${item.timestamp}`;
-                    
-                    // Jika kunci belum ada di Map, atau jika item ini lebih baru (berdasarkan timestamp)
-                    if (!dataMap.has(key) || new Date(item.timestamp) > new Date(dataMap.get(key).timestamp)) {
-                        dataMap.set(key, item);
-                    }
-                });
-                
-                // Konversi Map kembali ke array
-                return Array.from(dataMap.values());
-            }
-            
-            // Fungsi untuk push data ke GitHub (tanpa update UI)
+function mergeData(localData, remoteData) {
+    // Pastikan remoteData memiliki struktur yang benar
+    if (!remoteData || typeof remoteData !== 'object') {
+        remoteData = { scannedData: [], deletedDataIds: [] };
+    }
+    
+    if (!Array.isArray(remoteData.scannedData)) {
+        remoteData.scannedData = [];
+    }
+    
+    if (!Array.isArray(remoteData.deletedDataIds)) {
+        remoteData.deletedDataIds = [];
+    }
+
+    // Gabungkan kedua array data
+    const combinedData = [...localData.scannedData, ...remoteData.scannedData];
+    
+    // Buat Map untuk menyimpan data unik berdasarkan ID
+    const dataMap = new Map();
+    
+    // Prioritaskan data dengan versi terbaru
+    combinedData.forEach(item => {
+        if (!dataMap.has(item.id) || item.version > dataMap.get(item.id).version) {
+            dataMap.set(item.id, item);
+        }
+    });
+    
+    // Filter data yang tidak ada di daftar deleted
+    const finalData = Array.from(dataMap.values()).filter(item => 
+        !remoteData.deletedDataIds.includes(item.id)
+    );
+    
+    return {
+        scannedData: finalData,
+        deletedDataIds: [...new Set([...localData.deletedDataIds, ...remoteData.deletedDataIds])]
+    };
+}
+            // Fungsi untuk push data ke GitHub
             async function pushToGithubForSync(dataToPush) {
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
                     throw new Error('GitHub configuration is incomplete');
@@ -2026,7 +2081,7 @@
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            message: `Auto sync data dari ${currentUser} pada ${new Date().toISOString()}`,
+                            message: `Sync data dari ${currentUser} pada ${new Date().toISOString()}`,
                             content: contentEncoded,
                             sha: sha
                         })
@@ -2043,101 +2098,112 @@
                 }
             }
             
-            // Fungsi untuk pull data dari GitHub (tanpa update UI)
-            async function pullFromGithubForSync() {
-                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    throw new Error('GitHub configuration is incomplete');
-                }
-                
-                try {
-                    const fileUrl = `https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`;
-                    const response = await fetch(fileUrl, {
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const fileInfo = await response.json();
-                        const content = decodeURIComponent(escape(atob(fileInfo.content)));
-                        return JSON.parse(content);
-                    } else {
-                        // Jika file tidak ditemukan, kembalikan array kosong
-                        if (response.status === 404) {
-                            return [];
-                        }
-                        
-                        const error = await response.json();
-                        throw new Error(error.message || 'Gagal pull data');
-                    }
-                } catch (error) {
-                    throw error;
-                }
+// Fungsi untuk pull data dari GitHub
+async function pullFromGithubForSync() {
+    if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+        throw new Error('GitHub configuration is incomplete');
+    }
+    
+    try {
+        const fileUrl = `https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`;
+        const response = await fetch(fileUrl, {
+            headers: {
+                'Authorization': `token ${githubConfig.token}`,
+                'Accept': 'application/vnd.github.v3+json'
             }
+        });
+        
+        if (response.ok) {
+            const fileInfo = await response.json();
+            const content = decodeURIComponent(escape(atob(fileInfo.content)));
+            const parsedData = JSON.parse(content);
+            
+            // Pastikan data yang diterima memiliki struktur yang benar
+            return {
+                scannedData: Array.isArray(parsedData.scannedData) ? parsedData.scannedData : [],
+                deletedDataIds: Array.isArray(parsedData.deletedDataIds) ? parsedData.deletedDataIds : [],
+                lastUpdated: parsedData.lastUpdated || new Date().toISOString()
+            };
+        } else {
+            // Jika file tidak ditemukan, kembalikan objek kosong dengan struktur yang benar
+            if (response.status === 404) {
+                return { scannedData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
+            }
+            
+            const error = await response.json();
+            throw new Error(error.message || 'Gagal pull data');
+        }
+    } catch (error) {
+        console.error('Error pulling data:', error);
+        // Kembalikan objek kosong dengan struktur yang benar jika terjadi error
+        return { scannedData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
+    }
+}
             
             // Fungsi untuk melakukan sinkronisasi data (push lalu pull)
-            async function performSync() {
-                if (isSyncing) {
-                    console.log('Sync already in progress');
-                    return;
-                }
-                
-                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    showNotification('Harap konfigurasi GitHub terlebih dahulu!', 'error');
-                    return;
-                }
-                
-                isSyncing = true;
-                updatePushStatus('active', 'Syncing...');
-                
-                try {
-                    // 1. Ambil data lokal
-                    const localData = JSON.parse(localStorage.getItem('scannedData') || '[]');
-                    
-                    // 2. Pull data dari GitHub untuk mendapatkan data terbaru
-                    let remoteData = [];
-                    try {
-                        remoteData = await pullFromGithubForSync();
-                    } catch (error) {
-                        // Jika file belum ada di GitHub, lanjutkan dengan data lokal saja
-                        if (error.message.includes('404') || error.message.includes('Not Found')) {
-                            console.log('File not found on GitHub, creating new file');
-                            remoteData = [];
-                        } else {
-                            throw error;
-                        }
-                    }
-                    
-                    // 3. Merge data lokal dan data dari GitHub
-                    const mergedData = mergeData(localData, remoteData);
-                    
-                    // 4. Push data yang sudah di-merge ke GitHub
-                    await pushToGithubForSync(mergedData);
-                    
-                    // 5. Simpan data yang sudah di-merge ke local storage
-                    localStorage.setItem('scannedData', JSON.stringify(mergedData));
-                    scannedData = mergedData;
-                    
-                    // 6. Update UI
-                    renderTable();
-                    updateTotalEan();
-                    updateTotalContainer();
-                    populateFilterDropdowns();
-                    
-                    showNotification('Sinkronisasi berhasil!');
-                    updatePushStatus('idle', 'Sync berhasil');
-                    lastSyncTimestamp = Date.now();
-                    updateLastSyncTime();
-                } catch (error) {
-                    console.error('Error during sync:', error);
-                    showNotification('Sinkronisasi gagal: ' + error.message, 'error');
-                    updatePushStatus('error', 'Sync gagal');
-                } finally {
-                    isSyncing = false;
-                }
-            }
-            
+async function performSync() {
+    if (isSyncing) {
+        console.log('Sync already in progress');
+        return;
+    }
+    
+    if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+        showNotification('Harap konfigurasi GitHub terlebih dahulu!', 'error');
+        return;
+    }
+    
+    isSyncing = true;
+    updatePushStatus('active', 'Syncing...');
+    
+    try {
+        // 1. Siapkan data untuk dikirim ke GitHub
+        const dataToPush = {
+            scannedData: scannedData,
+            deletedDataIds: deletedDataIds,
+            lastUpdated: new Date().toISOString()
+        };
+        
+        // 2. Push data ke GitHub
+        await pushToGithubForSync(dataToPush);
+        
+        // 3. Pull data dari GitHub untuk mendapatkan data terbaru
+        const remoteData = await pullFromGithubForSync();
+        
+        // 4. Pastikan remoteData memiliki struktur yang benar
+        const validatedRemoteData = {
+            scannedData: Array.isArray(remoteData?.scannedData) ? remoteData.scannedData : [],
+            deletedDataIds: Array.isArray(remoteData?.deletedDataIds) ? remoteData.deletedDataIds : []
+        };
+        
+        // 5. Merge data lokal dan data dari GitHub
+        const mergedData = mergeData(
+            { scannedData, deletedDataIds }, 
+            validatedRemoteData
+        );
+        
+        // 6. Simpan data yang sudah di-merge ke local storage
+        scannedData = mergedData.scannedData;
+        deletedDataIds = mergedData.deletedDataIds;
+        saveToLocalStorage();
+        
+        // 7. Update UI
+        renderTable();
+        updateTotalEan();
+        updateTotalContainer();
+        populateFilterDropdowns();
+        
+        showNotification('Sinkronisasi berhasil!');
+        updatePushStatus('idle', 'Sync berhasil');
+        lastSyncTimestamp = Date.now();
+        updateLastSyncTime();
+    } catch (error) {
+        console.error('Error during sync:', error);
+        showNotification('Sinkronisasi gagal: ' + error.message, 'error');
+        updatePushStatus('error', 'Sync gagal');
+    } finally {
+        isSyncing = false;
+    }
+}
             // Fungsi untuk push data ke GitHub (manual)
             async function pushToGithub() {
                 await performSync();
@@ -2276,10 +2342,14 @@
             // Fungsi untuk menghapus data
             function deleteData(index) {
                 if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                    // Tambahkan ID data yang dihapus ke daftar deletedDataIds
+                    deletedDataIds.push(scannedData[index].id);
+                    
+                    // Hapus data dari array
                     scannedData.splice(index, 1);
                     
                     // Simpan perubahan lokal
-                    localStorage.setItem('scannedData', JSON.stringify(scannedData));
+                    saveToLocalStorage();
                     
                     renderTable();
                     updateTotalEan();
@@ -2316,7 +2386,7 @@
                 totalContainerSpan.textContent = total;
             }
             
-            // Fungsi untuk mengupdate dashboard summary
+            // Fungsi untuk mengupdate dashboard summary dengan logika finding
             function updateDashboardSummary() {
                 // Hitung data untuk dashboard
                 const containerMap = new Map();
@@ -2365,8 +2435,10 @@
                     if (palletData.eans.size > 1) {
                         totalFindings++;
                         findings.push({
+                            container: palletData.container,
                             pallet: palletData.pallet,
-                            eanCount: palletData.eans.size
+                            eanCount: palletData.eans.size,
+                            eans: Array.from(palletData.eans)
                         });
                     }
                 });
@@ -2390,8 +2462,10 @@
                 findings.forEach(finding => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
+                        <td>${finding.container}</td>
                         <td>${finding.pallet}</td>
                         <td>${finding.eanCount}</td>
+                        <td><span class="finding-highlight">Finding</span></td>
                     `;
                     findingTableBody.appendChild(row);
                 });
