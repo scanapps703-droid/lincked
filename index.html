@@ -11,7 +11,6 @@
             --primary-dark: #2980b9;
             --tumi-color: #9b59b6;
             --samsonite-color: #e67e22;
-            --cycle-count-color: #27ae60;
             --light: #f8f9fa;
             --dark: #2c3e50;
             --gray: #7f8c8d;
@@ -124,15 +123,6 @@
 
         .customer-option.samsonite.active::before, .customer-option.samsonite:hover::before {
             background: var(--samsonite-color);
-        }
-
-        .customer-option.cycle-count.active, .customer-option.cycle-count:hover {
-            border-color: var(--cycle-count-color);
-            background-color: #eafaf1;
-        }
-
-        .customer-option.cycle-count.active::before, .customer-option.cycle-count:hover::before {
-            background: var(--cycle-count-color);
         }
 
         .customer-logo {
@@ -305,13 +295,6 @@
                     <div class="customer-name">Samsonite</div>
                     <div class="customer-desc">Akses sistem inventory Samsonite</div>
                 </div>
-                <div class="customer-option cycle-count" data-customer="cycle-count">
-                    <div class="customer-logo">
-                        <img src="https://via.placeholder.com/80?text=CC" alt="Cycle Count Logo" onerror="this.src='https://via.placeholder.com/80?text=CC'">
-                    </div>
-                    <div class="customer-name">Cycle Count</div>
-                    <div class="customer-desc">Akses sistem Cycle Count</div>
-                </div>
             </div>
         </div>
         
@@ -340,7 +323,6 @@
                     instructions: "Klik pada Customer yang ingin Anda akses:",
                     tumiDesc: "Akses sistem inventory Tumi",
                     samsoniteDesc: "Akses sistem inventory Samsonite",
-                    cycleCountDesc: "Akses sistem Cycle Count",
                     loading: "Mengarahkan ke sistem...",
                     footer: "© 2025 Web Scan KED | Powered by Inventory"
                 },
@@ -348,7 +330,6 @@
                     instructions: "Click on the Customer you want to access:",
                     tumiDesc: "Access Tumi inventory system",
                     samsoniteDesc: "Access Samsonite inventory system",
-                    cycleCountDesc: "Access Cycle Count system",
                     loading: "Redirecting to system...",
                     footer: "© 2025 Web Scan KED | Powered by Inventory"
                 }
@@ -365,7 +346,6 @@
                 instructionsText.textContent = languageContent[currentLanguage].instructions;
                 document.querySelector('.customer-option.tumi .customer-desc').textContent = languageContent[currentLanguage].tumiDesc;
                 document.querySelector('.customer-option.samsonite .customer-desc').textContent = languageContent[currentLanguage].samsoniteDesc;
-                document.querySelector('.customer-option.cycle-count .customer-desc').textContent = languageContent[currentLanguage].cycleCountDesc;
                 loadingText.textContent = languageContent[currentLanguage].loading;
                 document.querySelector('.login-footer p').textContent = languageContent[currentLanguage].footer;
                 languageBtn.textContent = currentLanguage === 'id' ? 'ID | EN' : 'EN | ID';
@@ -399,8 +379,6 @@
                             window.location.href = 'Tumi.html';
                         } else if (selectedCustomer === 'samsonite') {
                             window.location.href = 'Samsonite.html';
-                        } else if (selectedCustomer === 'cycle-count') {
-                            window.location.href = 'CycleCount.html';
                         }
                     }, 800); // 800ms delay for visual feedback
                 });
@@ -431,8 +409,6 @@
                     customerOptions[0].click();
                 } else if (e.key === '2' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
                     customerOptions[1].click();
-                } else if (e.key === '3' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-                    customerOptions[2].click();
                 }
             });
             
