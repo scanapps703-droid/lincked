@@ -1,5 +1,127 @@
 {
-  "scannedData": [],
+  "scannedData": [
+    {
+      "id": "mfep3dnjn28vy",
+      "pallet": "A",
+      "container": "B 9530 JK",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-11T00:53:39.679Z",
+      "user": "admin",
+      "date": "2025-09-11",
+      "version": 1
+    },
+    {
+      "id": "mfep3e1b4uhbi",
+      "pallet": "A",
+      "container": "B 9530 JK",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-11T00:53:40.175Z",
+      "user": "admin",
+      "date": "2025-09-11",
+      "version": 1
+    },
+    {
+      "id": "mfep3ed8a38zx",
+      "pallet": "A",
+      "container": "B 9530 JK",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-11T00:53:40.604Z",
+      "user": "admin",
+      "date": "2025-09-11",
+      "version": 1
+    },
+    {
+      "id": "mfep3eqoil5r3",
+      "pallet": "A",
+      "container": "B 9530 JK",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-11T00:53:41.088Z",
+      "user": "admin",
+      "date": "2025-09-11",
+      "version": 1
+    },
+    {
+      "id": "mfep3f3g3o5uc",
+      "pallet": "A",
+      "container": "B 9530 JK",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-11T00:53:41.548Z",
+      "user": "admin",
+      "date": "2025-09-11",
+      "version": 1
+    },
+    {
+      "id": "mfep3ffl2mxx3",
+      "pallet": "A",
+      "container": "B 9530 JK",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-11T00:53:41.985Z",
+      "user": "admin",
+      "date": "2025-09-11",
+      "version": 1
+    },
+    {
+      "id": "mfep3fs39jo8t",
+      "pallet": "A",
+      "container": "B 9530 JK",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-11T00:53:42.435Z",
+      "user": "admin",
+      "date": "2025-09-11",
+      "version": 1
+    },
+    {
+      "id": "mfep3g5slyfjy",
+      "pallet": "A",
+      "container": "B 9530 JK",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-11T00:53:42.928Z",
+      "user": "admin",
+      "date": "2025-09-11",
+      "version": 1
+    },
+    {
+      "id": "mfep3gj1dlccm",
+      "pallet": "A",
+      "container": "B 9530 JK",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-11T00:53:43.405Z",
+      "user": "admin",
+      "date": "2025-09-11",
+      "version": 1
+    },
+    {
+      "id": "mfep3guks8ci2",
+      "pallet": "A",
+      "container": "B 9530 JK",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-11T00:53:43.820Z",
+      "user": "admin",
+      "date": "2025-09-11",
+      "version": 1
+    },
+    {
+      "id": "mfep3iu6ejjl1",
+      "pallet": "A",
+      "container": "B 9530 JK",
+      "ean": "1",
+      "qty": "1",
+      "timestamp": "2025-09-11T00:53:46.398Z",
+      "user": "admin",
+      "date": "2025-09-11",
+      "version": 1
+    }
+  ],
   "deletedDataIds": [],
-  "lastUpdated": "2025-09-11T00:50:28.978Z"
+  "lastUpdated": "2025-09-11T00:54:22.991Z"
 }
