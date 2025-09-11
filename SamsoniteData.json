@@ -109,19 +109,10 @@
       "user": "admin",
       "date": "2025-09-11",
       "version": 1
-    },
-    {
-      "id": "mfep3iu6ejjl1",
-      "pallet": "A",
-      "container": "B 9530 JK",
-      "ean": "1",
-      "qty": "1",
-      "timestamp": "2025-09-11T00:53:46.398Z",
-      "user": "admin",
-      "date": "2025-09-11",
-      "version": 1
     }
   ],
-  "deletedDataIds": [],
-  "lastUpdated": "2025-09-11T00:54:22.991Z"
+  "deletedDataIds": [
+    "mfep3iu6ejjl1"
+  ],
+  "lastUpdated": "2025-09-11T00:54:58.378Z"
 }
