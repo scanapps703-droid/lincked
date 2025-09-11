@@ -245,6 +245,33 @@
         .logo-placeholder {
             font-size: 24px;
             color: #aaa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+        }
+
+        .logo-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+        }
+
+        .logo-loading::after {
+            content: "";
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ddd;
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
     </style>
 </head>
@@ -268,14 +295,26 @@
             <div class="customer-options">
                 <div class="customer-option tumi active" data-customer="tumi">
                     <div class="customer-logo">
-                        <img src="https://drive.google.com/file/d/1fQPm1v3u1LpfR2C7bgW0S_LTPpK09OsH/view?usp=drive_link" alt="Tumi Logo" onerror="handleImageError(this, 'Tumi')">
+                        <div class="logo-loading" id="tumiLoading"></div>
+                        <img 
+                            src="https://drive.google.com/thumbnail?id=1fQPm1v3u1LpfR2C7bgW0S_LTPpK09OsH&sz=w200" 
+                            alt="Tumi Logo" 
+                            style="display: none;" 
+                            onload="handleImageLoad(this, 'tumi')"
+                            onerror="handleImageError(this, 'tumi')">
                     </div>
                     <div class="customer-name">Tumi</div>
                     <div class="customer-desc">Akses sistem inventory Tumi</div>
                 </div>
                 <div class="customer-option samsonite" data-customer="samsonite">
                     <div class="customer-logo">
-                        <img src="https://drive.google.com/file/d/1bajVBnzN57iob98CmKYOfs8l3OOgWwOt/view?usp=drive_link" alt="Samsonite Logo" onerror="handleImageError(this, 'Samsonite')">
+                        <div class="logo-loading" id="samsoniteLoading"></div>
+                        <img 
+                            src="https://drive.google.com/thumbnail?id=1bajVBnzN57iob98CmKYOfs8l3OOgWwOt&sz=w200" 
+                            alt="Samsonite Logo" 
+                            style="display: none;" 
+                            onload="handleImageLoad(this, 'samsonite')"
+                            onerror="handleImageError(this, 'samsonite')">
                     </div>
                     <div class="customer-name">Samsonite</div>
                     <div class="customer-desc">Akses sistem inventory Samsonite</div>
@@ -289,6 +328,20 @@
     </div>
 
     <script>
+        // Fungsi global untuk menangani event load gambar
+        function handleImageLoad(img, brand) {
+            img.style.display = 'block';
+            document.getElementById(`${brand}Loading`).style.display = 'none';
+        }
+
+        // Fungsi global untuk menangani error gambar
+        function handleImageError(img, brand) {
+            const loadingElement = document.getElementById(`${brand}Loading`);
+            loadingElement.className = 'logo-placeholder';
+            loadingElement.innerHTML = brand.charAt(0);
+            loadingElement.style.display = 'flex';
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Elements
             const customerOptions = document.querySelectorAll('.customer-option');
@@ -334,13 +387,6 @@
                 loadingText.textContent = languageContent[currentLanguage].loading;
                 document.querySelector('.login-footer p').textContent = languageContent[currentLanguage].footer;
                 languageBtn.textContent = currentLanguage === 'id' ? 'ID | EN' : 'EN | ID';
-            }
-
-            // Handle image loading errors
-            function handleImageError(img, brandName) {
-                // Replace with a placeholder div with the brand initial
-                const parent = img.parentElement;
-                parent.innerHTML = `<div class="logo-placeholder">${brandName.charAt(0)}</div>`;
             }
 
             // Handle Customer selection and auto-redirect
