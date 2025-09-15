@@ -1,0 +1,138 @@
+{
+  "scannedData": [
+    {
+      "id": "mfkiglwxnj0ma",
+      "pallet": "DID2509080305",
+      "container": "B3211UWX",
+      "ean": "5400520289209",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:34:36.632Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkign25emiv7",
+      "pallet": "DID2509080305",
+      "container": "B3211UWX",
+      "ean": "5400520289209",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:34:38.141Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkignwkuqrce",
+      "pallet": "DID2509080305",
+      "container": "B3211UWX",
+      "ean": "5400520289209",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:34:39.236Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkigoxfsktfc",
+      "pallet": "DID2509080305",
+      "container": "B3211UWX",
+      "ean": "5400520289209",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:34:40.563Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkigpl8vt8q0",
+      "pallet": "DID2509080305",
+      "container": "B3211UWX",
+      "ean": "5400520289209",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:34:41.420Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkigq8xdylmb",
+      "pallet": "DID2509080305",
+      "container": "B3211UWX",
+      "ean": "5400520289209",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:34:42.273Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkigrboscuro",
+      "pallet": "DID2509080305",
+      "container": "B3211UWX",
+      "ean": "5400520289209",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:34:43.668Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkigrxwdpz3t",
+      "pallet": "DID2509080305",
+      "container": "B3211UWX",
+      "ean": "5400520289209",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:34:44.468Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkigsoisccec",
+      "pallet": "DID2509080305",
+      "container": "B3211UWX",
+      "ean": "5400520289209",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:34:45.426Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkigvqod9elt",
+      "pallet": "DID2509080305",
+      "container": "B3211UWX",
+      "ean": "5400520289209",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:34:49.391Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkigzam7fgno",
+      "pallet": "DID2509080305",
+      "container": "B3211UWX",
+      "ean": "5400520289209",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:34:53.998Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkigzvd2ukyn",
+      "pallet": "DID2509080305",
+      "container": "B3211UWX",
+      "ean": "5400520289209",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:34:54.745Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    }
+  ],
+  "deletedDataIds": [],
+  "lastUpdated": "2025-09-15T02:35:03.665Z"
+}
