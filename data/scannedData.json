@@ -1231,8 +1231,96 @@
       "user": "Gawung",
       "date": "2025-09-15",
       "version": 1
+    },
+    {
+      "id": "mfkispn8aszkj",
+      "pallet": "DID2509080341",
+      "container": "B3211UWX",
+      "ean": "5400520239778",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:44:01.364Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkiss8wyhh38",
+      "pallet": "DID2509080341",
+      "container": "B3211UWX",
+      "ean": "5400520239778",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:44:04.736Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkissvqdvtps",
+      "pallet": "DID2509080341",
+      "container": "B3211UWX",
+      "ean": "5400520239778",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:44:05.558Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkisthgl8nbp",
+      "pallet": "DID2509080341",
+      "container": "B3211UWX",
+      "ean": "5400520239778",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:44:06.340Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkiszac1c556",
+      "pallet": "DID2509080341",
+      "container": "B3211UWX",
+      "ean": "5400520239778",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:44:13.860Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkit07yashwn",
+      "pallet": "DID2509080341",
+      "container": "B3211UWX",
+      "ean": "5400520239778",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:44:15.070Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkit12o32j00",
+      "pallet": "DID2509080341",
+      "container": "B3211UWX",
+      "ean": "5400520239778",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:44:16.176Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
+    },
+    {
+      "id": "mfkit1ug4w89w",
+      "pallet": "DID2509080341",
+      "container": "B3211UWX",
+      "ean": "5400520239778",
+      "qty": "1",
+      "timestamp": "2025-09-15T02:44:17.176Z",
+      "user": "Gawung",
+      "date": "2025-09-15",
+      "version": 1
     }
   ],
   "deletedDataIds": [],
-  "lastUpdated": "2025-09-15T02:43:35.382Z"
+  "lastUpdated": "2025-09-15T02:44:20.418Z"
 }
