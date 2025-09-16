@@ -8693,16 +8693,16 @@
       "customer": "Samsonite",
       "pallet": "DID2509110840",
       "container": "B9244UEL",
-      "ean": "DID2509110840",
+      "ean": "5400520239778",
       "sku": "",
       "description": "",
       "status": "Finding",
       "qty": "1",
-      "timestamp": "2025-09-16T07:32:16.948Z",
+      "timestamp": "2025-09-16T09:06:49.835Z",
       "user": "Gawung",
       "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T07:32:16.948Z"
+      "version": 2,
+      "lastModified": "2025-09-16T09:06:49.835Z"
     },
     {
       "id": "mfm8jyu1usk2n",
@@ -15116,5 +15116,5 @@
     "mfm2f45mkf0a7",
     "mfm2f3o34fnl7"
   ],
-  "lastUpdated": "2025-09-16T09:06:14.109Z"
+  "lastUpdated": "2025-09-16T09:07:07.138Z"
 }
