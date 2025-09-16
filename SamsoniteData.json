@@ -1,138 +1,5 @@
 {
-  "scannedData": [
-    {
-      "id": "mfm09el8h1vky",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T03:40:39.836Z",
-      "user": "riyan",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T03:40:39.836Z"
-    },
-    {
-      "id": "mfm09ey3b00z2",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T03:40:40.299Z",
-      "user": "riyan",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T03:40:40.299Z"
-    },
-    {
-      "id": "mfm09f6ortqr9",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T03:40:40.608Z",
-      "user": "riyan",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T03:40:40.608Z"
-    },
-    {
-      "id": "mfm09ff7hm29m",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T03:40:40.915Z",
-      "user": "riyan",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T03:40:40.915Z"
-    },
-    {
-      "id": "mfm09fmov54xh",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T03:40:41.184Z",
-      "user": "riyan",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T03:40:41.184Z"
-    },
-    {
-      "id": "mfm09fugbgeu0",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T03:40:41.464Z",
-      "user": "riyan",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T03:40:41.464Z"
-    },
-    {
-      "id": "mfm09g1v93a2r",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T03:40:41.731Z",
-      "user": "riyan",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T03:40:41.731Z"
-    },
-    {
-      "id": "mfm09g93ieult",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T03:40:41.991Z",
-      "user": "riyan",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T03:40:41.991Z"
-    },
-    {
-      "id": "mfm09ghms7eou",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T03:40:42.298Z",
-      "user": "riyan",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T03:40:42.298Z"
-    },
-    {
-      "id": "mfm09gq0bfme3",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T03:40:42.600Z",
-      "user": "riyan",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T03:40:42.600Z"
-    },
-    {
-      "id": "mfm09imssplxb",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "1",
-      "qty": "1",
-      "timestamp": "2025-09-16T03:40:45.076Z",
-      "user": "riyan",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T03:40:45.076Z"
-    }
-  ],
+  "scannedData": [],
   "deletedDataIds": [
     "mfep3iu6ejjl1",
     "mfep7g8e3f9f1",
@@ -176,7 +43,18 @@
     "mflws31b72i41",
     "mflws2r3pmajd",
     "mflws2hdkks39",
-    "mflws24g0vuzp"
+    "mflws24g0vuzp",
+    "mfm09imssplxb",
+    "mfm09gq0bfme3",
+    "mfm09ghms7eou",
+    "mfm09g93ieult",
+    "mfm09g1v93a2r",
+    "mfm09fugbgeu0",
+    "mfm09fmov54xh",
+    "mfm09ff7hm29m",
+    "mfm09f6ortqr9",
+    "mfm09ey3b00z2",
+    "mfm09el8h1vky"
   ],
-  "lastUpdated": "2025-09-16T03:41:31.315Z"
+  "lastUpdated": "2025-09-16T03:44:59.289Z"
 }
