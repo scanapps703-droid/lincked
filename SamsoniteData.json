@@ -1,6 +1,126 @@
 {
   "scannedData": [
     {
+      "id": "mflws24g0vuzp",
+      "pallet": "TEST",
+      "container": "B9201XYT",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-16T02:03:11.680Z",
+      "user": "admin",
+      "date": "2025-09-16",
+      "version": 1,
+      "lastModified": "2025-09-16T02:03:11.680Z"
+    },
+    {
+      "id": "mflws2hdkks39",
+      "pallet": "TEST",
+      "container": "B9201XYT",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-16T02:03:12.145Z",
+      "user": "admin",
+      "date": "2025-09-16",
+      "version": 1,
+      "lastModified": "2025-09-16T02:03:12.145Z"
+    },
+    {
+      "id": "mflws2r3pmajd",
+      "pallet": "TEST",
+      "container": "B9201XYT",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-16T02:03:12.495Z",
+      "user": "admin",
+      "date": "2025-09-16",
+      "version": 1,
+      "lastModified": "2025-09-16T02:03:12.495Z"
+    },
+    {
+      "id": "mflws31b72i41",
+      "pallet": "TEST",
+      "container": "B9201XYT",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-16T02:03:12.863Z",
+      "user": "admin",
+      "date": "2025-09-16",
+      "version": 1,
+      "lastModified": "2025-09-16T02:03:12.863Z"
+    },
+    {
+      "id": "mflws3cn6r5ay",
+      "pallet": "TEST",
+      "container": "B9201XYT",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-16T02:03:13.271Z",
+      "user": "admin",
+      "date": "2025-09-16",
+      "version": 1,
+      "lastModified": "2025-09-16T02:03:13.271Z"
+    },
+    {
+      "id": "mflws3psuorvu",
+      "pallet": "TEST",
+      "container": "B9201XYT",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-16T02:03:13.744Z",
+      "user": "admin",
+      "date": "2025-09-16",
+      "version": 1,
+      "lastModified": "2025-09-16T02:03:13.744Z"
+    },
+    {
+      "id": "mflws41chz4qg",
+      "pallet": "TEST",
+      "container": "B9201XYT",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-16T02:03:14.160Z",
+      "user": "admin",
+      "date": "2025-09-16",
+      "version": 1,
+      "lastModified": "2025-09-16T02:03:14.160Z"
+    },
+    {
+      "id": "mflws4dd78ody",
+      "pallet": "TEST",
+      "container": "B9201XYT",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-16T02:03:14.593Z",
+      "user": "admin",
+      "date": "2025-09-16",
+      "version": 1,
+      "lastModified": "2025-09-16T02:03:14.593Z"
+    },
+    {
+      "id": "mflws4o0x3vt5",
+      "pallet": "TEST",
+      "container": "B9201XYT",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-16T02:03:14.976Z",
+      "user": "admin",
+      "date": "2025-09-16",
+      "version": 1,
+      "lastModified": "2025-09-16T02:03:14.976Z"
+    },
+    {
+      "id": "mflws4zl57xs4",
+      "pallet": "TEST",
+      "container": "B9201XYT",
+      "ean": "0",
+      "qty": "1",
+      "timestamp": "2025-09-16T02:03:15.393Z",
+      "user": "admin",
+      "date": "2025-09-16",
+      "version": 1,
+      "lastModified": "2025-09-16T02:03:15.393Z"
+    },
+    {
       "id": "mflv4vorrpfnp",
       "pallet": "B",
       "container": "B 9530 JK",
@@ -9,7 +129,8 @@
       "timestamp": "2025-09-16T01:17:10.633Z",
       "user": "admin",
       "date": "2025-09-16",
-      "version": 1
+      "version": 1,
+      "lastModified": "2025-09-16T01:17:10.633Z"
     }
   ],
   "deletedDataIds": [
@@ -45,5 +166,5 @@
     "mfep3e1b4uhbi",
     "mfep3dnjn28vy"
   ],
-  "lastUpdated": "2025-09-16T02:31:43.869Z"
+  "lastUpdated": "2025-09-16T03:36:05.688Z"
 }
