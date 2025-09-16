@@ -971,6 +971,28 @@
             border-radius: 0.25rem;
             font-weight: 600;
         }
+
+        /* New styles for Master Data tab */
+        .master-data-form {
+            margin-bottom: 1.5rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-finding {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-ok {
+            background-color: #d4edda;
+            color: #155724;
+        }
     </style>
 </head>
 <body>
@@ -1020,6 +1042,35 @@
         </div>
     </div>
 
+    <!-- Modal untuk edit master data -->
+    <div class="modal" id="editMasterModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> Edit Master Data</h2>
+                <button class="close-modal" id="closeMasterModal">&times;</button>
+            </div>
+            <form id="editMasterForm">
+                <input type="hidden" id="editMasterIndex">
+                <div class="modal-form-group">
+                    <label for="editMasterEan">EAN</label>
+                    <input type="text" id="editMasterEan" required>
+                </div>
+                <div class="modal-form-group">
+                    <label for="editMasterSku">SKU</label>
+                    <input type="text" id="editMasterSku" required>
+                </div>
+                <div class="modal-form-group">
+                    <label for="editMasterDescription">Description</label>
+                    <input type="text" id="editMasterDescription" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-warning" id="cancelMasterEditBtn">Batal</button>
+                    <button type="submit" class="btn-info">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="container" id="mainContainer" style="display: none;">
         <div class="header">
             <h1><i class="fas fa-barcode"></i> SAMSONITE</h1>
@@ -1033,6 +1084,7 @@
                 <div class="tabs">
                     <div class="tab active" data-tab="input"><i class="fas fa-keyboard"></i> Input Data</div>
                     <div class="tab" data-tab="dashboard"><i class="fas fa-chart-pie"></i> Dashboard Summary</div>
+                    <div class="tab" data-tab="master"><i class="fas fa-database"></i> Master Data</div>
                     <div class="tab" data-tab="github" id="githubTabBtn"><i class="fab fa-github"></i> GitHub Config</div>
                 </div>
                 
@@ -1073,11 +1125,20 @@
                         <div class="container-info" id="containerInfo">
                             <p><i class="fas fa-info-circle"></i> No. Pallet saat ini: <span id="currentPallet">Belum dipilih</span></p>
                             <p><i class="fas fa-truck"></i> No. Container saat ini: <span id="currentContainer">Belum dipilih</span></p>
+                            <p><i class="fas fa-users"></i> Customer ID saat ini: <span id="currentCustomer">Belum dipilih</span></p>
                         </div>
                         
                         <div class="form-container">
                             <form id="dataForm">
                                 <div class="form-group">
+                                    <div>
+                                        <label for="customer"><i class="fas fa-users"></i> Customer ID</label>
+                                        <select id="customer" required>
+                                            <option value="">Pilih Customer</option>
+                                            <option value="Samsonite">Samsonite</option>
+                                            <option value="Tumi">Tumi</option>
+                                        </select>
+                                    </div>
                                     <div>
                                         <label for="container"><i class="fas fa-truck"></i> No. Container</label>
                                         <div class="input-with-button">
@@ -1100,13 +1161,28 @@
                                         <div class="input-with-button">
                                             <input type="text" id="ean" required placeholder="Masukkan atau scan kode EAN" disabled>
                                             <small id="eanHelpText" style="color: #e74c3c; display: none;">
-                                                <i class="fas fa-exclamation-circle"></i> Harap set Container dan Pallet terlebih dahulu
+                                                <i class="fas fa-exclamation-circle"></i> Harap set Container, Pallet, dan Customer terlebih dahulu
                                             </small>
                                         </div>
                                     </div>
                                     <div>
                                         <label for="qty"><i class="fas fa-cubes"></i> Qty (default: 1)</label>
                                         <input type="number" id="qty" value="1" min="1" placeholder="Jumlah" disabled readonly>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <div>
+                                        <label for="sku"><i class="fas fa-tag"></i> SKU</label>
+                                        <input type="text" id="sku" readonly placeholder="SKU akan terisi otomatis">
+                                    </div>
+                                    <div>
+                                        <label for="description"><i class="fas fa-align-left"></i> Description</label>
+                                        <input type="text" id="description" readonly placeholder="Deskripsi akan terisi otomatis">
+                                    </div>
+                                    <div>
+                                        <label for="status"><i class="fas fa-exclamation-triangle"></i> Status</label>
+                                        <input type="text" id="status" readonly placeholder="Status akan terisi otomatis">
                                     </div>
                                 </div>
                                 
@@ -1175,10 +1251,14 @@
                                     <th class="checkbox-cell">
                                         <input type="checkbox" id="selectAllCheckbox" class="select-all-checkbox">
                                     </th>
+                                    <th><i class="fas fa-users"></i> Customer</th>
                                     <th><i class="fas fa-truck"></i> No. Container</th>
                                     <th><i class="fas fa-pallet"></i> Pallet ID</th>
                                     <th><i class="fas fa-barcode"></i> EAN</th>
+                                    <th><i class="fas fa-tag"></i> SKU</th>
+                                    <th><i class="fas fa-align-left"></i> Description</th>
                                     <th><i class="fas fa-cubes"></i> Qty</th>
+                                    <th><i class="fas fa-exclamation-triangle"></i> Status</th>
                                     <th><i class="fas fa-clock"></i> Timestamp</th>
                                     <th><i class="fas fa-user"></i> User</th>
                                     <th><i class="fas fa-cog"></i> Actions</th>
@@ -1263,6 +1343,58 @@
                         </div>
                     </div>
 
+                    <!-- Tab Master Data -->
+                    <div class="tab-content" id="masterTab">
+                        <div class="github-config">
+                            <h3><i class="fas fa-database"></i> Master Data</h3>
+                            <p>Kelola data master EAN, SKU, dan Description</p>
+                        </div>
+                        
+                        <div class="form-container master-data-form">
+                            <form id="masterDataForm">
+                                <div class="form-group">
+                                    <div>
+                                        <label for="masterEan"><i class="fas fa-barcode"></i> EAN</label>
+                                        <input type="text" id="masterEan" required placeholder="Masukkan kode EAN">
+                                    </div>
+                                    <div>
+                                        <label for="masterSku"><i class="fas fa-tag"></i> SKU</label>
+                                        <input type="text" id="masterSku" required placeholder="Masukkan SKU">
+                                    </div>
+                                    <div>
+                                        <label for="masterDescription"><i class="fas fa-align-left"></i> Description</label>
+                                        <input type="text" id="masterDescription" required placeholder="Masukkan deskripsi">
+                                    </div>
+                                </div>
+                                
+                                <div class="button-group">
+                                    <button type="submit" class="btn-primary"><i class="fas fa-plus"></i> Tambah Data</button>
+                                    <button type="button" class="btn-excel" id="exportMasterBtn"><i class="fas fa-file-excel"></i> Export Master Data</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <table id="masterDataTable">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-barcode"></i> EAN</th>
+                                    <th><i class="fas fa-tag"></i> SKU</th>
+                                    <th><i class="fas fa-align-left"></i> Description</th>
+                                    <th><i class="fas fa-cog"></i> Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="masterTableBody">
+                                <!-- Data master akan ditampilkan di sini -->
+                            </tbody>
+                        </table>
+                        
+                        <div id="masterEmptyState" class="empty-state hidden">
+                            <i class="fas fa-inbox"></i>
+                            <h3>Belum ada data master</h3>
+                            <p>Tambahkan data master menggunakan form di atas</p>
+                        </div>
+                    </div>
+
                     <div class="tab-content" id="githubTab">
                         <div class="github-config">
                             <h3><i class="fab fa-github"></i> Konfigurasi GitHub</h3>
@@ -1339,10 +1471,14 @@
             // Variabel dan inisialisasi
             const form = document.getElementById('dataForm');
             const loginForm = document.getElementById('loginForm');
+            const customerSelect = document.getElementById('customer');
             const palletInput = document.getElementById('pallet');
             const containerInput = document.getElementById('container');
             const eanInput = document.getElementById('ean');
             const qtyInput = document.getElementById('qty');
+            const skuInput = document.getElementById('sku');
+            const descriptionInput = document.getElementById('description');
+            const statusInput = document.getElementById('status');
             const eanHelpText = document.getElementById('eanHelpText');
             const tableBody = document.getElementById('tableBody');
             const emptyState = document.getElementById('emptyState');
@@ -1350,6 +1486,7 @@
             const totalContainerSpan = document.getElementById('totalContainer');
             const currentPalletSpan = document.getElementById('currentPallet');
             const currentContainerSpan = document.getElementById('currentContainer');
+            const currentCustomerSpan = document.getElementById('currentCustomer');
             const savePalletBtn = document.getElementById('savePalletBtn');
             const saveContainerBtn = document.getElementById('saveContainerBtn');
             const finishBtn = document.getElementById('finishBtn');
@@ -1389,6 +1526,23 @@
             const editPalletInput = document.getElementById('editPallet');
             const editEanInput = document.getElementById('editEan');
             const editQtyInput = document.getElementById('editQty');
+            
+            // Master data elements
+            const masterDataForm = document.getElementById('masterDataForm');
+            const masterEanInput = document.getElementById('masterEan');
+            const masterSkuInput = document.getElementById('masterSku');
+            const masterDescriptionInput = document.getElementById('masterDescription');
+            const masterTableBody = document.getElementById('masterTableBody');
+            const masterEmptyState = document.getElementById('masterEmptyState');
+            const exportMasterBtn = document.getElementById('exportMasterBtn');
+            const editMasterModal = document.getElementById('editMasterModal');
+            const closeMasterModalBtn = document.getElementById('closeMasterModal');
+            const cancelMasterEditBtn = document.getElementById('cancelMasterEditBtn');
+            const editMasterForm = document.getElementById('editMasterForm');
+            const editMasterIndexInput = document.getElementById('editMasterIndex');
+            const editMasterEanInput = document.getElementById('editMasterEan');
+            const editMasterSkuInput = document.getElementById('editMasterSku');
+            const editMasterDescriptionInput = document.getElementById('editMasterDescription');
             
             // Elements untuk fitur delete dengan checklist
             const selectAllCheckbox = document.getElementById('selectAllCheckbox');
@@ -1432,7 +1586,9 @@
             
             let currentPallet = '';
             let currentContainer = '';
+            let currentCustomer = '';
             let scannedData = [];
+            let masterData = [];
             let deletedDataIds = []; // Daftar ID data yang dihapus
             let currentUser = 'Guest';
             let isAdmin = false;
@@ -1468,9 +1624,9 @@
                     if (show) {
                         loginContainer.style.display = 'none';
                         mainContainer.style.display = 'flex';
-                        // Setelah login, fokuskan ke input container
+                        // Setelah login, fokuskan ke input customer
                         setTimeout(() => {
-                            containerInput.focus();
+                            customerSelect.focus();
                         }, 100);
                     } else {
                         loginContainer.style.display = 'flex';
@@ -1543,7 +1699,7 @@
             
             // Fungsi untuk mengaktifkan/menonaktifkan input EAN
             function toggleEanInput() {
-                if (currentPallet && currentContainer) {
+                if (currentPallet && currentContainer && currentCustomer) {
                     eanInput.disabled = false;
                     qtyInput.disabled = false;
                     if (eanHelpText) eanHelpText.style.display = 'none';
@@ -1553,6 +1709,11 @@
                     qtyInput.disabled = true;
                     if (eanHelpText) eanHelpText.style.display = 'block';
                 }
+            }
+            
+            // Fungsi untuk mencari data master berdasarkan EAN
+            function findMasterData(ean) {
+                return masterData.find(item => item.ean === ean);
             }
             
             // Fungsi untuk memperbarui tampilan status sinkronisasi
@@ -1576,6 +1737,11 @@
                 const ean = eanInput.value.trim();
                 const qty = qtyInput.value;
                 
+                if (!currentCustomer) {
+                    showNotification('Harap pilih customer terlebih dahulu!', 'error');
+                    return;
+                }
+                
                 if (!currentPallet) {
                     showNotification('Harap set pallet terlebih dahulu!', 'error');
                     return;
@@ -1593,15 +1759,33 @@
                 
                 isSaving = true;
                 
+                // Cari data master berdasarkan EAN
+                const masterItem = findMasterData(ean);
+                let sku = '';
+                let description = '';
+                let status = 'OK';
+                
+                if (masterItem) {
+                    sku = masterItem.sku;
+                    description = masterItem.description;
+                } else {
+                    status = 'Finding';
+                    showNotification('EAN tidak ditemukan di master data! Status: Finding', 'error');
+                }
+                
                 // Membuat timestamp
                 const now = new Date();
                 const timestamp = now.toISOString();
                 
                 const newData = {
                     id: generateId(), // ID unik untuk setiap data
+                    customer: currentCustomer,
                     pallet: currentPallet,
                     container: currentContainer,
                     ean,
+                    sku,
+                    description,
+                    status,
                     qty,
                     timestamp: timestamp,
                     user: currentUser,
@@ -1624,6 +1808,9 @@
                 // Reset hanya input EAN dan Qty, biarkan pallet dan container tetap
                 eanInput.value = '';
                 qtyInput.value = 1;
+                skuInput.value = '';
+                descriptionInput.value = '';
+                statusInput.value = '';
                 
                 isSaving = false;
                 
@@ -1634,6 +1821,7 @@
             function saveToLocalStorage() {
                 const dataToSave = {
                     scannedData: scannedData,
+                    masterData: masterData,
                     deletedDataIds: deletedDataIds,
                     lastUpdated: new Date().toISOString()
                 };
@@ -1647,22 +1835,26 @@
                     try {
                         const parsedData = JSON.parse(savedData);
                         scannedData = parsedData.scannedData || [];
+                        masterData = parsedData.masterData || [];
                         deletedDataIds = parsedData.deletedDataIds || [];
                         
                         // Pastikan semua data memiliki version dan lastModified
                         scannedData.forEach(item => {
                             if (!item.version) item.version = 1;
                             if (!item.lastModified) item.lastModified = item.timestamp || new Date().toISOString();
+                            if (!item.customer) item.customer = 'Samsonite'; // Default value untuk data lama
                         });
                     } catch (e) {
                         console.error('Error parsing data from localStorage:', e);
                         scannedData = [];
+                        masterData = [];
                         deletedDataIds = [];
                         saveToLocalStorage();
                     }
                     populateFilterDropdowns();
                     updateTotalContainer();
                     renderTable();
+                    renderMasterTable();
                 }
             }
             
@@ -1685,6 +1877,8 @@
                 currentPalletSpan.textContent = 'Belum dipilih';
                 currentContainer = '';
                 currentContainerSpan.textContent = 'Belum dipilih';
+                currentCustomer = '';
+                currentCustomerSpan.textContent = 'Belum dipilih';
                 toggleEanInput();
                 
                 // Update status GitHub
@@ -1787,9 +1981,13 @@
                 
                 // Siapkan data untuk Excel
                 const excelData = filteredData.map(item => ({
+                    'Customer': item.customer,
                     'No. Container': item.container,
                     'Pallet ID': item.pallet,
                     'EAN': item.ean,
+                    'SKU': item.sku,
+                    'Description': item.description,
+                    'Status': item.status,
                     'Qty': item.qty,
                     'Timestamp': item.timestamp,
                     'User': item.user,
@@ -1810,6 +2008,36 @@
                 XLSX.writeFile(wb, fileName);
                 
                 showNotification('Data berhasil diekspor ke Excel!');
+            }
+            
+            // Fungsi untuk export master data ke Excel
+            function exportMasterToExcel() {
+                if (masterData.length === 0) {
+                    showNotification('Tidak ada data master untuk diekspor!', 'error');
+                    return;
+                }
+                
+                // Siapkan data untuk Excel
+                const excelData = masterData.map(item => ({
+                    'EAN': item.ean,
+                    'SKU': item.sku,
+                    'Description': item.description
+                }));
+                
+                // Buat worksheet
+                const ws = XLSX.utils.json_to_sheet(excelData);
+                
+                // Buat workbook
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Master Data');
+                
+                // Buat nama file
+                const fileName = `Master_Data_${new Date().getTime()}.xlsx`;
+                
+                // Export ke file Excel
+                XLSX.writeFile(wb, fileName);
+                
+                showNotification('Data master berhasil diekspor ke Excel!');
             }
             
             // Fungsi untuk menguji koneksi GitHub
@@ -2040,11 +2268,15 @@
             function mergeData(localData, remoteData) {
                 // Pastikan remoteData memiliki struktur yang benar
                 if (!remoteData || typeof remoteData !== 'object') {
-                    remoteData = { scannedData: [], deletedDataIds: [] };
+                    remoteData = { scannedData: [], masterData: [], deletedDataIds: [] };
                 }
                 
                 if (!Array.isArray(remoteData.scannedData)) {
                     remoteData.scannedData = [];
+                }
+                
+                if (!Array.isArray(remoteData.masterData)) {
+                    remoteData.masterData = [];
                 }
                 
                 if (!Array.isArray(remoteData.deletedDataIds)) {
@@ -2056,6 +2288,7 @@
                     data.scannedData.forEach(item => {
                         if (!item.version) item.version = 1;
                         if (!item.lastModified) item.lastModified = item.timestamp || new Date().toISOString();
+                        if (!item.customer) item.customer = 'Samsonite'; // Default value untuk data lama
                     });
                     return data;
                 };
@@ -2096,8 +2329,19 @@
                 // Gabungkan deletedDataIds dari kedua sumber
                 const mergedDeletedIds = [...new Set([...localData.deletedDataIds, ...remoteData.deletedDataIds])];
                 
+                // Gabungkan master data
+                const combinedMasterData = [...localData.masterData, ...remoteData.masterData];
+                const masterDataMap = new Map();
+                
+                combinedMasterData.forEach(item => {
+                    masterDataMap.set(item.ean, item);
+                });
+                
+                const finalMasterData = Array.from(masterDataMap.values());
+                
                 return {
                     scannedData: finalData,
+                    masterData: finalMasterData,
                     deletedDataIds: mergedDeletedIds
                 };
             }
@@ -2157,7 +2401,7 @@
             async function pullFromGithubForSync() {
                 if (!githubConfig.username && !githubConfig.repo && !githubConfig.token) {
                     // Jika konfigurasi GitHub belum diatur, kembalikan data kosong
-                    return { scannedData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
+                    return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
                 }
                 
                 try {
@@ -2177,13 +2421,14 @@
                         // Pastikan data yang diterima memiliki struktur yang benar
                         return {
                             scannedData: Array.isArray(parsedData.scannedData) ? parsedData.scannedData : [],
+                            masterData: Array.isArray(parsedData.masterData) ? parsedData.masterData : [],
                             deletedDataIds: Array.isArray(parsedData.deletedDataIds) ? parsedData.deletedDataIds : [],
                             lastUpdated: parsedData.lastUpdated || new Date().toISOString()
                         };
                     } else {
                         // Jika file tidak ditemukan, kembalikan objek kosong dengan struktur yang benar
                         if (response.status === 404) {
-                            return { scannedData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
+                            return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
                         }
                         
                         const error = await response.json();
@@ -2192,7 +2437,7 @@
                 } catch (error) {
                     console.error('Error pulling data:', error);
                     // Kembalikan objek kosong dengan struktur yang benar jika terjadi error
-                    return { scannedData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
+                    return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
                 }
             }
             
@@ -2217,24 +2462,27 @@
                     
                     // 2. Merge data lokal dan data dari GitHub
                     const mergedData = mergeData(
-                        { scannedData, deletedDataIds }, 
+                        { scannedData, masterData, deletedDataIds }, 
                         remoteData
                     );
                     
                     // 3. Simpan data yang sudah di-merge ke local storage
                     scannedData = mergedData.scannedData;
+                    masterData = mergedData.masterData;
                     deletedDataIds = mergedData.deletedDataIds;
                     saveToLocalStorage();
                     
                     // 4. Push data yang sudah di-merge ke GitHub
                     await pushToGithubForSync({
                         scannedData: mergedData.scannedData,
+                        masterData: mergedData.masterData,
                         deletedDataIds: mergedData.deletedDataIds,
                         lastUpdated: new Date().toISOString()
                     });
                     
                     // 5. Update UI
                     renderTable();
+                    renderMasterTable();
                     updateTotalEan();
                     updateTotalContainer();
                     populateFilterDropdowns();
@@ -2350,14 +2598,23 @@
                 
                 const row = document.createElement('tr');
                 
+                // Format status dengan badge
+                const statusBadge = data.status === 'Finding' 
+                    ? `<span class="status-badge status-finding">${data.status}</span>` 
+                    : `<span class="status-badge status-ok">${data.status}</span>`;
+                
                 row.innerHTML = `
                     <td class="checkbox-cell">
                         <input type="checkbox" class="data-checkbox" data-index="${index}">
                     </td>
+                    <td>${data.customer}</td>
                     <td>${data.container}</td>
                     <td>${data.pallet}</td>
                     <td>${data.ean}</td>
+                    <td>${data.sku}</td>
+                    <td>${data.description}</td>
                     <td>${data.qty}</td>
+                    <td>${statusBadge}</td>
                     <td>${new Date(data.timestamp).toLocaleString()}</td>
                     <td>${data.user}</td>
                     <td class="actions">
@@ -2406,6 +2663,153 @@
                     updateTotalContainer();
                     showNotification('Data berhasil dihapus!');
                 }
+            }
+            
+            // Fungsi untuk menampilkan data master dalam tabel
+            function renderMasterTable() {
+                // Kosongkan tabel
+                if (masterTableBody) masterTableBody.innerHTML = '';
+                
+                if (masterData.length === 0) {
+                    if (masterEmptyState) masterEmptyState.classList.remove('hidden');
+                    return;
+                }
+                
+                if (masterEmptyState) masterEmptyState.classList.add('hidden');
+                
+                // Tambahkan data ke tabel
+                masterData.forEach((item, index) => {
+                    addMasterTableRow(item, index);
+                });
+            }
+            
+            // Fungsi untuk menambahkan baris ke tabel master data
+            function addMasterTableRow(data, index) {
+                if (!masterTableBody) return;
+                
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${data.ean}</td>
+                    <td>${data.sku}</td>
+                    <td>${data.description}</td>
+                    <td class="actions">
+                        <i class="fas fa-edit btn-edit" data-index="${index}"></i>
+                        <i class="fas fa-trash btn-delete" data-index="${index}"></i>
+                    </td>
+                `;
+                
+                masterTableBody.appendChild(row);
+                
+                // Tambahkan event listener untuk tombol edit dan hapus
+                const editBtn = row.querySelector('.btn-edit');
+                const deleteBtn = row.querySelector('.btn-delete');
+                
+                if (editBtn) {
+                    editBtn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        showEditMasterModal(index);
+                    });
+                }
+                
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        deleteMasterData(index);
+                    });
+                }
+            }
+            
+            // Fungsi untuk menampilkan modal edit master data
+            function showEditMasterModal(index) {
+                const data = masterData[index];
+                
+                editMasterIndexInput.value = index;
+                editMasterEanInput.value = data.ean;
+                editMasterSkuInput.value = data.sku;
+                editMasterDescriptionInput.value = data.description;
+                
+                editMasterModal.style.display = 'flex';
+            }
+            
+            // Fungsi untuk menyembunyikan modal edit master data
+            function hideEditMasterModal() {
+                editMasterModal.style.display = 'none';
+                editMasterForm.reset();
+            }
+            
+            // Fungsi untuk menyimpan perubahan master data
+            function saveEditedMasterData(e) {
+                e.preventDefault();
+                
+                const index = parseInt(editMasterIndexInput.value);
+                if (isNaN(index)) return;
+                
+                const updatedData = {
+                    ean: editMasterEanInput.value,
+                    sku: editMasterSkuInput.value,
+                    description: editMasterDescriptionInput.value
+                };
+                
+                // Update data master
+                masterData[index] = updatedData;
+                saveToLocalStorage();
+                
+                showNotification('Data master berhasil diupdate!');
+                
+                hideEditMasterModal();
+                renderMasterTable();
+            }
+            
+            // Fungsi untuk menghapus master data
+            function deleteMasterData(index) {
+                if (confirm('Apakah Anda yakin ingin menghapus data master ini?')) {
+                    // Hapus data dari array
+                    masterData.splice(index, 1);
+                    
+                    // Simpan perubahan lokal
+                    saveToLocalStorage();
+                    
+                    renderMasterTable();
+                    showNotification('Data master berhasil dihapus!');
+                }
+            }
+            
+            // Fungsi untuk menambah master data
+            function addMasterData(e) {
+                e.preventDefault();
+                
+                const ean = masterEanInput.value.trim();
+                const sku = masterSkuInput.value.trim();
+                const description = masterDescriptionInput.value.trim();
+                
+                if (!ean || !sku || !description) {
+                    showNotification('Harap isi semua field!', 'error');
+                    return;
+                }
+                
+                // Cek apakah EAN sudah ada
+                const existingIndex = masterData.findIndex(item => item.ean === ean);
+                if (existingIndex !== -1) {
+                    showNotification('EAN sudah ada dalam data master!', 'error');
+                    return;
+                }
+                
+                const newData = {
+                    ean,
+                    sku,
+                    description
+                };
+                
+                // Tambahkan data master
+                masterData.push(newData);
+                saveToLocalStorage();
+                
+                showNotification('Data master berhasil ditambahkan!');
+                
+                // Reset form
+                masterDataForm.reset();
+                renderMasterTable();
             }
             
             // Fungsi untuk mengupdate total EAN
@@ -2546,6 +2950,21 @@
                 eanInput.addEventListener('input', function() {
                     clearTimeout(eanInputTimer);
                     
+                    // Cari data master berdasarkan EAN
+                    const ean = eanInput.value.trim();
+                    if (ean) {
+                        const masterItem = findMasterData(ean);
+                        if (masterItem) {
+                            skuInput.value = masterItem.sku;
+                            descriptionInput.value = masterItem.description;
+                            statusInput.value = 'OK';
+                        } else {
+                            skuInput.value = '';
+                            descriptionInput.value = '';
+                            statusInput.value = 'Finding';
+                        }
+                    }
+                    
                     eanInputTimer = setTimeout(function() {
                         if (eanInput.value.trim() !== '') {
                             saveData();
@@ -2554,9 +2973,23 @@
                 });
             }
             
+            // Event listener untuk perubahan customer
+            if (customerSelect) {
+                customerSelect.addEventListener('change', function() {
+                    currentCustomer = this.value;
+                    if (currentCustomerSpan) currentCustomerSpan.textContent = currentCustomer;
+                    toggleEanInput();
+                });
+            }
+            
             // Event listener untuk tombol Finish
             if (finishBtn) {
                 finishBtn.addEventListener('click', function() {
+                    if (!currentCustomer) {
+                        showNotification('Harap pilih customer terlebih dahulu!', 'error');
+                        return;
+                    }
+                    
                     if (!currentPallet) {
                         showNotification('Harap set pallet terlebih dahulu!', 'error');
                         return;
@@ -2577,10 +3010,13 @@
                     // Reset pallet dan container setelah finish
                     currentPallet = '';
                     currentContainer = '';
+                    currentCustomer = '';
                     if (currentPalletSpan) currentPalletSpan.textContent = 'Belum dipilih';
                     if (currentContainerSpan) currentContainerSpan.textContent = 'Belum dipilih';
+                    if (currentCustomerSpan) currentCustomerSpan.textContent = 'Belum dipilih';
                     if (palletInput) palletInput.value = '';
                     if (containerInput) containerInput.value = '';
+                    if (customerSelect) customerSelect.value = '';
                     toggleEanInput();
                 });
             }
@@ -2624,6 +3060,11 @@
             // Event listener untuk tombol export
             if (exportSelectedBtn) {
                 exportSelectedBtn.addEventListener('click', exportToExcel);
+            }
+            
+            // Event listener untuk tombol export master data
+            if (exportMasterBtn) {
+                exportMasterBtn.addEventListener('click', exportMasterToExcel);
             }
             
             // Event listener untuk perubahan dropdown user
@@ -2672,6 +3113,11 @@
                     if (tabId === 'dashboard') {
                         updateDashboardSummary();
                     }
+                    
+                    // Jika master data tab diklik, render master table
+                    if (tabId === 'master') {
+                        renderMasterTable();
+                    }
                 });
             });
             
@@ -2705,6 +3151,33 @@
                         hideEditModal();
                     }
                 });
+            }
+            
+            // Event listener untuk modal edit master data
+            if (closeMasterModalBtn) {
+                closeMasterModalBtn.addEventListener('click', hideEditMasterModal);
+            }
+            
+            if (cancelMasterEditBtn) {
+                cancelMasterEditBtn.addEventListener('click', hideEditMasterModal);
+            }
+            
+            if (editMasterForm) {
+                editMasterForm.addEventListener('submit', saveEditedMasterData);
+            }
+            
+            // Tutup modal ketika klik di luar konten modal
+            if (editMasterModal) {
+                editMasterModal.addEventListener('click', function(e) {
+                    if (e.target === editMasterModal) {
+                        hideEditMasterModal();
+                    }
+                });
+            }
+            
+            // Event listener untuk form master data
+            if (masterDataForm) {
+                masterDataForm.addEventListener('submit', addMasterData);
             }
             
             // Event listener untuk select all checkbox
