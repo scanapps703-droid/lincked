@@ -1,150 +1,5 @@
 {
-  "scannedData": [
-    {
-      "id": "mflws24g0vuzp",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T02:03:11.680Z",
-      "user": "admin",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T02:03:11.680Z"
-    },
-    {
-      "id": "mflws2hdkks39",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T02:03:12.145Z",
-      "user": "admin",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T02:03:12.145Z"
-    },
-    {
-      "id": "mflws2r3pmajd",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T02:03:12.495Z",
-      "user": "admin",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T02:03:12.495Z"
-    },
-    {
-      "id": "mflws31b72i41",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T02:03:12.863Z",
-      "user": "admin",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T02:03:12.863Z"
-    },
-    {
-      "id": "mflws3cn6r5ay",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T02:03:13.271Z",
-      "user": "admin",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T02:03:13.271Z"
-    },
-    {
-      "id": "mflws3psuorvu",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T02:03:13.744Z",
-      "user": "admin",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T02:03:13.744Z"
-    },
-    {
-      "id": "mflws41chz4qg",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T02:03:14.160Z",
-      "user": "admin",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T02:03:14.160Z"
-    },
-    {
-      "id": "mflws4dd78ody",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T02:03:14.593Z",
-      "user": "admin",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T02:03:14.593Z"
-    },
-    {
-      "id": "mflws4o0x3vt5",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T02:03:14.976Z",
-      "user": "admin",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T02:03:14.976Z"
-    },
-    {
-      "id": "mflws4zl57xs4",
-      "pallet": "TEST",
-      "container": "B9201XYT",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T02:03:15.393Z",
-      "user": "admin",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T02:03:15.393Z"
-    },
-    {
-      "id": "mflv4vorrpfnp",
-      "pallet": "B",
-      "container": "B 9530 JK",
-      "ean": "0",
-      "qty": "1",
-      "timestamp": "2025-09-16T01:17:10.633Z",
-      "user": "admin",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T01:17:10.633Z"
-    },
-    {
-      "id": "mflxdcd2mk8qc",
-      "pallet": "A",
-      "container": "B",
-      "ean": "1234567890123",
-      "qty": "1",
-      "timestamp": "2025-09-16T02:19:44.726Z",
-      "user": "Riyan",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T02:19:44.726Z"
-    }
-  ],
+  "scannedData": [],
   "deletedDataIds": [
     "mfep3iu6ejjl1",
     "mfep7g8e3f9f1",
@@ -176,7 +31,19 @@
     "mfep3eqoil5r3",
     "mfep3ed8a38zx",
     "mfep3e1b4uhbi",
-    "mfep3dnjn28vy"
+    "mfep3dnjn28vy",
+    "mflxdcd2mk8qc",
+    "mflv4vorrpfnp",
+    "mflws4zl57xs4",
+    "mflws4o0x3vt5",
+    "mflws4dd78ody",
+    "mflws41chz4qg",
+    "mflws3psuorvu",
+    "mflws3cn6r5ay",
+    "mflws31b72i41",
+    "mflws2r3pmajd",
+    "mflws2hdkks39",
+    "mflws24g0vuzp"
   ],
-  "lastUpdated": "2025-09-16T03:37:15.296Z"
+  "lastUpdated": "2025-09-16T03:38:15.352Z"
 }
