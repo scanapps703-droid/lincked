@@ -5135,6 +5135,70 @@
       "date": "2025-09-16",
       "version": 1,
       "lastModified": "2025-09-16T06:32:36.941Z"
+    },
+    {
+      "id": "mfm6f6ihwfrzk",
+      "customer": "Samsonite",
+      "pallet": "DID2509110956",
+      "container": "B9602FEH",
+      "ean": "5400520239761",
+      "sku": "1469431041",
+      "description": "ELLIPSO SPINNER 68/25 TSA BLACK",
+      "status": "OK",
+      "qty": "1",
+      "timestamp": "2025-09-16T06:33:07.001Z",
+      "user": "Gawung",
+      "date": "2025-09-16",
+      "version": 1,
+      "lastModified": "2025-09-16T06:33:07.001Z"
+    },
+    {
+      "id": "mfm6f72cbhr04",
+      "customer": "Samsonite",
+      "pallet": "DID2509110956",
+      "container": "B9602FEH",
+      "ean": "5400520239761",
+      "sku": "1469431041",
+      "description": "ELLIPSO SPINNER 68/25 TSA BLACK",
+      "status": "OK",
+      "qty": "1",
+      "timestamp": "2025-09-16T06:33:07.716Z",
+      "user": "Gawung",
+      "date": "2025-09-16",
+      "version": 1,
+      "lastModified": "2025-09-16T06:33:07.716Z"
+    },
+    {
+      "id": "mfm6f9ou89zya",
+      "customer": "Samsonite",
+      "pallet": "DID2509110956",
+      "container": "B9602FEH",
+      "ean": "5400520239761",
+      "sku": "1469431041",
+      "description": "ELLIPSO SPINNER 68/25 TSA BLACK",
+      "status": "OK",
+      "qty": "1",
+      "timestamp": "2025-09-16T06:33:11.118Z",
+      "user": "Gawung",
+      "date": "2025-09-16",
+      "version": 1,
+      "lastModified": "2025-09-16T06:33:11.118Z"
+    },
+    {
+      "id": "mfm6faf939kjj",
+      "customer": "Samsonite",
+      "pallet": "DID2509110956",
+      "container": "B9602FEH",
+      "ean": "5400520239761",
+      "sku": "1469431041",
+      "description": "ELLIPSO SPINNER 68/25 TSA BLACK",
+      "status": "OK",
+      "qty": "1",
+      "timestamp": "2025-09-16T06:33:12.068Z",
+      "user": "Gawung",
+      "date": "2025-09-16",
+      "version": 1,
+      "lastModified": "2025-09-16T06:33:12.068Z"
     }
   ],
   "masterData": [
@@ -5244,5 +5308,5 @@
     "mfm2f45mkf0a7",
     "mfm2f3o34fnl7"
   ],
-  "lastUpdated": "2025-09-16T06:29:44.314Z"
+  "lastUpdated": "2025-09-16T06:33:23.971Z"
 }
