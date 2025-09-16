@@ -1,5 +1,22 @@
 {
-  "scannedData": [],
+  "scannedData": [
+    {
+      "id": "mfm1sxj49se86",
+      "customer": "Samsonite",
+      "pallet": "Tes-A",
+      "container": "Test01",
+      "ean": "5400520239778",
+      "sku": "1469441041",
+      "description": "ELLIPSO SPINNER 79/29 TSA BLACK",
+      "status": "OK",
+      "qty": "1",
+      "timestamp": "2025-09-16T04:23:50.464Z",
+      "user": "admin",
+      "date": "2025-09-16",
+      "version": 1,
+      "lastModified": "2025-09-16T04:23:50.464Z"
+    }
+  ],
   "masterData": [
     {
       "ean": "8901836238280",
@@ -25,6 +42,11 @@
       "ean": "5400520239761",
       "sku": "1469431041",
       "description": "ELLIPSO SPINNER 68/25 TSA BLACK"
+    },
+    {
+      "ean": "5400520289223",
+      "sku": "1469431012",
+      "description": "ELLIPSO SPINNER 68/25 TSA AQUA BLUE"
     }
   ],
   "deletedDataIds": [
@@ -83,5 +105,5 @@
     "mfm09ey3b00z2",
     "mfm09el8h1vky"
   ],
-  "lastUpdated": "2025-09-16T04:23:10.819Z"
+  "lastUpdated": "2025-09-16T04:24:11.242Z"
 }
