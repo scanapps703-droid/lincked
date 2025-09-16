@@ -683,10 +683,19 @@
             
             .modal-content {
                 padding: 1.25rem;
+                width: 95%;
+                max-width: 95%;
             }
             
             .summary-item {
                 min-width: 100%;
+            }
+
+            /* Responsivitas untuk form di modal */
+            .modal-form-group input,
+            .modal-form-group select {
+                font-size: 16px; /* Mencegah zoom pada iOS */
+                padding: 0.875rem;
             }
         }
 
@@ -993,6 +1002,63 @@
             background-color: #d4edda;
             color: #155724;
         }
+
+        /* New styles for upload feature */
+        .upload-container {
+            margin-bottom: 1.5rem;
+            padding: 1.25rem;
+            background-color: white;
+            border-radius: var(--spark-radius);
+            box-shadow: var(--spark-shadow);
+            border: 1px solid var(--spark-border);
+        }
+
+        .upload-info {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--spark-gray);
+        }
+
+        .upload-info ul {
+            margin-top: 0.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .file-input-container {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .file-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px dashed var(--spark-border);
+            border-radius: var(--spark-radius);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--spark-transition);
+        }
+
+        .file-input:hover {
+            border-color: var(--spark-primary);
+            background-color: #f7fafc;
+        }
+
+        .file-input input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-name {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--spark-gray);
+        }
     </style>
 </head>
 <body>
@@ -1068,6 +1134,41 @@
                     <button type="submit" class="btn-info">Simpan Perubahan</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal untuk upload master data -->
+    <div class="modal" id="uploadMasterModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-upload"></i> Upload Master Data</h2>
+                <button class="close-modal" id="closeUploadMasterModal">&times;</button>
+            </div>
+            <div class="upload-container">
+                <div class="file-input-container">
+                    <div class="file-input">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Klik atau seret file Excel ke sini</p>
+                        <input type="file" id="masterFile" accept=".xlsx, .xls">
+                    </div>
+                    <div class="file-name" id="fileName">Belum ada file dipilih</div>
+                </div>
+                
+                <div class="upload-info">
+                    <p><strong>Format file Excel yang diterima:</strong></p>
+                    <ul>
+                        <li>Kolom A: EAN (wajib)</li>
+                        <li>Kolom B: SKU (wajib)</li>
+                        <li>Kolom C: Description (wajib)</li>
+                    </ul>
+                    <p>Baris pertama dianggap sebagai header dan akan diabaikan.</p>
+                </div>
+                
+                <div class="button-group">
+                    <button type="button" class="btn-warning" id="cancelUploadMasterBtn">Batal</button>
+                    <button type="button" class="btn-primary" id="processUploadBtn" disabled>Proses Upload</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1370,13 +1471,22 @@
                                 <div class="button-group">
                                     <button type="submit" class="btn-primary"><i class="fas fa-plus"></i> Tambah Data</button>
                                     <button type="button" class="btn-excel" id="exportMasterBtn"><i class="fas fa-file-excel"></i> Export Master Data</button>
+                                    <button type="button" class="btn-info" id="uploadMasterBtn"><i class="fas fa-upload"></i> Upload Master Data</button>
                                 </div>
                             </form>
+                        </div>
+
+                        <!-- Container untuk tombol Delete Selected Master Data -->
+                        <div class="delete-selected-container" id="deleteSelectedMasterContainer">
+                            <button type="button" class="btn-logout" id="deleteSelectedMasterBtn"><i class="fas fa-trash"></i> Delete Selected</button>
                         </div>
                         
                         <table id="masterDataTable">
                             <thead>
                                 <tr>
+                                    <th class="checkbox-cell">
+                                        <input type="checkbox" id="selectAllMasterCheckbox" class="select-all-checkbox">
+                                    </th>
                                     <th><i class="fas fa-barcode"></i> EAN</th>
                                     <th><i class="fas fa-tag"></i> SKU</th>
                                     <th><i class="fas fa-align-left"></i> Description</th>
@@ -1584,6 +1694,20 @@
             const mobilTableBody = document.getElementById('mobilTableBody');
             const findingTableBody = document.getElementById('findingTableBody');
             
+            // Elements untuk fitur upload master data
+            const uploadMasterBtn = document.getElementById('uploadMasterBtn');
+            const uploadMasterModal = document.getElementById('uploadMasterModal');
+            const closeUploadMasterModalBtn = document.getElementById('closeUploadMasterModal');
+            const cancelUploadMasterBtn = document.getElementById('cancelUploadMasterBtn');
+            const masterFileInput = document.getElementById('masterFile');
+            const fileNameSpan = document.getElementById('fileName');
+            const processUploadBtn = document.getElementById('processUploadBtn');
+            
+            // Elements untuk fitur delete master data
+            const selectAllMasterCheckbox = document.getElementById('selectAllMasterCheckbox');
+            const deleteSelectedMasterBtn = document.getElementById('deleteSelectedMasterBtn');
+            const deleteSelectedMasterContainer = document.getElementById('deleteSelectedMasterContainer');
+            
             let currentPallet = '';
             let currentContainer = '';
             let currentCustomer = '';
@@ -1676,6 +1800,9 @@
                     
                     // Tampilkan container tombol delete selected
                     if (deleteSelectedContainer) deleteSelectedContainer.classList.remove('hidden');
+                    
+                    // Tampilkan container tombol delete selected untuk master data
+                    if (deleteSelectedMasterContainer) deleteSelectedMasterContainer.classList.remove('hidden');
                 } else {
                     userTypeBadge.textContent = '(User)';
                     userTypeBadge.classList.remove('hidden');
@@ -1694,6 +1821,9 @@
                     
                     // Sembunyikan container tombol delete selected
                     if (deleteSelectedContainer) deleteSelectedContainer.classList.add('hidden');
+                    
+                    // Sembunyikan container tombol delete selected untuk master data
+                    if (deleteSelectedMasterContainer) deleteSelectedMasterContainer.classList.add('hidden');
                 }
             }
             
@@ -1855,6 +1985,7 @@
                     updateTotalContainer();
                     renderTable();
                     renderMasterTable();
+                    updateDashboardSummary(); // Pastikan dashboard diperbarui
                 }
             }
             
@@ -2486,6 +2617,7 @@
                     updateTotalEan();
                     updateTotalContainer();
                     populateFilterDropdowns();
+                    updateDashboardSummary(); // Perbarui dashboard summary
                     
                     showNotification('Sinkronisasi berhasil!');
                     updatePushStatus('idle', 'Sync berhasil');
@@ -2690,6 +2822,9 @@
                 const row = document.createElement('tr');
                 
                 row.innerHTML = `
+                    <td class="checkbox-cell">
+                        <input type="checkbox" class="data-checkbox" data-index="${index}">
+                    </td>
                     <td>${data.ean}</td>
                     <td>${data.sku}</td>
                     <td>${data.description}</td>
@@ -2775,6 +2910,39 @@
                 }
             }
             
+            // Fungsi untuk menghapus master data yang dipilih
+            function deleteSelectedMasterData() {
+                const checkboxes = document.querySelectorAll('#masterTableBody .data-checkbox:checked');
+                
+                if (checkboxes.length === 0) {
+                    showNotification('Tidak ada data master yang dipilih untuk dihapus!', 'error');
+                    return;
+                }
+                
+                if (!confirm(`Apakah Anda yakin ingin menghapus ${checkboxes.length} data master terpilih?`)) {
+                    return;
+                }
+                
+                // Dapatkan indeks data yang dipilih (dalam urutan terbalik untuk menghindari masalah indeks saat menghapus)
+                const indexesToDelete = Array.from(checkboxes)
+                    .map(checkbox => parseInt(checkbox.dataset.index))
+                    .sort((a, b) => b - a);
+                
+                // Hapus data dari array
+                for (const index of indexesToDelete) {
+                    masterData.splice(index, 1);
+                }
+                
+                // Simpan perubahan lokal
+                saveToLocalStorage();
+                
+                renderMasterTable();
+                showNotification(`${indexesToDelete.length} data master berhasil dihapus!`);
+                
+                // Reset select all checkbox
+                selectAllMasterCheckbox.checked = false;
+            }
+            
             // Fungsi untuk menambah master data
             function addMasterData(e) {
                 e.preventDefault();
@@ -2810,6 +2978,106 @@
                 // Reset form
                 masterDataForm.reset();
                 renderMasterTable();
+            }
+            
+            // Fungsi untuk memproses upload file master data
+            function processMasterDataUpload(file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        
+                        // Ambil sheet pertama
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        
+                        // Konversi ke JSON
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: ['ean', 'sku', 'description'] });
+                        
+                        // Hapus baris header jika ada
+                        if (jsonData.length > 0 && (jsonData[0].ean === 'ean' || jsonData[0].ean === 'EAN')) {
+                            jsonData.shift();
+                        }
+                        
+                        // Validasi data
+                        const validData = [];
+                        const invalidData = [];
+                        
+                        jsonData.forEach((item, index) => {
+                            // Validasi minimal memiliki EAN dan SKU
+                            if (item.ean && item.sku) {
+                                validData.push({
+                                    ean: String(item.ean).trim(),
+                                    sku: String(item.sku).trim(),
+                                    description: item.description ? String(item.description).trim() : ''
+                                });
+                            } else {
+                                invalidData.push({ index: index + 1, item });
+                            }
+                        });
+                        
+                        if (validData.length === 0) {
+                            showNotification('Tidak ada data valid yang ditemukan dalam file!', 'error');
+                            return;
+                        }
+                        
+                        // Tampilkan ringkasan upload
+                        let message = `Berhasil memproses ${validData.length} data dari file.`;
+                        if (invalidData.length > 0) {
+                            message += ` ${invalidData.length} data tidak valid dan diabaikan.`;
+                        }
+                        
+                        // Tambahkan data master yang valid
+                        let addedCount = 0;
+                        let updatedCount = 0;
+                        
+                        validData.forEach(item => {
+                            const existingIndex = masterData.findIndex(m => m.ean === item.ean);
+                            if (existingIndex === -1) {
+                                // Data baru
+                                masterData.push(item);
+                                addedCount++;
+                            } else {
+                                // Update data existing
+                                masterData[existingIndex] = item;
+                                updatedCount++;
+                            }
+                        });
+                        
+                        // Simpan perubahan
+                        saveToLocalStorage();
+                        renderMasterTable();
+                        
+                        showNotification(`${message} Ditambahkan: ${addedCount}, Diupdate: ${updatedCount}`);
+                        
+                        // Tutup modal upload
+                        hideUploadMasterModal();
+                        
+                    } catch (error) {
+                        console.error('Error processing file:', error);
+                        showNotification('Error memproses file: ' + error.message, 'error');
+                    }
+                };
+                
+                reader.onerror = function() {
+                    showNotification('Error membaca file!', 'error');
+                };
+                
+                reader.readAsArrayBuffer(file);
+            }
+            
+            // Fungsi untuk menampilkan modal upload master data
+            function showUploadMasterModal() {
+                uploadMasterModal.style.display = 'flex';
+                fileNameSpan.textContent = 'Belum ada file dipilih';
+                processUploadBtn.disabled = true;
+            }
+            
+            // Fungsi untuk menyembunyikan modal upload master data
+            function hideUploadMasterModal() {
+                uploadMasterModal.style.display = 'none';
+                masterFileInput.value = '';
             }
             
             // Fungsi untuk mengupdate total EAN
@@ -3026,7 +3294,6 @@
                     const pallet = palletInput.value.trim();
                     if (!pallet) {
                         showNotification('Harap masukkan Pallet ID!', 'error');
-                        return;
                     }
                     
                     currentPallet = pallet;
@@ -3043,7 +3310,6 @@
                     const container = containerInput.value.trim();
                     if (!container) {
                         showNotification('Harap masukkan No. Container!', 'error');
-                        return;
                     }
                     
                     currentContainer = container;
@@ -3190,9 +3456,24 @@
                 });
             }
             
+            // Event listener untuk select all master checkbox
+            if (selectAllMasterCheckbox) {
+                selectAllMasterCheckbox.addEventListener('change', function() {
+                    const checkboxes = document.querySelectorAll('#masterTableBody .data-checkbox');
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = selectAllMasterCheckbox.checked;
+                    });
+                });
+            }
+            
             // Event listener untuk tombol delete selected
             if (deleteSelectedBtn) {
                 deleteSelectedBtn.addEventListener('click', deleteSelectedData);
+            }
+            
+            // Event listener untuk tombol delete selected master data
+            if (deleteSelectedMasterBtn) {
+                deleteSelectedMasterBtn.addEventListener('click', deleteSelectedMasterData);
             }
             
             // Event listener untuk tombol push ke GitHub
@@ -3252,6 +3533,83 @@
                 });
             }
             
+            // Event listener untuk tombol upload master data
+            if (uploadMasterBtn) {
+                uploadMasterBtn.addEventListener('click', showUploadMasterModal);
+            }
+            
+            // Event listener untuk tombol close modal upload
+            if (closeUploadMasterModalBtn) {
+                closeUploadMasterModalBtn.addEventListener('click', hideUploadMasterModal);
+            }
+            
+            // Event listener untuk tombol cancel upload
+            if (cancelUploadMasterBtn) {
+                cancelUploadMasterBtn.addEventListener('click', hideUploadMasterModal);
+            }
+            
+            // Event listener untuk file input change
+            if (masterFileInput) {
+                masterFileInput.addEventListener('change', function() {
+                    if (this.files && this.files.length > 0) {
+                        const file = this.files[0];
+                        fileNameSpan.textContent = file.name;
+                        processUploadBtn.disabled = false;
+                    } else {
+                        fileNameSpan.textContent = 'Belum ada file dipilih';
+                        processUploadBtn.disabled = true;
+                    }
+                });
+            }
+            
+            // Event listener untuk tombol process upload
+            if (processUploadBtn) {
+                processUploadBtn.addEventListener('click', function() {
+                    if (masterFileInput.files && masterFileInput.files.length > 0) {
+                        processMasterDataUpload(masterFileInput.files[0]);
+                    } else {
+                        showNotification('Pilih file terlebih dahulu!', 'error');
+                    }
+                });
+            }
+            
+            // Event listener untuk drag and drop file
+            const fileInputContainer = document.querySelector('.file-input');
+            if (fileInputContainer) {
+                fileInputContainer.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.style.borderColor = 'var(--spark-primary)';
+                    this.style.backgroundColor = '#f7fafc';
+                });
+                
+                fileInputContainer.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    this.style.borderColor = 'var(--spark-border)';
+                    this.style.backgroundColor = 'white';
+                });
+                
+                fileInputContainer.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.style.borderColor = 'var(--spark-border)';
+                    this.style.backgroundColor = 'white';
+                    
+                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                        masterFileInput.files = e.dataTransfer.files;
+                        fileNameSpan.textContent = e.dataTransfer.files[0].name;
+                        processUploadBtn.disabled = false;
+                    }
+                });
+            }
+            
+            // Tutup modal upload ketika klik di luar konten modal
+            if (uploadMasterModal) {
+                uploadMasterModal.addEventListener('click', function(e) {
+                    if (e.target === uploadMasterModal) {
+                        hideUploadMasterModal();
+                    }
+                });
+            }
+            
             // Fungsi untuk menampilkan notifikasi
             function showNotification(message, type = 'success') {
                 if (notification) {
@@ -3301,7 +3659,7 @@
                     // Setup auto sync
                     setupAutoSync();
                     
-                    // Update waktu sync terakhir setiap menit
+                    // Update waktu sync terakhir setiap menut
                     setInterval(updateLastSyncTime, 60000);
                     
                     // Fokuskan ke input EAN jika sudah diaktifkan
