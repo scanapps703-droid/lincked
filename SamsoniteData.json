@@ -1,18 +1,6 @@
 {
   "scannedData": [
     {
-      "id": "mflxdcd2mk8qc",
-      "pallet": "A",
-      "container": "B",
-      "ean": "1234567890123",
-      "qty": "1",
-      "timestamp": "2025-09-16T02:19:44.726Z",
-      "user": "Riyan",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T02:19:44.726Z"
-    },
-    {
       "id": "mflws24g0vuzp",
       "pallet": "TEST",
       "container": "B9201XYT",
@@ -143,6 +131,18 @@
       "date": "2025-09-16",
       "version": 1,
       "lastModified": "2025-09-16T01:17:10.633Z"
+    },
+    {
+      "id": "mflxdcd2mk8qc",
+      "pallet": "A",
+      "container": "B",
+      "ean": "1234567890123",
+      "qty": "1",
+      "timestamp": "2025-09-16T02:19:44.726Z",
+      "user": "Riyan",
+      "date": "2025-09-16",
+      "version": 1,
+      "lastModified": "2025-09-16T02:19:44.726Z"
     }
   ],
   "deletedDataIds": [
@@ -178,5 +178,5 @@
     "mfep3e1b4uhbi",
     "mfep3dnjn28vy"
   ],
-  "lastUpdated": "2025-09-16T03:40:35.124Z"
+  "lastUpdated": "2025-09-16T03:37:15.296Z"
 }
