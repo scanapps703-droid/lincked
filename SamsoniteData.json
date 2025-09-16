@@ -8223,6 +8223,22 @@
       "date": "2025-09-16",
       "version": 1,
       "lastModified": "2025-09-16T06:57:46.308Z"
+    },
+    {
+      "id": "mfm7cvr2niu7n",
+      "customer": "Samsonite",
+      "pallet": "DID2509110933",
+      "container": "B9602FEH",
+      "ean": "5400520289247",
+      "sku": "1469441012",
+      "description": "ELLIPSO SPINNER 79/29 TSA AQUA BLUE",
+      "status": "OK",
+      "qty": "1",
+      "timestamp": "2025-09-16T06:59:19.358Z",
+      "user": "Gawung",
+      "date": "2025-09-16",
+      "version": 1,
+      "lastModified": "2025-09-16T06:59:19.358Z"
     }
   ],
   "masterData": [
@@ -8332,5 +8348,5 @@
     "mfm2f45mkf0a7",
     "mfm2f3o34fnl7"
   ],
-  "lastUpdated": "2025-09-16T06:59:03.204Z"
+  "lastUpdated": "2025-09-16T06:59:24.335Z"
 }
