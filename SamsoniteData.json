@@ -1,17 +1,49 @@
 {
   "scannedData": [
     {
-      "id": "mflxdcd2mk8qc",
-      "pallet": "A",
-      "container": "B",
-      "ean": "1234567890123",
+      "id": "mflv4vorrpfnp",
+      "pallet": "B",
+      "container": "B 9530 JK",
+      "ean": "0",
       "qty": "1",
-      "timestamp": "2025-09-16T02:19:44.726Z",
-      "user": "Riyan",
+      "timestamp": "2025-09-16T01:17:10.633Z",
+      "user": "admin",
       "date": "2025-09-16",
       "version": 1
     }
   ],
-  "deletedDataIds": [],
-  "lastUpdated": "2025-09-16T02:20:45.484Z"
+  "deletedDataIds": [
+    "mfep3iu6ejjl1",
+    "mfep7g8e3f9f1",
+    "mfep7fldx7t28",
+    "mfep7f9sovahw",
+    "mfep7exo6zdvu",
+    "mfep6yavlfuhj",
+    "mfep6y7bbu2iu",
+    "mfep6y0nc0zek",
+    "mfep6xuy9g50u",
+    "mfep6xpmbtvp5",
+    "mfep6xh3bd4x0",
+    "mfep6xd43fw7h",
+    "mfep6x8kkj9f6",
+    "mfep6x3nfx0lm",
+    "mfep6wy62kisx",
+    "mfep6ws29jwn8",
+    "mfep6wm84splc",
+    "mfep6wfjs28uq",
+    "mfep6w8digmal",
+    "mfep6w1qbkmj4",
+    "mfep6vrbnnt1b",
+    "mfep3guks8ci2",
+    "mfep3gj1dlccm",
+    "mfep3g5slyfjy",
+    "mfep3fs39jo8t",
+    "mfep3ffl2mxx3",
+    "mfep3f3g3o5uc",
+    "mfep3eqoil5r3",
+    "mfep3ed8a38zx",
+    "mfep3e1b4uhbi",
+    "mfep3dnjn28vy"
+  ],
+  "lastUpdated": "2025-09-16T02:17:32.146Z"
 }
