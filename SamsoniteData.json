@@ -1,22 +1,5 @@
 {
-  "scannedData": [
-    {
-      "id": "mfm1sxj49se86",
-      "customer": "Samsonite",
-      "pallet": "Tes-A",
-      "container": "Test01",
-      "ean": "5400520239778",
-      "sku": "1469441041",
-      "description": "ELLIPSO SPINNER 79/29 TSA BLACK",
-      "status": "OK",
-      "qty": "1",
-      "timestamp": "2025-09-16T04:23:50.464Z",
-      "user": "admin",
-      "date": "2025-09-16",
-      "version": 1,
-      "lastModified": "2025-09-16T04:23:50.464Z"
-    }
-  ],
+  "scannedData": [],
   "masterData": [
     {
       "ean": "8901836238280",
@@ -103,7 +86,8 @@
     "mfm09ff7hm29m",
     "mfm09f6ortqr9",
     "mfm09ey3b00z2",
-    "mfm09el8h1vky"
+    "mfm09el8h1vky",
+    "mfm1sxj49se86"
   ],
-  "lastUpdated": "2025-09-16T04:25:11.949Z"
+  "lastUpdated": "2025-09-16T04:25:26.136Z"
 }
