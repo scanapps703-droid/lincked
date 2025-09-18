@@ -1059,6 +1059,25 @@
             font-size: 0.875rem;
             color: var(--spark-gray);
         }
+
+        /* New styles for filter controls */
+        .filter-controls {
+            background-color: #fff;
+            padding: 1.25rem;
+            border-radius: var(--spark-radius);
+            box-shadow: var(--spark-shadow);
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--spark-border);
+        }
+
+        .filter-controls p {
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: var(--spark-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
@@ -1315,6 +1334,45 @@
                                 <div class="summary-label">Total Qty Container</div>
                             </div>
                         </div>
+
+                        <!-- Filter Controls untuk Input Data -->
+                        <div class="filter-controls" id="filterControls">
+                            <p><i class="fas fa-filter"></i> Filter Data</p>
+                            <div class="form-group">
+                                <div>
+                                    <label for="filterCustomer"><i class="fas fa-users"></i> Customer</label>
+                                    <select id="filterCustomer">
+                                        <option value="">Semua Customer</option>
+                                        <option value="Samsonite">Samsonite</option>
+                                        <option value="Tumi">Tumi</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="filterContainer"><i class="fas fa-truck"></i> Container</label>
+                                    <input type="text" id="filterContainer" placeholder="Filter container">
+                                </div>
+                                <div>
+                                    <label for="filterPallet"><i class="fas fa-pallet"></i> Pallet</label>
+                                    <input type="text" id="filterPallet" placeholder="Filter pallet">
+                                </div>
+                                <div>
+                                    <label for="filterEan"><i class="fas fa-barcode"></i> EAN</label>
+                                    <input type="text" id="filterEan" placeholder="Filter EAN">
+                                </div>
+                                <div>
+                                    <label for="filterDateFrom"><i class="fas fa-calendar"></i> Dari Tanggal</label>
+                                    <input type="date" id="filterDateFrom">
+                                </div>
+                                <div>
+                                    <label for="filterDateTo"><i class="fas fa-calendar"></i> Sampai Tanggal</label>
+                                    <input type="date" id="filterDateTo">
+                                </div>
+                                <div>
+                                    <button type="button" class="btn-info" id="applyFilterBtn"><i class="fas fa-check"></i> Terapkan Filter</button>
+                                    <button type="button" class="btn-warning" id="resetFilterBtn"><i class="fas fa-times"></i> Reset</button>
+                                </div>
+                            </div>
+                        </div>
                         
                         <div class="export-controls" id="exportControls">
                             <p><i class="fas fa-download"></i> Export Data by User & Container</p>
@@ -1390,6 +1448,25 @@
 
                     <!-- Tab Dashboard Summary -->
                     <div class="tab-content" id="dashboardTab">
+                        <!-- Filter Controls untuk Dashboard Summary -->
+                        <div class="filter-controls" id="dashboardFilterControls">
+                            <p><i class="fas fa-filter"></i> Filter Dashboard Berdasarkan Tanggal</p>
+                            <div class="form-group">
+                                <div>
+                                    <label for="dashboardDateFrom"><i class="fas fa-calendar"></i> Dari Tanggal</label>
+                                    <input type="date" id="dashboardDateFrom">
+                                </div>
+                                <div>
+                                    <label for="dashboardDateTo"><i class="fas fa-calendar"></i> Sampai Tanggal</label>
+                                    <input type="date" id="dashboardDateTo">
+                                </div>
+                                <div>
+                                    <button type="button" class="btn-info" id="applyDashboardFilterBtn"><i class="fas fa-check"></i> Terapkan Filter</button>
+                                    <button type="button" class="btn-warning" id="resetDashboardFilterBtn"><i class="fas fa-times"></i> Reset</button>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="summary">
                             <div class="summary-item">
                                 <i class="fas fa-truck"></i>
@@ -1708,6 +1785,20 @@
             const deleteSelectedMasterBtn = document.getElementById('deleteSelectedMasterBtn');
             const deleteSelectedMasterContainer = document.getElementById('deleteSelectedMasterContainer');
             
+            // Elements untuk filter
+            const filterCustomer = document.getElementById('filterCustomer');
+            const filterContainer = document.getElementById('filterContainer');
+            const filterPallet = document.getElementById('filterPallet');
+            const filterEan = document.getElementById('filterEan');
+            const filterDateFrom = document.getElementById('filterDateFrom');
+            const filterDateTo = document.getElementById('filterDateTo');
+            const applyFilterBtn = document.getElementById('applyFilterBtn');
+            const resetFilterBtn = document.getElementById('resetFilterBtn');
+            const dashboardDateFrom = document.getElementById('dashboardDateFrom');
+            const dashboardDateTo = document.getElementById('dashboardDateTo');
+            const applyDashboardFilterBtn = document.getElementById('applyDashboardFilterBtn');
+            const resetDashboardFilterBtn = document.getElementById('resetDashboardFilterBtn');
+            
             let currentPallet = '';
             let currentContainer = '';
             let currentCustomer = '';
@@ -1726,6 +1817,11 @@
             // Pagination variables
             let currentPage = 1;
             const rowsPerPage = 15;
+            
+            // Filter variables
+            let filteredData = [];
+            let isFilterActive = false;
+            let dashboardFilterActive = false;
             
             // Konfigurasi GitHub
             let githubConfig = {
@@ -2549,7 +2645,7 @@
                         const content = decodeURIComponent(escape(atob(fileInfo.content)));
                         const parsedData = JSON.parse(content);
                         
-                        // Pastikan data yang diterima memiliki struktur yang benar
+                        // Ensure the data has the correct structure
                         return {
                             scannedData: Array.isArray(parsedData.scannedData) ? parsedData.scannedData : [],
                             masterData: Array.isArray(parsedData.masterData) ? parsedData.masterData : [],
@@ -2557,7 +2653,7 @@
                             lastUpdated: parsedData.lastUpdated || new Date().toISOString()
                         };
                     } else {
-                        // Jika file tidak ditemukan, kembalikan objek kosong dengan struktur yang benar
+                        // If file not found, return empty object with correct structure
                         if (response.status === 404) {
                             return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
                         }
@@ -2567,7 +2663,7 @@
                     }
                 } catch (error) {
                     console.error('Error pulling data:', error);
-                    // Kembalikan objek kosong dengan struktur yang benar jika terjadi error
+                    // Return empty object with correct structure if error occurs
                     return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
                 }
             }
@@ -2667,6 +2763,109 @@
                 }
             }
             
+            // Fungsi untuk filter data
+            function filterData() {
+                const customer = filterCustomer.value;
+                const container = filterContainer.value.toLowerCase();
+                const pallet = filterPallet.value.toLowerCase();
+                const ean = filterEan.value.toLowerCase();
+                const dateFrom = filterDateFrom.value;
+                const dateTo = filterDateTo.value;
+                
+                // Jika tidak ada filter yang diterapkan
+                if (!customer && !container && !pallet && !ean && !dateFrom && !dateTo) {
+                    isFilterActive = false;
+                    renderTable();
+                    return;
+                }
+                
+                isFilterActive = true;
+                
+                // Filter data
+                filteredData = scannedData.filter(item => {
+                    // Filter customer
+                    if (customer && item.customer !== customer) return false;
+                    
+                    // Filter container
+                    if (container && !item.container.toLowerCase().includes(container)) return false;
+                    
+                    // Filter pallet
+                    if (pallet && !item.pallet.toLowerCase().includes(pallet)) return false;
+                    
+                    // Filter EAN
+                    if (ean && !item.ean.toLowerCase().includes(ean)) return false;
+                    
+                    // Filter tanggal
+                    if (dateFrom && item.date < dateFrom) return false;
+                    if (dateTo && item.date > dateTo) return false;
+                    
+                    return true;
+                });
+                
+                // Render tabel dengan data yang sudah difilter
+                renderFilteredTable();
+            }
+            
+            // Fungsi untuk render tabel dengan data yang sudah difilter
+            function renderFilteredTable() {
+                // Kosongkan tabel
+                if (tableBody) tableBody.innerHTML = '';
+                
+                const dataToShow = isFilterActive ? filteredData : scannedData;
+                
+                if (dataToShow.length === 0) {
+                    if (emptyState) emptyState.classList.remove('hidden');
+                    if (paginationControls) paginationControls.classList.add('hidden');
+                    return;
+                }
+                
+                if (emptyState) emptyState.classList.add('hidden');
+                if (paginationControls) paginationControls.classList.add('hidden'); // Sembunyikan pagination saat filter aktif
+                
+                // Tambahkan semua data yang difilter ke tabel
+                dataToShow.forEach((item, index) => {
+                    addTableRow(item, index);
+                });
+            }
+            
+            // Fungsi untuk reset filter
+            function resetFilter() {
+                filterCustomer.value = '';
+                filterContainer.value = '';
+                filterPallet.value = '';
+                filterEan.value = '';
+                filterDateFrom.value = '';
+                filterDateTo.value = '';
+                
+                isFilterActive = false;
+                renderTable();
+            }
+            
+            // Fungsi untuk filter dashboard data
+            function filterDashboardData() {
+                const dateFrom = dashboardDateFrom.value;
+                const dateTo = dashboardDateTo.value;
+                
+                // Jika tidak ada filter yang diterapkan
+                if (!dateFrom && !dateTo) {
+                    dashboardFilterActive = false;
+                    updateDashboardSummary();
+                    return;
+                }
+                
+                dashboardFilterActive = true;
+                updateDashboardSummary();
+            }
+            
+            // Fungsi untuk reset dashboard filter
+            function resetDashboardFilter() {
+                dashboardDateFrom.value = '';
+                dashboardDateTo.value = '';
+                
+                dashboardFilterActive = false;
+                updateDashboardSummary();
+            }
+            
             // Fungsi untuk menampilkan data dalam halaman (pagination)
             function renderTable() {
                 // Kosongkan tabel
@@ -2679,6 +2878,14 @@
                 }
                 
                 if (emptyState) emptyState.classList.add('hidden');
+                
+                // Jika filter aktif, gunakan data yang sudah difilter
+                if (isFilterActive) {
+                    renderFilteredTable();
+                    return;
+                }
+                
+                // Tampilkan pagination hanya jika filter tidak aktif
                 if (paginationControls) paginationControls.classList.remove('hidden');
                 
                 // Filter data berdasarkan user jika bukan admin
@@ -3110,13 +3317,24 @@
             
             // Fungsi untuk mengupdate dashboard summary dengan logika finding
             function updateDashboardSummary() {
+                // Gunakan data yang difilter jika filter aktif
+                const dataToUse = dashboardFilterActive ? 
+                    scannedData.filter(item => {
+                        if (dashboardDateFrom.value && 
+                            item.date < dashboardDateFrom.value) return false;
+                        if (dashboardDateTo.value && 
+                            item.date > dashboardDateTo.value) return false;
+                        return true;
+                    }) : 
+                    scannedData;
+                
                 // Hitung data untuk dashboard
                 const containerMap = new Map();
                 const palletEanMap = new Map();
                 let totalQty = 0;
                 
                 // Proses data untuk summary
-                scannedData.forEach(item => {
+                dataToUse.forEach(item => {
                     if (item.container && item.container.trim() !== '') {
                         // Hitung per container
                         if (!containerMap.has(item.container)) {
@@ -3359,6 +3577,10 @@
                 tab.addEventListener('click', function() {
                     const tabId = this.getAttribute('data-tab');
                     
+                    // Reset filter saat berpindah tab
+                    isFilterActive = false;
+                    dashboardFilterActive = false;
+                    
                     // Jika tab GitHub diklik dan user bukan admin
                     if (tabId === 'github' && !isAdmin) {
                         showNotification('Hanya admin yang dapat mengakses menu GitHub Config!', 'error');
@@ -3383,6 +3605,11 @@
                     // Jika master data tab diklik, render master table
                     if (tabId === 'master') {
                         renderMasterTable();
+                    }
+                    
+                    // Jika input data tab diklik, render table normal
+                    if (tabId === 'input') {
+                        renderTable();
                     }
                 });
             });
@@ -3608,6 +3835,26 @@
                         hideUploadMasterModal();
                     }
                 });
+            }
+            
+            // Event listener untuk tombol apply filter
+            if (applyFilterBtn) {
+                applyFilterBtn.addEventListener('click', filterData);
+            }
+            
+            // Event listener untuk tombol reset filter
+            if (resetFilterBtn) {
+                resetFilterBtn.addEventListener('click', resetFilter);
+            }
+            
+            // Event listener untuk tombol apply dashboard filter
+            if (applyDashboardFilterBtn) {
+                applyDashboardFilterBtn.addEventListener('click', filterDashboardData);
+            }
+            
+            // Event listener untuk tombol reset dashboard filter
+            if (resetDashboardFilterBtn) {
+                resetDashboardFilterBtn.addEventListener('click', resetDashboardFilter);
             }
             
             // Fungsi untuk menampilkan notifikasi
