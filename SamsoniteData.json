@@ -51295,6 +51295,70 @@
       "date": "2025-09-25",
       "version": 1,
       "lastModified": "2025-09-25T04:39:33.706Z"
+    },
+    {
+      "id": "mfyxbu03rboxp",
+      "customer": "Samsonite",
+      "pallet": "DID2509240435",
+      "container": "B9818TEJ",
+      "ean": "5400520367129",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-09-25T04:39:34.563Z",
+      "user": "Ilham",
+      "date": "2025-09-25",
+      "version": 1,
+      "lastModified": "2025-09-25T04:39:34.563Z"
+    },
+    {
+      "id": "mfyxbupeghmze",
+      "customer": "Samsonite",
+      "pallet": "DID2509240435",
+      "container": "B9818TEJ",
+      "ean": "5400520367129",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-09-25T04:39:35.474Z",
+      "user": "Ilham",
+      "date": "2025-09-25",
+      "version": 1,
+      "lastModified": "2025-09-25T04:39:35.474Z"
+    },
+    {
+      "id": "mfyxbvcj9ik8x",
+      "customer": "Samsonite",
+      "pallet": "DID2509240435",
+      "container": "B9818TEJ",
+      "ean": "5400520367129",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-09-25T04:39:36.307Z",
+      "user": "Ilham",
+      "date": "2025-09-25",
+      "version": 1,
+      "lastModified": "2025-09-25T04:39:36.307Z"
+    },
+    {
+      "id": "mfyxbvxvavrk5",
+      "customer": "Samsonite",
+      "pallet": "DID2509240435",
+      "container": "B9818TEJ",
+      "ean": "5400520367129",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-09-25T04:39:37.075Z",
+      "user": "Ilham",
+      "date": "2025-09-25",
+      "version": 1,
+      "lastModified": "2025-09-25T04:39:37.075Z"
     }
   ],
   "masterData": [
@@ -51409,5 +51473,5 @@
     "mfm2f45mkf0a7",
     "mfm2f3o34fnl7"
   ],
-  "lastUpdated": "2025-09-25T04:39:33.963Z"
+  "lastUpdated": "2025-09-25T04:39:50.028Z"
 }
