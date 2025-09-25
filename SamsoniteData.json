@@ -52303,6 +52303,22 @@
       "date": "2025-09-25",
       "version": 1,
       "lastModified": "2025-09-25T04:45:32.221Z"
+    },
+    {
+      "id": "mfyxjlem0oajy",
+      "customer": "Samsonite",
+      "pallet": "DID2509240432",
+      "container": "B9818TEJ",
+      "ean": "5400520367129",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-09-25T04:45:36.670Z",
+      "user": "Ilham",
+      "date": "2025-09-25",
+      "version": 1,
+      "lastModified": "2025-09-25T04:45:36.670Z"
     }
   ],
   "masterData": [
@@ -52417,5 +52433,5 @@
     "mfm2f45mkf0a7",
     "mfm2f3o34fnl7"
   ],
-  "lastUpdated": "2025-09-25T04:45:33.786Z"
+  "lastUpdated": "2025-09-25T04:45:45.655Z"
 }
