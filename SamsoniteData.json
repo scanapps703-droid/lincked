@@ -48799,6 +48799,86 @@
       "date": "2025-09-25",
       "version": 1,
       "lastModified": "2025-09-25T04:19:48.106Z"
+    },
+    {
+      "id": "mfywn678c72v4",
+      "customer": "Samsonite",
+      "pallet": "DID2509240441",
+      "container": "B9818TEJ",
+      "ean": "5400520367136",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-09-25T04:20:23.972Z",
+      "user": "Ilham",
+      "date": "2025-09-25",
+      "version": 1,
+      "lastModified": "2025-09-25T04:20:23.972Z"
+    },
+    {
+      "id": "mfywn709tej71",
+      "customer": "Samsonite",
+      "pallet": "DID2509240441",
+      "container": "B9818TEJ",
+      "ean": "5400520367136",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-09-25T04:20:25.017Z",
+      "user": "Ilham",
+      "date": "2025-09-25",
+      "version": 1,
+      "lastModified": "2025-09-25T04:20:25.017Z"
+    },
+    {
+      "id": "mfywn80hyxq0c",
+      "customer": "Samsonite",
+      "pallet": "DID2509240441",
+      "container": "B9818TEJ",
+      "ean": "5400520367136",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-09-25T04:20:26.321Z",
+      "user": "Ilham",
+      "date": "2025-09-25",
+      "version": 1,
+      "lastModified": "2025-09-25T04:20:26.321Z"
+    },
+    {
+      "id": "mfywn8pqba43b",
+      "customer": "Samsonite",
+      "pallet": "DID2509240441",
+      "container": "B9818TEJ",
+      "ean": "5400520367136",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-09-25T04:20:27.230Z",
+      "user": "Ilham",
+      "date": "2025-09-25",
+      "version": 1,
+      "lastModified": "2025-09-25T04:20:27.230Z"
+    },
+    {
+      "id": "mfywn9rjbbuh5",
+      "customer": "Samsonite",
+      "pallet": "DID2509240441",
+      "container": "B9818TEJ",
+      "ean": "5400520367136",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-09-25T04:20:28.591Z",
+      "user": "Ilham",
+      "date": "2025-09-25",
+      "version": 1,
+      "lastModified": "2025-09-25T04:20:28.591Z"
     }
   ],
   "masterData": [
@@ -48913,5 +48993,5 @@
     "mfm2f45mkf0a7",
     "mfm2f3o34fnl7"
   ],
-  "lastUpdated": "2025-09-25T04:19:58.311Z"
+  "lastUpdated": "2025-09-25T04:20:28.824Z"
 }
