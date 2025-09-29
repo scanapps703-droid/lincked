@@ -31007,6 +31007,70 @@
       "date": "2025-09-29",
       "version": 1,
       "lastModified": "2025-09-29T13:58:03.863Z"
+    },
+    {
+      "id": "mg57avarxuq25",
+      "customer": "Samsonite",
+      "pallet": "DID2509250861",
+      "container": "B9778WI",
+      "ean": "5400520329981",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-09-29T14:05:22.803Z",
+      "user": "fajarakmalf",
+      "date": "2025-09-29",
+      "version": 1,
+      "lastModified": "2025-09-29T14:05:22.803Z"
+    },
+    {
+      "id": "mg57aw4etxp1m",
+      "customer": "Samsonite",
+      "pallet": "DID2509250861",
+      "container": "B9778WI",
+      "ean": "5400520329981",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-09-29T14:05:23.870Z",
+      "user": "fajarakmalf",
+      "date": "2025-09-29",
+      "version": 1,
+      "lastModified": "2025-09-29T14:05:23.870Z"
+    },
+    {
+      "id": "mg57axd3cq1y1",
+      "customer": "Samsonite",
+      "pallet": "DID2509250861",
+      "container": "B9778WI",
+      "ean": "5400520329981",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-09-29T14:05:25.479Z",
+      "user": "fajarakmalf",
+      "date": "2025-09-29",
+      "version": 1,
+      "lastModified": "2025-09-29T14:05:25.479Z"
+    },
+    {
+      "id": "mg57ay7s1hpme",
+      "customer": "Samsonite",
+      "pallet": "DID2509250861",
+      "container": "B9778WI",
+      "ean": "5400520329981",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-09-29T14:05:26.584Z",
+      "user": "fajarakmalf",
+      "date": "2025-09-29",
+      "version": 1,
+      "lastModified": "2025-09-29T14:05:26.584Z"
     }
   ],
   "masterData": [
@@ -31116,5 +31180,5 @@
     "mfm2f45mkf0a7",
     "mfm2f3o34fnl7"
   ],
-  "lastUpdated": "2025-09-29T14:04:29.303Z"
+  "lastUpdated": "2025-09-29T14:05:29.398Z"
 }
