@@ -48159,6 +48159,70 @@
       "date": "2025-10-03",
       "version": 1,
       "lastModified": "2025-10-03T06:40:52.105Z"
+    },
+    {
+      "id": "mgah7f87so8hw",
+      "customer": "Samsonite",
+      "pallet": "DID2509250517",
+      "container": "B9715UEI*",
+      "ean": "5400520348784",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-03T06:41:29.047Z",
+      "user": "Anton",
+      "date": "2025-10-03",
+      "version": 1,
+      "lastModified": "2025-10-03T06:41:29.047Z"
+    },
+    {
+      "id": "mgah7g3dh4fwu",
+      "customer": "Samsonite",
+      "pallet": "DID2509250517",
+      "container": "B9715UEI*",
+      "ean": "5400520348784",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-03T06:41:30.169Z",
+      "user": "Anton",
+      "date": "2025-10-03",
+      "version": 1,
+      "lastModified": "2025-10-03T06:41:30.169Z"
+    },
+    {
+      "id": "mgah7ip51xf0m",
+      "customer": "Samsonite",
+      "pallet": "DID2509250517",
+      "container": "B9715UEI*",
+      "ean": "5400520348784",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-03T06:41:33.545Z",
+      "user": "Anton",
+      "date": "2025-10-03",
+      "version": 1,
+      "lastModified": "2025-10-03T06:41:33.545Z"
+    },
+    {
+      "id": "mgah7jb5rnm6u",
+      "customer": "Samsonite",
+      "pallet": "DID2509250517",
+      "container": "B9715UEI*",
+      "ean": "5400520348784",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-03T06:41:34.337Z",
+      "user": "Anton",
+      "date": "2025-10-03",
+      "version": 1,
+      "lastModified": "2025-10-03T06:41:34.337Z"
     }
   ],
   "masterData": [
@@ -48174,5 +48238,5 @@
     }
   ],
   "deletedDataIds": [],
-  "lastUpdated": "2025-10-03T06:40:57.093Z"
+  "lastUpdated": "2025-10-03T06:41:39.683Z"
 }
