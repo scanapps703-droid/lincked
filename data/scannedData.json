@@ -63359,6 +63359,70 @@
       "date": "2025-10-03",
       "version": 1,
       "lastModified": "2025-10-03T08:45:19.699Z"
+    },
+    {
+      "id": "mgalne8g4ejdy",
+      "customer": "Samsonite",
+      "pallet": "DID2509250454",
+      "container": "B9530JK",
+      "ean": "5400520348784",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-03T08:45:52.720Z",
+      "user": "Anton",
+      "date": "2025-10-03",
+      "version": 1,
+      "lastModified": "2025-10-03T08:45:52.720Z"
+    },
+    {
+      "id": "mgalneuijc31n",
+      "customer": "Samsonite",
+      "pallet": "DID2509250454",
+      "container": "B9530JK",
+      "ean": "5400520348784",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-03T08:45:53.514Z",
+      "user": "Anton",
+      "date": "2025-10-03",
+      "version": 1,
+      "lastModified": "2025-10-03T08:45:53.514Z"
+    },
+    {
+      "id": "mgalnfcxynzyb",
+      "customer": "Samsonite",
+      "pallet": "DID2509250454",
+      "container": "B9530JK",
+      "ean": "5400520348784",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-03T08:45:54.177Z",
+      "user": "Anton",
+      "date": "2025-10-03",
+      "version": 1,
+      "lastModified": "2025-10-03T08:45:54.177Z"
+    },
+    {
+      "id": "mgalni4vblodr",
+      "customer": "Samsonite",
+      "pallet": "DID2509250454",
+      "container": "B9530JK",
+      "ean": "5400520348784",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-03T08:45:57.775Z",
+      "user": "Anton",
+      "date": "2025-10-03",
+      "version": 1,
+      "lastModified": "2025-10-03T08:45:57.775Z"
     }
   ],
   "masterData": [
@@ -63374,5 +63438,5 @@
     }
   ],
   "deletedDataIds": [],
-  "lastUpdated": "2025-10-03T08:45:26.409Z"
+  "lastUpdated": "2025-10-03T08:46:03.604Z"
 }
