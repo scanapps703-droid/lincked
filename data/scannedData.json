@@ -16159,6 +16159,38 @@
       "date": "2025-10-08",
       "version": 2,
       "lastModified": "2025-10-08T03:49:47.033Z"
+    },
+    {
+      "id": "mghg9wsgdy9o5",
+      "customer": "Samsonite",
+      "pallet": "DID2509250397",
+      "container": "B9723UEL",
+      "ean": "5400520348197",
+      "sku": "0000000000001562911041",
+      "description": "FRONTEC SP 68/25 EXP TSA OS V2-BLACK",
+      "status": "OK",
+      "qty": "1",
+      "timestamp": "2025-10-08T03:49:48.736Z",
+      "user": "Yogi",
+      "date": "2025-10-08",
+      "version": 1,
+      "lastModified": "2025-10-08T03:49:48.736Z"
+    },
+    {
+      "id": "mghg9xainfbzc",
+      "customer": "Samsonite",
+      "pallet": "DID2509250397",
+      "container": "B9723UEL",
+      "ean": "5400520348197",
+      "sku": "0000000000001562911041",
+      "description": "FRONTEC SP 68/25 EXP TSA OS V2-BLACK",
+      "status": "OK",
+      "qty": "1",
+      "timestamp": "2025-10-08T03:49:49.386Z",
+      "user": "Yogi",
+      "date": "2025-10-08",
+      "version": 1,
+      "lastModified": "2025-10-08T03:49:49.386Z"
     }
   ],
   "masterData": [
@@ -16283,5 +16315,5 @@
     "mghfda7595082",
     "mghfd9o6c65xm"
   ],
-  "lastUpdated": "2025-10-08T03:49:47.106Z"
+  "lastUpdated": "2025-10-08T03:50:03.053Z"
 }
