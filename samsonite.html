@@ -1079,20 +1079,18 @@
             gap: 10px;
         }
 
-        /* New styles for view-detail button */
-        .view-detail-btn {
-            background-color: var(--spark-info);
-            color: white;
-            border: none;
-            border-radius: var(--spark-radius);
-            padding: 0.375rem 0.75rem;
-            font-size: 0.75rem;
+        /* New styles for finding links */
+        .finding-link {
+            color: var(--spark-primary);
             cursor: pointer;
+            text-decoration: underline;
+            font-weight: 600;
             transition: var(--spark-transition);
         }
 
-        .view-detail-btn:hover {
-            background-color: #5a9fe4;
+        .finding-link:hover {
+            color: var(--spark-primary-dark);
+            text-decoration: none;
         }
     </style>
 </head>
@@ -1117,7 +1115,7 @@
                 <button class="close-modal" id="closeModal">&times;</button>
             </div>
             <form id="editForm">
-                <input type="hidden" id="editId">
+                <input type="hidden" id="editIndex">
                 <input type="hidden" id="editVersion">
                 <div class="modal-form-group">
                     <label for="editContainer">No. Container</label>
@@ -1710,7 +1708,7 @@
             const closeModalBtn = document.getElementById('closeModal');
             const cancelEditBtn = document.getElementById('cancelEditBtn');
             const editForm = document.getElementById('editForm');
-            const editIdInput = document.getElementById('editId');
+            const editIndexInput = document.getElementById('editIndex');
             const editVersionInput = document.getElementById('editVersion');
             const editContainerInput = document.getElementById('editContainer');
             const editPalletInput = document.getElementById('editPallet');
@@ -1806,7 +1804,7 @@
             let currentUser = 'Guest';
             let isAdmin = false;
             let eanInputTimer = null;
-            let currentEditingId = null;
+            let currentEditingIndex = -1;
             let isSaving = false;
             let autoSyncIntervalId = null;
             let lastSyncTimestamp = null;
@@ -1820,6 +1818,7 @@
             let filteredData = [];
             let isFilterActive = false;
             let dashboardFilterActive = false;
+            let currentFilteredIndices = []; // Menyimpan indeks asli data yang difilter
             
             // Konfigurasi GitHub
             let githubConfig = {
@@ -2067,6 +2066,10 @@
                             if (!item.lastModified) item.lastModified = item.timestamp || new Date().toISOString();
                             if (!item.customer) item.customer = 'Samsonite'; // Default value untuk data lama
                         });
+                        
+                        // Update data finding saat load
+                        updateFindingData();
+                        
                     } catch (e) {
                         console.error('Error parsing data from localStorage:', e);
                         scannedData = [];
@@ -2355,17 +2358,14 @@
             }
             
             // Fungsi untuk menampilkan modal edit data
-            function showEditModal(id) {
-                const dataIndex = scannedData.findIndex(item => item.id === id);
-                if (dataIndex === -1) {
-                    showNotification('Data tidak ditemukan!', 'error');
-                    return;
-                }
+            function showEditModal(index) {
+                // Jika data difilter, gunakan indeks asli dari currentFilteredIndices
+                const actualIndex = isFilterActive ? currentFilteredIndices[index] : index;
                 
-                const data = scannedData[dataIndex];
-                currentEditingId = id;
+                const data = scannedData[actualIndex];
+                currentEditingIndex = actualIndex;
                 
-                editIdInput.value = id;
+                editIndexInput.value = actualIndex;
                 editContainerInput.value = data.container;
                 editPalletInput.value = data.pallet;
                 editEanInput.value = data.ean;
@@ -2378,7 +2378,7 @@
             // Fungsi untuk menyembunyikan modal edit data
             function hideEditModal() {
                 editModal.style.display = 'none';
-                currentEditingId = null;
+                currentEditingIndex = -1;
                 editForm.reset();
             }
             
@@ -2386,17 +2386,10 @@
             function saveEditedData(e) {
                 e.preventDefault();
                 
-                if (!currentEditingId) return;
-                
-                const dataIndex = scannedData.findIndex(item => item.id === currentEditingId);
-                if (dataIndex === -1) {
-                    showNotification('Data tidak ditemukan!', 'error');
-                    hideEditModal();
-                    return;
-                }
+                if (currentEditingIndex === -1) return;
                 
                 const updatedData = {
-                    ...scannedData[dataIndex],
+                    ...scannedData[currentEditingIndex],
                     container: editContainerInput.value,
                     pallet: editPalletInput.value,
                     ean: editEanInput.value,
@@ -2407,7 +2400,7 @@
                 };
                 
                 // Update data lokal
-                scannedData[dataIndex] = updatedData;
+                scannedData[currentEditingIndex] = updatedData;
                 saveToLocalStorage();
                 
                 showNotification('Data berhasil diupdate!');
@@ -2429,17 +2422,24 @@
                     return;
                 }
                 
-                // Dapatkan ID data yang dipilih
-                const idsToDelete = Array.from(checkboxes)
-                    .map(checkbox => checkbox.dataset.id);
+                // Dapatkan indeks data yang dipilih (dalam urutan terbalik untuk menghindari masalah indeks saat menghapus)
+                const indexesToDelete = Array.from(checkboxes)
+                    .map(checkbox => {
+                        const index = parseInt(checkbox.dataset.index);
+                        // Jika data difilter, gunakan indeks asli dari currentFilteredIndices
+                        return isFilterActive ? currentFilteredIndices[index] : index;
+                    })
+                    .sort((a, b) => b - a);
                 
                 // Tambahkan ID data yang dihapus ke daftar deletedDataIds
-                idsToDelete.forEach(id => {
-                    deletedDataIds.push(id);
-                });
+                for (const index of indexesToDelete) {
+                    deletedDataIds.push(scannedData[index].id);
+                }
                 
                 // Hapus data dari array
-                scannedData = scannedData.filter(item => !idsToDelete.includes(item.id));
+                for (const index of indexesToDelete) {
+                    scannedData.splice(index, 1);
+                }
                 
                 // Simpan perubahan lokal
                 saveToLocalStorage();
@@ -2447,7 +2447,7 @@
                 renderTable();
                 updateTotalEan();
                 updateTotalContainer();
-                showNotification(`${idsToDelete.length} data berhasil dihapus!`);
+                showNotification(`${indexesToDelete.length} data berhasil dihapus!`);
                 
                 // Reset select all checkbox
                 selectAllCheckbox.checked = false;
@@ -2784,12 +2784,17 @@
                 isFilterActive = true;
                 
                 // Filter data berdasarkan pallet
-                filteredData = scannedData.filter(item => {
+                const filteredIndices = [];
+                filteredData = scannedData.filter((item, index) => {
                     // Filter pallet
                     if (pallet && !item.pallet.toLowerCase().includes(pallet)) return false;
                     
+                    filteredIndices.push(index);
                     return true;
                 });
+                
+                // Simpan indeks asli data yang difilter
+                currentFilteredIndices = filteredIndices;
                 
                 // Render tabel dengan data yang sudah difilter
                 renderFilteredTable();
@@ -2812,8 +2817,8 @@
                 if (paginationControls) paginationControls.classList.add('hidden'); // Sembunyikan pagination saat filter aktif
                 
                 // Tambahkan semua data yang difilter ke tabel
-                dataToShow.forEach((item) => {
-                    addTableRow(item);
+                dataToShow.forEach((item, index) => {
+                    addTableRow(item, index);
                 });
             }
             
@@ -2911,12 +2916,12 @@
                 
                 // Tambahkan data ke tabel
                 for (let i = startIndex; i < endIndex; i++) {
-                    addTableRow(dataToShow[i]);
+                    addTableRow(dataToShow[i], i);
                 }
             }
             
             // Fungsi untuk menambahkan baris ke tabel
-            function addTableRow(data) {
+            function addTableRow(data, index) {
                 if (!tableBody) return;
                 
                 const row = document.createElement('tr');
@@ -2928,7 +2933,7 @@
                 
                 row.innerHTML = `
                     <td class="checkbox-cell">
-                        <input type="checkbox" class="data-checkbox" data-id="${data.id}">
+                        <input type="checkbox" class="data-checkbox" data-index="${index}">
                     </td>
                     <td>${data.customer}</td>
                     <td>${data.container}</td>
@@ -2941,8 +2946,8 @@
                     <td>${new Date(data.timestamp).toLocaleString()}</td>
                     <td>${data.user}</td>
                     <td class="actions">
-                        ${isAdmin ? `<i class="fas fa-edit btn-edit" data-id="${data.id}"></i>
-                        <i class="fas fa-trash btn-delete" data-id="${data.id}"></i>` : ''}
+                        ${isAdmin ? `<i class="fas fa-edit btn-edit" data-index="${index}"></i>
+                        <i class="fas fa-trash btn-delete" data-index="${index}"></i>` : ''}
                     </td>
                 `;
                 
@@ -2955,28 +2960,30 @@
                     
                     if (editBtn) {
                         editBtn.addEventListener('click', function() {
-                            const id = this.getAttribute('data-id');
-                            showEditModal(id);
+                            const index = parseInt(this.getAttribute('data-index'));
+                            showEditModal(index);
                         });
                     }
                     
                     if (deleteBtn) {
                         deleteBtn.addEventListener('click', function() {
-                            const id = this.getAttribute('data-id');
-                            deleteData(id);
+                            const index = parseInt(this.getAttribute('data-index'));
+                            // Jika data difilter, gunakan indeks asli dari currentFilteredIndices
+                            const actualIndex = isFilterActive ? currentFilteredIndices[index] : index;
+                            deleteData(actualIndex);
                         });
                     }
                 }
             }
             
             // Fungsi untuk menghapus data
-            function deleteData(id) {
+            function deleteData(index) {
                 if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
                     // Tambahkan ID data yang dihapus ke daftar deletedDataIds
-                    deletedDataIds.push(id);
+                    deletedDataIds.push(scannedData[index].id);
                     
                     // Hapus data dari array
-                    scannedData = scannedData.filter(item => item.id !== id);
+                    scannedData.splice(index, 1);
                     
                     // Simpan perubahan lokal
                     saveToLocalStorage();
@@ -3081,6 +3088,9 @@
                 masterData[index] = updatedData;
                 saveToLocalStorage();
                 
+                // Update data finding yang terkait
+                updateFindingData();
+                
                 showNotification('Data master berhasil diupdate!');
                 
                 hideEditMasterModal();
@@ -3164,6 +3174,9 @@
                 masterData.push(newData);
                 saveToLocalStorage();
                 
+                // Update data finding yang terkait
+                updateFindingData();
+                
                 showNotification('Data master berhasil ditambahkan!');
                 
                 // Reset form
@@ -3239,6 +3252,9 @@
                         // Simpan perubahan
                         saveToLocalStorage();
                         renderMasterTable();
+                        
+                        // Update data finding yang terkait
+                        updateFindingData();
                         
                         showNotification(`${message} Ditambahkan: ${addedCount}, Diupdate: ${updatedCount}`);
                         
@@ -3393,25 +3409,22 @@
                             <td>${finding.pallet}</td>
                             <td>${finding.eanCount}</td>
                             <td><span class="finding-highlight">Finding</span></td>
-                            <td>
-                                <button class="view-detail-btn" data-container="${finding.container}" data-pallet="${finding.pallet}">
-                                    <i class="fas fa-search"></i> Lihat Detail
-                                </button>
-                            </td>
+                            <td><span class="finding-link" data-container="${finding.container}" data-pallet="${finding.pallet}">Lihat Detail</span></td>
                         `;
                         findingTableBody.appendChild(row);
                     });
                     
-                    // Tambahkan event listener untuk tombol "Lihat Detail"
-                    document.querySelectorAll('.view-detail-btn').forEach(button => {
-                        button.addEventListener('click', function() {
+                    // Tambahkan event listener untuk link finding
+                    const findingLinks = findingTableBody.querySelectorAll('.finding-link');
+                    findingLinks.forEach(link => {
+                        link.addEventListener('click', function() {
                             const container = this.getAttribute('data-container');
                             const pallet = this.getAttribute('data-pallet');
                             
-                            // Buka tab "Hasil Input Scan"
-                            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-                            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                            document.querySelector('[data-tab="scanResult"]').classList.add('active');
+                            // Aktifkan tab hasil input scan
+                            tabs.forEach(t => t.classList.remove('active'));
+                            tabContents.forEach(c => c.classList.remove('active'));
+                            document.querySelector('.tab[data-tab="scanResult"]').classList.add('active');
                             document.getElementById('scanResultTab').classList.add('active');
                             
                             // Set filter pallet
@@ -3420,10 +3433,42 @@
                             // Terapkan filter
                             filterData();
                             
-                            showNotification(`Menampilkan data untuk Container: ${container}, Pallet: ${pallet}`);
+                            // Scroll ke tabel hasil input scan
+                            document.getElementById('scanResultTab').scrollIntoView({ behavior: 'smooth' });
                         });
                     });
                 }
+            }
+            
+            // Fungsi untuk memperbarui data scan yang statusnya "Finding" ketika master data diperbarui
+            function updateFindingData() {
+                let updatedCount = 0;
+                
+                // Loop melalui semua data scan yang statusnya "Finding"
+                scannedData.forEach(item => {
+                    if (item.status === 'Finding') {
+                        // Cari apakah EAN sekarang ada di master data
+                        const masterItem = findMasterData(item.ean);
+                        if (masterItem) {
+                            // Update data scan dengan informasi dari master data
+                            item.sku = masterItem.sku;
+                            item.description = masterItem.description;
+                            item.status = 'OK';
+                            item.lastModified = new Date().toISOString();
+                            item.version = (item.version || 1) + 1;
+                            updatedCount++;
+                        }
+                    }
+                });
+                
+                if (updatedCount > 0) {
+                    saveToLocalStorage();
+                    renderTable();
+                    updateDashboardSummary();
+                    showNotification(`${updatedCount} data finding berhasil diupdate menjadi OK!`);
+                }
+                
+                return updatedCount;
             }
             
             // Event listeners
@@ -3689,17 +3734,7 @@
                 selectAllCheckbox.addEventListener('change', function() {
                     const checkboxes = document.querySelectorAll('.data-checkbox');
                     checkboxes.forEach(checkbox => {
-                        checkbox.checked = selectAllCheckbox.checked;
-                    });
-                });
-            }
-            
-            // Event listener untuk select all master checkbox
-            if (selectAllMasterCheckbox) {
-                selectAllMasterCheckbox.addEventListener('change', function() {
-                    const checkboxes = document.querySelectorAll('#masterTableBody .data-checkbox');
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = selectAllMasterCheckbox.checked;
+                        checkbox.checked = this.checked;
                     });
                 });
             }
@@ -3707,11 +3742,6 @@
             // Event listener untuk tombol delete selected
             if (deleteSelectedBtn) {
                 deleteSelectedBtn.addEventListener('click', deleteSelectedData);
-            }
-            
-            // Event listener untuk tombol delete selected master data
-            if (deleteSelectedMasterBtn) {
-                deleteSelectedMasterBtn.addEventListener('click', deleteSelectedMasterData);
             }
             
             // Event listener untuk tombol push ke GitHub
@@ -3724,34 +3754,22 @@
                 pullButton.addEventListener('click', pullFromGithub);
             }
             
-            // Event listener untuk toggle auto sync
-            if (autoSyncToggle) {
-                autoSyncToggle.addEventListener('change', function() {
-                    githubConfig.autoSync = this.checked;
-                    localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
-                    
-                    if (this.checked) {
-                        setupAutoSync();
-                    } else {
-                        stopAutoSync();
-                        showNotification('Auto sync dinonaktifkan');
-                    }
+            // Event listener untuk select all checkbox master data
+            if (selectAllMasterCheckbox) {
+                selectAllMasterCheckbox.addEventListener('change', function() {
+                    const checkboxes = document.querySelectorAll('#masterTableBody .data-checkbox');
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = this.checked;
+                    });
                 });
             }
             
-            // Event listener untuk perubahan interval auto sync
-            if (autoSyncInterval) {
-                autoSyncInterval.addEventListener('change', function() {
-                    githubConfig.autoSyncInterval = parseInt(this.value) || 1;
-                    localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
-                    
-                    if (githubConfig.autoSync) {
-                        setupAutoSync();
-                    }
-                });
+            // Event listener untuk tombol delete selected master data
+            if (deleteSelectedMasterBtn) {
+                deleteSelectedMasterBtn.addEventListener('click', deleteSelectedMasterData);
             }
             
-            // Event listener untuk pagination
+            // Event listener untuk tombol pagination
             if (prevPageBtn) {
                 prevPageBtn.addEventListener('click', function() {
                     if (currentPage > 1) {
@@ -3763,7 +3781,11 @@
             
             if (nextPageBtn) {
                 nextPageBtn.addEventListener('click', function() {
-                    const totalPages = Math.ceil(scannedData.length / rowsPerPage);
+                    const dataToShow = !isAdmin ? 
+                        scannedData.filter(item => item.user === currentUser) : 
+                        scannedData;
+                    const totalPages = Math.ceil(dataToShow.length / rowsPerPage);
+                    
                     if (currentPage < totalPages) {
                         currentPage++;
                         renderTable();
@@ -3771,27 +3793,24 @@
                 });
             }
             
-            // Event listener untuk tombol upload master data
+            // Event listener untuk upload master data
             if (uploadMasterBtn) {
                 uploadMasterBtn.addEventListener('click', showUploadMasterModal);
             }
             
-            // Event listener untuk tombol close modal upload
             if (closeUploadMasterModalBtn) {
                 closeUploadMasterModalBtn.addEventListener('click', hideUploadMasterModal);
             }
             
-            // Event listener untuk tombol cancel upload
             if (cancelUploadMasterBtn) {
                 cancelUploadMasterBtn.addEventListener('click', hideUploadMasterModal);
             }
             
-            // Event listener untuk file input change
+            // Event listener untuk file input
             if (masterFileInput) {
                 masterFileInput.addEventListener('change', function() {
-                    if (this.files && this.files.length > 0) {
-                        const file = this.files[0];
-                        fileNameSpan.textContent = file.name;
+                    if (this.files.length > 0) {
+                        fileNameSpan.textContent = this.files[0].name;
                         processUploadBtn.disabled = false;
                     } else {
                         fileNameSpan.textContent = 'Belum ada file dipilih';
@@ -3800,163 +3819,114 @@
                 });
             }
             
-            // Event listener untuk tombol process upload
             if (processUploadBtn) {
                 processUploadBtn.addEventListener('click', function() {
-                    if (masterFileInput.files && masterFileInput.files.length > 0) {
+                    if (masterFileInput.files.length > 0) {
                         processMasterDataUpload(masterFileInput.files[0]);
-                    } else {
-                        showNotification('Pilih file terlebih dahulu!', 'error');
                     }
                 });
             }
             
-            // Event listener untuk drag and drop file
-            const fileInputContainer = document.querySelector('.file-input');
-            if (fileInputContainer) {
-                fileInputContainer.addEventListener('dragover', function(e) {
-                    e.preventDefault();
-                    this.style.borderColor = 'var(--spark-primary)';
-                    this.style.backgroundColor = '#f7fafc';
-                });
-                
-                fileInputContainer.addEventListener('dragleave', function(e) {
-                    e.preventDefault();
-                    this.style.borderColor = 'var(--spark-border)';
-                    this.style.backgroundColor = 'white';
-                });
-                
-                fileInputContainer.addEventListener('drop', function(e) {
-                    e.preventDefault();
-                    this.style.borderColor = 'var(--spark-border)';
-                    this.style.backgroundColor = 'white';
-                    
-                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                        masterFileInput.files = e.dataTransfer.files;
-                        fileNameSpan.textContent = e.dataTransfer.files[0].name;
-                        processUploadBtn.disabled = false;
-                    }
-                });
-            }
-            
-            // Tutup modal upload ketika klik di luar konten modal
-            if (uploadMasterModal) {
-                uploadMasterModal.addEventListener('click', function(e) {
-                    if (e.target === uploadMasterModal) {
-                        hideUploadMasterModal();
-                    }
-                });
-            }
-            
-            // Event listener untuk tombol apply filter
+            // Event listener untuk filter controls
             if (applyFilterBtn) {
                 applyFilterBtn.addEventListener('click', filterData);
             }
             
-            // Event listener untuk tombol reset filter
             if (resetFilterBtn) {
                 resetFilterBtn.addEventListener('click', resetFilter);
             }
             
-            // Event listener untuk tombol apply dashboard filter
+            // Event listener untuk dashboard filter controls
             if (applyDashboardFilterBtn) {
                 applyDashboardFilterBtn.addEventListener('click', filterDashboardData);
             }
             
-            // Event listener untuk tombol reset dashboard filter
             if (resetDashboardFilterBtn) {
                 resetDashboardFilterBtn.addEventListener('click', resetDashboardFilter);
             }
             
-            // Fungsi untuk menampilkan notifikasi
-            function showNotification(message, type = 'success') {
-                if (notification) {
-                    notification.textContent = message;
-                    notification.className = type === 'success' ? 'notification' : 'notification error';
-                    notification.style.display = 'block';
-                    
-                    setTimeout(() => {
-                        notification.style.display = 'none';
-                    }, 3000);
-                } else {
-                    // Fallback: gunakan alert jika notification element tidak ada
-                    alert(message);
-                }
-            }
-            
             // Fungsi untuk menangani login
             function handleLogin() {
-                try {
-                    const username = usernameInput.value.trim();
-                    if (!username) {
-                        showNotification('Harap masukkan username!', 'error');
-                        return;
-                    }
-                    
-                    currentUser = username;
-                    if (currentUserSpan) currentUserSpan.textContent = username;
-                    isAdmin = checkIfAdmin(username);
-                    setUserView();
-                    
-                    showNotification(`Selamat datang, ${username}!`);
-                    
-                    // Sembunyikan form login dan tampilkan konten utama
-                    toggleMainContent(true);
-                    
-                    // Muat data dari local storage
-                    loadFromStorage();
-                    renderTable();
-                    updateTotalEan();
-                    updateTotalContainer();
-                    populateFilterDropdowns();
-                    toggleEanInput();
-                    
-                    // Perbarui status sinkronisasi
-                    updateSyncStatusUI();
-                    
-                    // Setup auto sync
-                    setupAutoSync();
-                    
-                    // Update waktu sync terakhir setiap menit
-                    setInterval(updateLastSyncTime, 60000);
-                    
-                    // Fokuskan ke input EAN jika sudah diaktifkan
-                    if (!eanInput.disabled) {
-                        eanInput.focus();
-                    }
-                } catch (error) {
-                    console.error('Error during login:', error);
-                    showNotification('Terjadi kesalahan saat login. Silakan coba lagi.', 'error');
-                    // Pastikan login container ditampilkan jika terjadi error
-                    if (loginContainer) loginContainer.style.display = 'flex';
-                    if (mainContainer) mainContainer.style.display = 'none';
+                const username = usernameInput.value.trim();
+                
+                if (!username) {
+                    showNotification('Harap masukkan username!', 'error');
+                    return;
                 }
+                
+                // Set current user
+                currentUser = username;
+                currentUserSpan.textContent = username;
+                
+                // Cek apakah user adalah admin
+                isAdmin = checkIfAdmin(username);
+                
+                // Atur tampilan berdasarkan jenis user
+                setUserView();
+                
+                // Muat data dari local storage
+                loadFromStorage();
+                
+                // Setup auto sync
+                setupAutoSync();
+                
+                // Tampilkan konten utama
+                toggleMainContent(true);
+                
+                // Reset form login
+                loginForm.reset();
+                
+                showNotification(`Selamat datang, ${username}!`);
             }
             
-            // Inisialisasi
-            try {
-                loadGithubConfig();
-                loadFromStorage();
+            // Fungsi untuk menampilkan notifikasi
+            function showNotification(message, type = 'success') {
+                if (!notification) return;
+                
+                notification.textContent = message;
+                notification.className = 'notification';
+                
+                if (type === 'error') {
+                    notification.classList.add('error');
+                }
+                
+                notification.style.display = 'block';
+                
+                // Sembunyikan notifikasi setelah 3 detik
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            }
+            
+            // Inisialisasi aplikasi
+            function init() {
+                // Setup mobile menu
                 setupMobileMenu();
-                setUserView();
-                renderTable();
-                updateTotalEan();
-                updateTotalContainer();
-                toggleEanInput();
+                
+                // Muat konfigurasi GitHub
+                loadGithubConfig();
+                
+                // Muat data dari local storage
+                loadFromStorage();
+                
+                // Update status sinkronisasi UI
                 updateSyncStatusUI();
-                updatePushStatus('idle', 'Idle');
+                
+                // Update waktu sync terakhir
                 updateLastSyncTime();
                 
-                // Tampilkan form login pertama kali
+                // Setup auto sync
+                setupAutoSync();
+                
+                // Tampilkan form login
                 toggleMainContent(false);
                 
-                // Fokuskan ke input username pada form login
-                if (usernameInput) usernameInput.focus();
-            } catch (error) {
-                console.error('Error during initialization:', error);
-                // Tampilkan pesan error kepada pengguna
-                alert('Terjadi kesalahan saat memuat aplikasi. Silakan refresh halaman.');
+                // Fokus ke input username
+                usernameInput.focus();
             }
+            
+            // Jalankan inisialisasi
+            init();
         });
     </script>
 </body>
