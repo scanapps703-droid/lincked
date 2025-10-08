@@ -1078,6 +1078,22 @@
             align-items: center;
             gap: 10px;
         }
+
+        /* New styles for view-detail button */
+        .view-detail-btn {
+            background-color: var(--spark-info);
+            color: white;
+            border: none;
+            border-radius: var(--spark-radius);
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: var(--spark-transition);
+        }
+
+        .view-detail-btn:hover {
+            background-color: #5a9fe4;
+        }
     </style>
 </head>
 <body>
@@ -1101,7 +1117,7 @@
                 <button class="close-modal" id="closeModal">&times;</button>
             </div>
             <form id="editForm">
-                <input type="hidden" id="editIndex">
+                <input type="hidden" id="editId">
                 <input type="hidden" id="editVersion">
                 <div class="modal-form-group">
                     <label for="editContainer">No. Container</label>
@@ -1497,6 +1513,7 @@
                                             <th>Pallet ID</th>
                                             <th>Jumlah EAN</th>
                                             <th>Status</th>
+                                            <th>Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody id="findingTableBody">
@@ -1693,7 +1710,7 @@
             const closeModalBtn = document.getElementById('closeModal');
             const cancelEditBtn = document.getElementById('cancelEditBtn');
             const editForm = document.getElementById('editForm');
-            const editIndexInput = document.getElementById('editIndex');
+            const editIdInput = document.getElementById('editId');
             const editVersionInput = document.getElementById('editVersion');
             const editContainerInput = document.getElementById('editContainer');
             const editPalletInput = document.getElementById('editPallet');
@@ -1789,7 +1806,7 @@
             let currentUser = 'Guest';
             let isAdmin = false;
             let eanInputTimer = null;
-            let currentEditingIndex = -1;
+            let currentEditingId = null;
             let isSaving = false;
             let autoSyncIntervalId = null;
             let lastSyncTimestamp = null;
@@ -2338,11 +2355,17 @@
             }
             
             // Fungsi untuk menampilkan modal edit data
-            function showEditModal(index) {
-                const data = scannedData[index];
-                currentEditingIndex = index;
+            function showEditModal(id) {
+                const dataIndex = scannedData.findIndex(item => item.id === id);
+                if (dataIndex === -1) {
+                    showNotification('Data tidak ditemukan!', 'error');
+                    return;
+                }
                 
-                editIndexInput.value = index;
+                const data = scannedData[dataIndex];
+                currentEditingId = id;
+                
+                editIdInput.value = id;
                 editContainerInput.value = data.container;
                 editPalletInput.value = data.pallet;
                 editEanInput.value = data.ean;
@@ -2355,7 +2378,7 @@
             // Fungsi untuk menyembunyikan modal edit data
             function hideEditModal() {
                 editModal.style.display = 'none';
-                currentEditingIndex = -1;
+                currentEditingId = null;
                 editForm.reset();
             }
             
@@ -2363,10 +2386,17 @@
             function saveEditedData(e) {
                 e.preventDefault();
                 
-                if (currentEditingIndex === -1) return;
+                if (!currentEditingId) return;
+                
+                const dataIndex = scannedData.findIndex(item => item.id === currentEditingId);
+                if (dataIndex === -1) {
+                    showNotification('Data tidak ditemukan!', 'error');
+                    hideEditModal();
+                    return;
+                }
                 
                 const updatedData = {
-                    ...scannedData[currentEditingIndex],
+                    ...scannedData[dataIndex],
                     container: editContainerInput.value,
                     pallet: editPalletInput.value,
                     ean: editEanInput.value,
@@ -2377,7 +2407,7 @@
                 };
                 
                 // Update data lokal
-                scannedData[currentEditingIndex] = updatedData;
+                scannedData[dataIndex] = updatedData;
                 saveToLocalStorage();
                 
                 showNotification('Data berhasil diupdate!');
@@ -2399,20 +2429,17 @@
                     return;
                 }
                 
-                // Dapatkan indeks data yang dipilih (dalam urutan terbalik untuk menghindari masalah indeks saat menghapus)
-                const indexesToDelete = Array.from(checkboxes)
-                    .map(checkbox => parseInt(checkbox.dataset.index))
-                    .sort((a, b) => b - a);
+                // Dapatkan ID data yang dipilih
+                const idsToDelete = Array.from(checkboxes)
+                    .map(checkbox => checkbox.dataset.id);
                 
                 // Tambahkan ID data yang dihapus ke daftar deletedDataIds
-                for (const index of indexesToDelete) {
-                    deletedDataIds.push(scannedData[index].id);
-                }
+                idsToDelete.forEach(id => {
+                    deletedDataIds.push(id);
+                });
                 
                 // Hapus data dari array
-                for (const index of indexesToDelete) {
-                    scannedData.splice(index, 1);
-                }
+                scannedData = scannedData.filter(item => !idsToDelete.includes(item.id));
                 
                 // Simpan perubahan lokal
                 saveToLocalStorage();
@@ -2420,7 +2447,7 @@
                 renderTable();
                 updateTotalEan();
                 updateTotalContainer();
-                showNotification(`${indexesToDelete.length} data berhasil dihapus!`);
+                showNotification(`${idsToDelete.length} data berhasil dihapus!`);
                 
                 // Reset select all checkbox
                 selectAllCheckbox.checked = false;
@@ -2785,8 +2812,8 @@
                 if (paginationControls) paginationControls.classList.add('hidden'); // Sembunyikan pagination saat filter aktif
                 
                 // Tambahkan semua data yang difilter ke tabel
-                dataToShow.forEach((item, index) => {
-                    addTableRow(item, index);
+                dataToShow.forEach((item) => {
+                    addTableRow(item);
                 });
             }
             
@@ -2884,12 +2911,12 @@
                 
                 // Tambahkan data ke tabel
                 for (let i = startIndex; i < endIndex; i++) {
-                    addTableRow(dataToShow[i], i);
+                    addTableRow(dataToShow[i]);
                 }
             }
             
             // Fungsi untuk menambahkan baris ke tabel
-            function addTableRow(data, index) {
+            function addTableRow(data) {
                 if (!tableBody) return;
                 
                 const row = document.createElement('tr');
@@ -2901,7 +2928,7 @@
                 
                 row.innerHTML = `
                     <td class="checkbox-cell">
-                        <input type="checkbox" class="data-checkbox" data-index="${index}">
+                        <input type="checkbox" class="data-checkbox" data-id="${data.id}">
                     </td>
                     <td>${data.customer}</td>
                     <td>${data.container}</td>
@@ -2914,8 +2941,8 @@
                     <td>${new Date(data.timestamp).toLocaleString()}</td>
                     <td>${data.user}</td>
                     <td class="actions">
-                        ${isAdmin ? `<i class="fas fa-edit btn-edit" data-index="${index}"></i>
-                        <i class="fas fa-trash btn-delete" data-index="${index}"></i>` : ''}
+                        ${isAdmin ? `<i class="fas fa-edit btn-edit" data-id="${data.id}"></i>
+                        <i class="fas fa-trash btn-delete" data-id="${data.id}"></i>` : ''}
                     </td>
                 `;
                 
@@ -2928,28 +2955,28 @@
                     
                     if (editBtn) {
                         editBtn.addEventListener('click', function() {
-                            const index = parseInt(this.getAttribute('data-index'));
-                            showEditModal(index);
+                            const id = this.getAttribute('data-id');
+                            showEditModal(id);
                         });
                     }
                     
                     if (deleteBtn) {
                         deleteBtn.addEventListener('click', function() {
-                            const index = parseInt(this.getAttribute('data-index'));
-                            deleteData(index);
+                            const id = this.getAttribute('data-id');
+                            deleteData(id);
                         });
                     }
                 }
             }
             
             // Fungsi untuk menghapus data
-            function deleteData(index) {
+            function deleteData(id) {
                 if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
                     // Tambahkan ID data yang dihapus ke daftar deletedDataIds
-                    deletedDataIds.push(scannedData[index].id);
+                    deletedDataIds.push(id);
                     
                     // Hapus data dari array
-                    scannedData.splice(index, 1);
+                    scannedData = scannedData.filter(item => item.id !== id);
                     
                     // Simpan perubahan lokal
                     saveToLocalStorage();
@@ -3366,8 +3393,35 @@
                             <td>${finding.pallet}</td>
                             <td>${finding.eanCount}</td>
                             <td><span class="finding-highlight">Finding</span></td>
+                            <td>
+                                <button class="view-detail-btn" data-container="${finding.container}" data-pallet="${finding.pallet}">
+                                    <i class="fas fa-search"></i> Lihat Detail
+                                </button>
+                            </td>
                         `;
                         findingTableBody.appendChild(row);
+                    });
+                    
+                    // Tambahkan event listener untuk tombol "Lihat Detail"
+                    document.querySelectorAll('.view-detail-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const container = this.getAttribute('data-container');
+                            const pallet = this.getAttribute('data-pallet');
+                            
+                            // Buka tab "Hasil Input Scan"
+                            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+                            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                            document.querySelector('[data-tab="scanResult"]').classList.add('active');
+                            document.getElementById('scanResultTab').classList.add('active');
+                            
+                            // Set filter pallet
+                            filterPallet.value = pallet;
+                            
+                            // Terapkan filter
+                            filterData();
+                            
+                            showNotification(`Menampilkan data untuk Container: ${container}, Pallet: ${pallet}`);
+                        });
                     });
                 }
             }
@@ -3878,388 +3932,7 @@
                     if (mainContainer) mainContainer.style.display = 'none';
                 }
             }
-			// Fungsi untuk memperbarui data scan yang statusnya "Finding" ketika master data diperbarui
-function updateFindingData() {
-    let updatedCount = 0;
-    
-    // Loop melalui semua data scan yang statusnya "Finding"
-    scannedData.forEach(item => {
-        if (item.status === 'Finding') {
-            // Cari apakah EAN sekarang ada di master data
-            const masterItem = findMasterData(item.ean);
-            if (masterItem) {
-                // Update data scan dengan informasi dari master data
-                item.sku = masterItem.sku;
-                item.description = masterItem.description;
-                item.status = 'OK';
-                item.lastModified = new Date().toISOString();
-                item.version = (item.version || 1) + 1;
-                updatedCount++;
-            }
-        }
-    });
-    
-    if (updatedCount > 0) {
-        saveToLocalStorage();
-        renderTable();
-        updateDashboardSummary();
-        showNotification(`${updatedCount} data finding berhasil diupdate menjadi OK!`);
-    }
-    
-    return updatedCount;
-}
-
-// Fungsi untuk sinkronisasi data ke kedua file
-async function syncToBothFiles(dataToPush) {
-    if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-        throw new Error('GitHub configuration is incomplete');
-    }
-    
-    try {
-        const content = JSON.stringify(dataToPush, null, 2);
-        const contentEncoded = btoa(unescape(encodeURIComponent(content)));
-        
-        // Sinkronisasi ke SamsoniteData.json (file utama)
-        await syncToFile(githubConfig.dataFilePath, contentEncoded);
-        
-        // Sinkronisasi ke scannedData.json (file backup)
-        await syncToFile('data/scannedData.json', contentEncoded);
-        
-        return true;
-    } catch (error) {
-        throw error;
-    }
-}
-
-// Fungsi helper untuk sinkronisasi ke file tertentu
-async function syncToFile(filePath, contentEncoded) {
-    const fileUrl = `https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${filePath}`;
-    
-    // Cek apakah file sudah ada
-    const fileResponse = await fetch(fileUrl, {
-        headers: {
-            'Authorization': `token ${githubConfig.token}`,
-            'Accept': 'application/vnd.github.v3+json'
-        }
-    });
-    
-    let sha = null;
-    if (fileResponse.ok) {
-        const fileInfo = await fileResponse.json();
-        sha = fileInfo.sha;
-    }
-    
-    // Upload file
-    const response = await fetch(fileUrl, {
-        method: 'PUT',
-        headers: {
-            'Authorization': `token ${githubConfig.token}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            message: `Sync data dari ${currentUser} pada ${new Date().toISOString()}`,
-            content: contentEncoded,
-            sha: sha
-        })
-    });
-    
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`Gagal sync ke ${filePath}: ${error.message}`);
-    }
-    
-    return true;
-}
-
-// Fungsi untuk pull data dari kedua file (utamakan SamsoniteData.json, fallback ke scannedData.json)
-async function pullFromBothFiles() {
-    if (!githubConfig.username && !githubConfig.repo && !githubConfig.token) {
-        return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
-    }
-    
-    try {
-        // Coba pull dari SamsoniteData.json terlebih dahulu
-        let remoteData = await pullFromFile(githubConfig.dataFilePath);
-        
-        // Jika SamsoniteData.json tidak ada atau kosong, coba pull dari scannedData.json
-        if (!remoteData || remoteData.scannedData.length === 0) {
-            remoteData = await pullFromFile('data/scannedData.json');
-        }
-        
-        return remoteData;
-    } catch (error) {
-        console.error('Error pulling data from both files:', error);
-        return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
-    }
-}
-
-// Fungsi helper untuk pull dari file tertentu
-async function pullFromFile(filePath) {
-    try {
-        const fileUrl = `https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${filePath}`;
-        const response = await fetch(fileUrl, {
-            headers: {
-                'Authorization': `token ${githubConfig.token}`,
-                'Accept': 'application/vnd.github.v3+json'
-            }
-        });
-        
-        if (response.ok) {
-            const fileInfo = await response.json();
-            const content = decodeURIComponent(escape(atob(fileInfo.content)));
-            const parsedData = JSON.parse(content);
             
-            return {
-                scannedData: Array.isArray(parsedData.scannedData) ? parsedData.scannedData : [],
-                masterData: Array.isArray(parsedData.masterData) ? parsedData.masterData : [],
-                deletedDataIds: Array.isArray(parsedData.deletedDataIds) ? parsedData.deletedDataIds : [],
-                lastUpdated: parsedData.lastUpdated || new Date().toISOString()
-            };
-        } else if (response.status === 404) {
-            // File tidak ditemukan, return data kosong
-            return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
-        } else {
-            const error = await response.json();
-            throw new Error(error.message || `Gagal pull dari ${filePath}`);
-        }
-    } catch (error) {
-        throw error;
-    }
-}
-
-// Update fungsi performSync untuk menggunakan kedua file
-async function performSync() {
-    if (isSyncing) {
-        console.log('Sync already in progress');
-        return;
-    }
-    
-    if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-        showNotification('Harap konfigurasi GitHub terlebih dahulu!', 'error');
-        return;
-    }
-    
-    isSyncing = true;
-    updatePushStatus('active', 'Syncing...');
-    
-    try {
-        // 1. Pull data dari kedua file GitHub
-        const remoteData = await pullFromBothFiles();
-        
-        // 2. Merge data lokal dan data dari GitHub
-        const mergedData = mergeData(
-            { scannedData, masterData, deletedDataIds }, 
-            remoteData
-        );
-        
-        // 3. Update finding data sebelum menyimpan
-        scannedData = mergedData.scannedData;
-        masterData = mergedData.masterData;
-        deletedDataIds = mergedData.deletedDataIds;
-        
-        // 4. Update data finding yang bisa diupdate
-        updateFindingData();
-        
-        // 5. Simpan ke localStorage
-        saveToLocalStorage();
-        
-        // 6. Push data yang sudah di-merge ke kedua file GitHub
-        await syncToBothFiles({
-            scannedData: scannedData,
-            masterData: masterData,
-            deletedDataIds: deletedDataIds,
-            lastUpdated: new Date().toISOString()
-        });
-        
-        // 7. Update UI
-        renderTable();
-        renderMasterTable();
-        updateTotalEan();
-        updateTotalContainer();
-        populateFilterDropdowns();
-        updateDashboardSummary();
-        
-        showNotification('Sinkronisasi berhasil!');
-        updatePushStatus('idle', 'Sync berhasil');
-        lastSyncTimestamp = Date.now();
-        updateLastSyncTime();
-    } catch (error) {
-        console.error('Error during sync:', error);
-        showNotification('Sinkronisasi gagal: ' + error.message, 'error');
-        updatePushStatus('error', 'Sync gagal');
-    } finally {
-        isSyncing = false;
-    }
-}
-
-// Update fungsi pushToGithub untuk menggunakan kedua file
-async function pushToGithub() {
-    if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-        showNotification('Harap konfigurasi GitHub terlebih dahulu!', 'error');
-        return;
-    }
-    
-    isSyncing = true;
-    updatePushStatus('active', 'Pushing...');
-    
-    try {
-        // Update finding data sebelum push
-        updateFindingData();
-        
-        // Push ke kedua file
-        await syncToBothFiles({
-            scannedData: scannedData,
-            masterData: masterData,
-            deletedDataIds: deletedDataIds,
-            lastUpdated: new Date().toISOString()
-        });
-        
-        showNotification('Data berhasil di-push ke GitHub!');
-        updatePushStatus('idle', 'Push berhasil');
-        lastSyncTimestamp = Date.now();
-        updateLastSyncTime();
-    } catch (error) {
-        console.error('Error during push:', error);
-        showNotification('Push gagal: ' + error.message, 'error');
-        updatePushStatus('error', 'Push gagal');
-    } finally {
-        isSyncing = false;
-    }
-}
-
-// Panggil updateFindingData ketika master data berubah
-// Tambahkan di akhir fungsi addMasterData
-function addMasterData(e) {
-    e.preventDefault();
-    
-    const ean = masterEanInput.value.trim();
-    const sku = masterSkuInput.value.trim();
-    const description = masterDescriptionInput.value.trim();
-    
-    if (!ean || !sku || !description) {
-        showNotification('Harap isi semua field!', 'error');
-        return;
-    }
-    
-    // Cek apakah EAN sudah ada
-    const existingIndex = masterData.findIndex(item => item.ean === ean);
-    if (existingIndex !== -1) {
-        showNotification('EAN sudah ada dalam data master!', 'error');
-        return;
-    }
-    
-    const newData = {
-        ean,
-        sku,
-        description
-    };
-    
-    // Tambahkan data master
-    masterData.push(newData);
-    saveToLocalStorage();
-    
-    // Update data finding yang terkait
-    updateFindingData();
-    
-    showNotification('Data master berhasil ditambahkan!');
-    
-    // Reset form
-    masterDataForm.reset();
-    renderMasterTable();
-}
-
-// Tambahkan juga di akhir fungsi saveEditedMasterData
-function saveEditedMasterData(e) {
-    e.preventDefault();
-    
-    const index = parseInt(editMasterIndexInput.value);
-    if (isNaN(index)) return;
-    
-    const updatedData = {
-        ean: editMasterEanInput.value,
-        sku: editMasterSkuInput.value,
-        description: editMasterDescriptionInput.value
-    };
-    
-    // Update data master
-    masterData[index] = updatedData;
-    saveToLocalStorage();
-    
-    // Update data finding yang terkait
-    updateFindingData();
-    
-    showNotification('Data master berhasil diupdate!');
-    
-    hideEditMasterModal();
-    renderMasterTable();
-}
-
-// Tambahkan juga di akhir fungsi processMasterDataUpload
-function processMasterDataUpload(file) {
-    const reader = new FileReader();
-    
-    reader.onload = function(e) {
-        try {
-            // ... (kode pemrosesan file yang sudah ada)
-            
-            // Setelah menambah/update master data
-            // Update data finding yang terkait
-            updateFindingData();
-            
-            showNotification(`${message} Ditambahkan: ${addedCount}, Diupdate: ${updatedCount}`);
-            
-            // Tutup modal upload
-            hideUploadMasterModal();
-            
-        } catch (error) {
-            console.error('Error processing file:', error);
-            showNotification('Error memproses file: ' + error.message, 'error');
-        }
-    };
-    
-    reader.onerror = function() {
-        showNotification('Error membaca file!', 'error');
-    };
-    
-    reader.readAsArrayBuffer(file);
-}
-
-// Panggil updateFindingData saat inisialisasi aplikasi
-// Tambahkan di akhir fungsi loadFromStorage
-function loadFromStorage() {
-    const savedData = localStorage.getItem('appData');
-    if (savedData) {
-        try {
-            const parsedData = JSON.parse(savedData);
-            scannedData = parsedData.scannedData || [];
-            masterData = parsedData.masterData || [];
-            deletedDataIds = parsedData.deletedDataIds || [];
-            
-            // Pastikan semua data memiliki version dan lastModified
-            scannedData.forEach(item => {
-                if (!item.version) item.version = 1;
-                if (!item.lastModified) item.lastModified = item.timestamp || new Date().toISOString();
-                if (!item.customer) item.customer = 'Samsonite';
-            });
-            
-            // Update data finding saat load
-            updateFindingData();
-            
-        } catch (e) {
-            console.error('Error parsing data from localStorage:', e);
-            scannedData = [];
-            masterData = [];
-            deletedDataIds = [];
-            saveToLocalStorage();
-        }
-        populateFilterDropdowns();
-        updateTotalContainer();
-        renderTable();
-        renderMasterTable();
-        updateDashboardSummary();
-    }
-}
-
             // Inisialisasi
             try {
                 loadGithubConfig();
