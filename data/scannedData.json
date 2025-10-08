@@ -69503,6 +69503,38 @@
       "date": "2025-10-08",
       "version": 1,
       "lastModified": "2025-10-08T02:26:11.496Z"
+    },
+    {
+      "id": "mghdc3iu248dn",
+      "customer": "Samsonite",
+      "pallet": "DID2510022182",
+      "container": "YMLU8989535",
+      "ean": "5400520348470",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-08T02:27:31.926Z",
+      "user": "Muhdi",
+      "date": "2025-10-08",
+      "version": 1,
+      "lastModified": "2025-10-08T02:27:31.926Z"
+    },
+    {
+      "id": "mghdc5q8aofiy",
+      "customer": "Samsonite",
+      "pallet": "DID2510022182",
+      "container": "YMLU8989535",
+      "ean": "5400520348470",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-08T02:27:34.784Z",
+      "user": "Muhdi",
+      "date": "2025-10-08",
+      "version": 1,
+      "lastModified": "2025-10-08T02:27:34.784Z"
     }
   ],
   "masterData": [
@@ -69518,5 +69550,5 @@
     }
   ],
   "deletedDataIds": [],
-  "lastUpdated": "2025-10-08T02:26:18.739Z"
+  "lastUpdated": "2025-10-08T02:27:41.928Z"
 }
