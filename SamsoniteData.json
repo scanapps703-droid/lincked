@@ -83279,6 +83279,22 @@
       "date": "2025-10-08",
       "version": 1,
       "lastModified": "2025-10-08T03:30:07.009Z"
+    },
+    {
+      "id": "mghfkowii6pna",
+      "customer": "Samsonite",
+      "pallet": "DID2509250390",
+      "container": "B9723UEL",
+      "ean": "5400520348197",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-08T03:30:12.114Z",
+      "user": "Yogi",
+      "date": "2025-10-08",
+      "version": 1,
+      "lastModified": "2025-10-08T03:30:12.114Z"
     }
   ],
   "masterData": [
@@ -83393,5 +83409,5 @@
     "mfm2f45mkf0a7",
     "mfm2f3o34fnl7"
   ],
-  "lastUpdated": "2025-10-08T03:30:07.492Z"
+  "lastUpdated": "2025-10-08T03:30:17.227Z"
 }
