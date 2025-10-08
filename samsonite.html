@@ -1092,6 +1092,23 @@
             color: var(--spark-primary-dark);
             text-decoration: none;
         }
+
+        /* PERBAIKAN: Highlight untuk data yang bermasalah */
+        .finding-row {
+            background-color: #fff3cd !important;
+            border-left: 4px solid #ffc107;
+        }
+
+        /* PERBAIKAN: Status remark styles */
+        .status-double-ean {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-update-master {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
     </style>
 </head>
 <body>
@@ -1830,12 +1847,64 @@
                 autoSyncInterval: 1
             };
             
-            // Fungsi untuk generate ID unik untuk setiap data
+            // PERBAIKAN: Fungsi untuk generate ID unik untuk setiap data
             function generateId() {
                 return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
             }
             
-            // Fungsi untuk menampilkan/menyembunyikan konten utama
+            // PERBAIKAN: Fungsi untuk menghitung ulang status remark
+            function calculateStatusRemarks() {
+                // Kelompokkan data berdasarkan Container dan Pallet
+                const palletMap = new Map();
+                
+                // Kelompokkan data per pallet
+                scannedData.forEach(item => {
+                    const key = `${item.container}-${item.pallet}`;
+                    if (!palletMap.has(key)) {
+                        palletMap.set(key, []);
+                    }
+                    palletMap.get(key).push(item);
+                });
+                
+                // Hitung ulang status untuk setiap pallet
+                palletMap.forEach((items, key) => {
+                    // Hitung jumlah EAN unik dalam pallet
+                    const uniqueEans = new Set(items.map(item => item.ean));
+                    
+                    // PERBAIKAN: Logika status remark
+                    let status = 'OK';
+                    let remark = '';
+                    
+                    // Kondisi 1: Double EAN - Jika lebih dari 1 EAN berbeda dalam satu pallet
+                    if (uniqueEans.size > 1) {
+                        status = 'Double EAN';
+                        remark = `Pallet ini memiliki ${uniqueEans.size} EAN berbeda`;
+                    }
+                    // Kondisi 2: Update Master Data - Jika EAN tidak ada di master data
+                    else if (uniqueEans.size === 1) {
+                        const ean = Array.from(uniqueEans)[0];
+                        const masterItem = findMasterData(ean);
+                        if (!masterItem) {
+                            status = 'Update Master Data';
+                            remark = 'EAN tidak ditemukan di master data';
+                        } else {
+                            status = 'OK';
+                            remark = '';
+                        }
+                    }
+                    
+                    // Update status untuk semua item dalam pallet
+                    items.forEach(item => {
+                        item.status = status;
+                        item.remark = remark;
+                    });
+                });
+                
+                // Simpan perubahan
+                saveToLocalStorage();
+            }
+            
+            // PERBAIKAN: Fungsi untuk menampilkan/menyembunyikan konten utama
             function toggleMainContent(show) {
                 try {
                     if (show) {
@@ -1859,7 +1928,7 @@
                 }
             }
             
-            // Fungsi untuk toggle menu pada perangkat mobile
+            // PERBAIKAN: Fungsi untuk toggle menu pada perangkat mobile
             function setupMobileMenu() {
                 if (mobileMenuBtn) {
                     mobileMenuBtn.addEventListener('click', function() {
@@ -1868,12 +1937,12 @@
                 }
             }
             
-            // Fungsi untuk mengecek apakah user adalah admin
+            // PERBAIKAN: Fungsi untuk mengecek apakah user adalah admin
             function checkIfAdmin(username) {
                 return username.toLowerCase() === 'admin';
             }
             
-            // Fungsi untuk mengatur tampilan berdasarkan jenis user
+            // PERBAIKAN: Fungsi untuk mengatur tampilan berdasarkan jenis user
             function setUserView() {
                 if (isAdmin) {
                     userTypeBadge.textContent = '(Admin)';
@@ -1920,7 +1989,7 @@
                 }
             }
             
-            // Fungsi untuk mengaktifkan/menonaktifkan input EAN
+            // PERBAIKAN: Fungsi untuk mengaktifkan/menonaktifkan input EAN
             function toggleEanInput() {
                 if (currentPallet && currentContainer && currentCustomer) {
                     eanInput.disabled = false;
@@ -1934,12 +2003,12 @@
                 }
             }
             
-            // Fungsi untuk mencari data master berdasarkan EAN
+            // PERBAIKAN: Fungsi untuk mencari data master berdasarkan EAN
             function findMasterData(ean) {
                 return masterData.find(item => item.ean === ean);
             }
             
-            // Fungsi untuk memperbarui tampilan status sinkronisasi
+            // PERBAIKAN: Fungsi untuk memperbarui tampilan status sinkronisasi
             function updateSyncStatusUI() {
                 // Sederhanakan UI status sinkronisasi
                 if (syncStatus) syncStatus.classList.add('hidden');
@@ -1953,7 +2022,7 @@
                 }
             }
             
-            // Fungsi untuk menyimpan data (hanya ke local storage)
+            // PERBAIKAN: Fungsi untuk menyimpan data (hanya ke local storage)
             function saveData() {
                 if (isSaving) return;
                 
@@ -1987,13 +2056,15 @@
                 let sku = '';
                 let description = '';
                 let status = 'OK';
+                let remark = '';
                 
                 if (masterItem) {
                     sku = masterItem.sku;
                     description = masterItem.description;
                 } else {
-                    status = 'Finding';
-                    showNotification('EAN tidak ditemukan di master data! Status: Finding', 'error');
+                    status = 'Update Master Data';
+                    remark = 'EAN tidak ditemukan di master data';
+                    showNotification('EAN tidak ditemukan di master data! Status: Update Master Data', 'error');
                 }
                 
                 // Membuat timestamp
@@ -2009,6 +2080,7 @@
                     sku,
                     description,
                     status,
+                    remark,
                     qty,
                     timestamp: timestamp,
                     user: currentUser,
@@ -2019,6 +2091,9 @@
                 
                 // Simpan data ke array sementara
                 scannedData.push(newData);
+                
+                // PERBAIKAN: Hitung ulang status remark setelah menambah data baru
+                calculateStatusRemarks();
                 
                 // Simpan ke localStorage
                 saveToLocalStorage();
@@ -2039,7 +2114,7 @@
                 showNotification('Data berhasil disimpan!');
             }
             
-            // Fungsi untuk menyimpan data ke localStorage
+            // PERBAIKAN: Fungsi untuk menyimpan data ke localStorage
             function saveToLocalStorage() {
                 const dataToSave = {
                     scannedData: scannedData,
@@ -2050,7 +2125,7 @@
                 localStorage.setItem('appData', JSON.stringify(dataToSave));
             }
             
-            // Fungsi untuk memuat data dari local storage
+            // PERBAIKAN: Fungsi untuk memuat data dari local storage
             function loadFromStorage() {
                 const savedData = localStorage.getItem('appData');
                 if (savedData) {
@@ -2065,10 +2140,11 @@
                             if (!item.version) item.version = 1;
                             if (!item.lastModified) item.lastModified = item.timestamp || new Date().toISOString();
                             if (!item.customer) item.customer = 'Samsonite'; // Default value untuk data lama
+                            if (!item.remark) item.remark = '';
                         });
                         
-                        // Update data finding saat load
-                        updateFindingData();
+                        // PERBAIKAN: Hitung ulang status remark saat load
+                        calculateStatusRemarks();
                         
                     } catch (e) {
                         console.error('Error parsing data from localStorage:', e);
@@ -2085,7 +2161,7 @@
                 }
             }
             
-            // Fungsi untuk logout
+            // PERBAIKAN: Fungsi untuk logout
             function logout() {
                 currentUser = 'Guest';
                 currentUserSpan.textContent = 'Guest';
@@ -2121,7 +2197,7 @@
                 toggleMainContent(false);
             }
             
-            // Fungsi untuk mengisi dropdown filter
+            // PERBAIKAN: Fungsi untuk mengisi dropdown filter
             function populateFilterDropdowns() {
                 // Kosongkan dropdown
                 if (userSelect) userSelect.innerHTML = '<option value="">Pilih User</option>';
@@ -2144,7 +2220,7 @@
                 updateContainerDropdown();
             }
             
-            // Fungsi untuk memperbarui dropdown container berdasarkan user yang dipilih
+            // PERBAIKAN: Fungsi untuk memperbarui dropdown container berdasarkan user yang dipilih
             function updateContainerDropdown() {
                 const selectedUser = userSelect.value;
                 
@@ -2167,7 +2243,7 @@
                 }
             }
             
-            // Fungsi untuk export data ke Excel
+            // PERBAIKAN: Fungsi untuk export data ke Excel
             function exportToExcel() {
                 const selectedUser = userSelect.value;
                 const selectedContainer = containerSelect.value;
@@ -2215,6 +2291,7 @@
                     'SKU': item.sku,
                     'Description': item.description,
                     'Status': item.status,
+                    'Remark': item.remark || '',
                     'Qty': item.qty,
                     'Timestamp': item.timestamp,
                     'User': item.user,
@@ -2237,7 +2314,7 @@
                 showNotification('Data berhasil diekspor ke Excel!');
             }
             
-            // Fungsi untuk export master data ke Excel
+            // PERBAIKAN: Fungsi untuk export master data ke Excel
             function exportMasterToExcel() {
                 if (masterData.length === 0) {
                     showNotification('Tidak ada data master untuk diekspor!', 'error');
@@ -2267,7 +2344,7 @@
                 showNotification('Data master berhasil diekspor ke Excel!');
             }
             
-            // Fungsi untuk menguji koneksi GitHub
+            // PERBAIKAN: Fungsi untuk menguji koneksi GitHub
             async function testGitHubConnection() {
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
                     showNotification('Harap isi semua field konfigurasi GitHub!', 'error');
@@ -2306,7 +2383,7 @@
                 }
             }
             
-            // Fungsi untuk menyimpan konfigurasi GitHub
+            // PERBAIKAN: Fungsi untuk menyimpan konfigurasi GitHub
             function saveGithubConfig() {
                 githubConfig = {
                     username: document.getElementById('githubUsername').value.trim(),
@@ -2327,7 +2404,7 @@
                 testGitHubConnection();
             }
             
-            // Fungsi untuk memuat konfigurasi GitHub dari local storage
+            // PERBAIKAN: Fungsi untuk memuat konfigurasi GitHub dari local storage
             function loadGithubConfig() {
                 const savedConfig = localStorage.getItem('githubConfig');
                 if (savedConfig) {
@@ -2357,7 +2434,7 @@
                 }
             }
             
-            // Fungsi untuk menampilkan modal edit data
+            // PERBAIKAN: Fungsi untuk menampilkan modal edit data
             function showEditModal(index) {
                 // Jika data difilter, gunakan indeks asli dari currentFilteredIndices
                 const actualIndex = isFilterActive ? currentFilteredIndices[index] : index;
@@ -2375,14 +2452,14 @@
                 editModal.style.display = 'flex';
             }
             
-            // Fungsi untuk menyembunyikan modal edit data
+            // PERBAIKAN: Fungsi untuk menyembunyikan modal edit data
             function hideEditModal() {
                 editModal.style.display = 'none';
                 currentEditingIndex = -1;
                 editForm.reset();
             }
             
-            // Fungsi untuk menyimpan perubahan data
+            // PERBAIKAN: Fungsi untuk menyimpan perubahan data
             function saveEditedData(e) {
                 e.preventDefault();
                 
@@ -2401,6 +2478,11 @@
                 
                 // Update data lokal
                 scannedData[currentEditingIndex] = updatedData;
+                
+                // PERBAIKAN: Hitung ulang status remark setelah edit
+                calculateStatusRemarks();
+                
+                // Simpan ke localStorage
                 saveToLocalStorage();
                 
                 showNotification('Data berhasil diupdate!');
@@ -2409,7 +2491,7 @@
                 renderTable();
             }
             
-            // Fungsi untuk menghapus data yang dipilih
+            // PERBAIKAN: Fungsi untuk menghapus data yang dipilih
             function deleteSelectedData() {
                 const checkboxes = document.querySelectorAll('.data-checkbox:checked');
                 
@@ -2441,6 +2523,9 @@
                     scannedData.splice(index, 1);
                 }
                 
+                // PERBAIKAN: Hitung ulang status remark setelah menghapus data
+                calculateStatusRemarks();
+                
                 // Simpan perubahan lokal
                 saveToLocalStorage();
                 
@@ -2453,7 +2538,7 @@
                 selectAllCheckbox.checked = false;
             }
             
-            // Fungsi untuk memperbarui status indikator koneksi GitHub
+            // PERBAIKAN: Fungsi untuk memperbarui status indikator koneksi GitHub
             function updateGitHubStatus(isConnected, message) {
                 if (isConnected) {
                     githubStatusIndicator.className = 'github-connection-status github-connected';
@@ -2471,14 +2556,14 @@
                 }
             }
             
-            // Fungsi untuk memperbarui status tombol push
+            // PERBAIKAN: Fungsi untuk memperbarui status tombol push
             function updatePushStatus(status, message) {
                 pushStatusIndicator.className = `sync-indicator ${status}`;
                 pushStatusIcon.className = status === 'active' ? 'fas fa-sync fa-spin' : 'fas fa-circle';
                 pushStatusText.textContent = message;
             }
             
-            // Fungsi untuk memperbarui waktu sync terakhir
+            // PERBAIKAN: Fungsi untuk memperbarui waktu sync terakhir
             function updateLastSyncTime() {
                 if (lastSyncTimestamp) {
                     const timeDiff = Math.floor((Date.now() - lastSyncTimestamp) / 1000);
@@ -2498,7 +2583,7 @@
                 }
             }
             
-            // Fungsi untuk merge data lokal dan data dari GitHub
+            // PERBAIKAN: Fungsi untuk merge data lokal dan data dari GitHub
             function mergeData(localData, remoteData) {
                 // Pastikan remoteData memiliki struktur yang benar
                 if (!remoteData || typeof remoteData !== 'object') {
@@ -2523,6 +2608,7 @@
                         if (!item.version) item.version = 1;
                         if (!item.lastModified) item.lastModified = item.timestamp || new Date().toISOString();
                         if (!item.customer) item.customer = 'Samsonite'; // Default value untuk data lama
+                        if (!item.remark) item.remark = '';
                     });
                     return data;
                 };
@@ -2580,7 +2666,7 @@
                 };
             }
             
-            // Fungsi untuk push data ke GitHub
+            // PERBAIKAN: Fungsi untuk push data ke GitHub
             async function pushToGithubForSync(dataToPush) {
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
                     throw new Error('GitHub configuration is incomplete');
@@ -2631,7 +2717,7 @@
                 }
             }
             
-            // Fungsi untuk pull data dari GitHub
+            // PERBAIKAN: Fungsi untuk pull data dari GitHub
             async function pullFromGithubForSync() {
                 if (!githubConfig.username && !githubConfig.repo && !githubConfig.token) {
                     // Jika konfigurasi GitHub belum diatur, kembalikan data kosong
@@ -2675,7 +2761,7 @@
                 }
             }
             
-            // Fungsi untuk melakukan sinkronisasi data (push lalu pull)
+            // PERBAIKAN: Fungsi untuk melakukan sinkronisasi data (push lalu pull)
             async function performSync() {
                 if (isSyncing) {
                     console.log('Sync already in progress');
@@ -2706,6 +2792,9 @@
                     deletedDataIds = mergedData.deletedDataIds;
                     saveToLocalStorage();
                     
+                    // PERBAIKAN: Hitung ulang status remark setelah sinkronisasi
+                    calculateStatusRemarks();
+                    
                     // 4. Push data yang sudah di-merge ke GitHub
                     await pushToGithubForSync({
                         scannedData: mergedData.scannedData,
@@ -2735,17 +2824,17 @@
                 }
             }
             
-            // Fungsi untuk push data ke GitHub (manual)
+            // PERBAIKAN: Fungsi untuk push data ke GitHub (manual)
             async function pushToGithub() {
                 await performSync();
             }
             
-            // Fungsi untuk pull data dari GitHub (manual)
+            // PERBAIKAN: Fungsi untuk pull data dari GitHub (manual)
             async function pullFromGithub() {
                 await performSync();
             }
             
-            // Fungsi untuk setup auto sync
+            // PERBAIKAN: Fungsi untuk setup auto sync
             function setupAutoSync() {
                 // Hentikan interval sebelumnya jika ada
                 stopAutoSync();
@@ -2762,7 +2851,7 @@
                 }
             }
             
-            // Fungsi untuk menghentikan auto sync
+            // PERBAIKAN: Fungsi untuk menghentikan auto sync
             function stopAutoSync() {
                 if (autoSyncIntervalId) {
                     clearInterval(autoSyncIntervalId);
@@ -2770,7 +2859,7 @@
                 }
             }
             
-            // Fungsi untuk filter data - HANYA FILTER BY PALLET
+            // PERBAIKAN: Fungsi untuk filter data - HANYA FILTER BY PALLET
             function filterData() {
                 const pallet = filterPallet.value.toLowerCase();
                 
@@ -2800,7 +2889,7 @@
                 renderFilteredTable();
             }
             
-            // Fungsi untuk render tabel dengan data yang sudah difilter
+            // PERBAIKAN: Fungsi untuk render tabel dengan data yang sudah difilter
             function renderFilteredTable() {
                 // Kosongkan tabel
                 if (tableBody) tableBody.innerHTML = '';
@@ -2822,7 +2911,7 @@
                 });
             }
             
-            // Fungsi untuk reset filter
+            // PERBAIKAN: Fungsi untuk reset filter
             function resetFilter() {
                 filterPallet.value = '';
                 
@@ -2830,7 +2919,7 @@
                 renderTable();
             }
             
-            // Fungsi untuk filter dashboard data
+            // PERBAIKAN: Fungsi untuk filter dashboard data
             function filterDashboardData() {
                 const dateFrom = dashboardDateFrom.value;
                 const dateTo = dashboardDateTo.value;
@@ -2846,7 +2935,7 @@
                 updateDashboardSummary();
             }
             
-            // Fungsi untuk reset dashboard filter
+            // PERBAIKAN: Fungsi untuk reset dashboard filter
             function resetDashboardFilter() {
                 dashboardDateFrom.value = '';
                 dashboardDateTo.value = '';
@@ -2855,7 +2944,7 @@
                 updateDashboardSummary();
             }
             
-            // Fungsi untuk menampilkan data dalam halaman (pagination)
+            // PERBAIKAN: Fungsi untuk menampilkan data dalam halaman (pagination)
             function renderTable() {
                 // Kosongkan tabel
                 if (tableBody) tableBody.innerHTML = '';
@@ -2920,16 +3009,23 @@
                 }
             }
             
-            // Fungsi untuk menambahkan baris ke tabel
+            // PERBAIKAN: Fungsi untuk menambahkan baris ke tabel
             function addTableRow(data, index) {
                 if (!tableBody) return;
                 
                 const row = document.createElement('tr');
                 
-                // Format status dengan badge
-                const statusBadge = data.status === 'Finding' 
-                    ? `<span class="status-badge status-finding">${data.status}</span>` 
-                    : `<span class="status-badge status-ok">${data.status}</span>`;
+                // PERBAIKAN: Format status dengan badge yang sesuai
+                let statusBadge = '';
+                if (data.status === 'OK') {
+                    statusBadge = `<span class="status-badge status-ok">${data.status}</span>`;
+                } else if (data.status === 'Double EAN') {
+                    statusBadge = `<span class="status-badge status-double-ean">${data.status}</span>`;
+                } else if (data.status === 'Update Master Data') {
+                    statusBadge = `<span class="status-badge status-update-master">${data.status}</span>`;
+                } else {
+                    statusBadge = `<span class="status-badge status-finding">${data.status}</span>`;
+                }
                 
                 row.innerHTML = `
                     <td class="checkbox-cell">
@@ -2942,7 +3038,7 @@
                     <td>${data.sku}</td>
                     <td>${data.description}</td>
                     <td>${data.qty}</td>
-                    <td>${statusBadge}</td>
+                    <td>${statusBadge}${data.remark ? '<br><small>' + data.remark + '</small>' : ''}</td>
                     <td>${new Date(data.timestamp).toLocaleString()}</td>
                     <td>${data.user}</td>
                     <td class="actions">
@@ -2950,6 +3046,11 @@
                         <i class="fas fa-trash btn-delete" data-index="${index}"></i>` : ''}
                     </td>
                 `;
+                
+                // PERBAIKAN: Tambahkan class finding-row untuk data yang bermasalah
+                if (data.status !== 'OK') {
+                    row.classList.add('finding-row');
+                }
                 
                 tableBody.appendChild(row);
                 
@@ -2976,7 +3077,7 @@
                 }
             }
             
-            // Fungsi untuk menghapus data
+            // PERBAIKAN: Fungsi untuk menghapus data
             function deleteData(index) {
                 if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
                     // Tambahkan ID data yang dihapus ke daftar deletedDataIds
@@ -2984,6 +3085,9 @@
                     
                     // Hapus data dari array
                     scannedData.splice(index, 1);
+                    
+                    // PERBAIKAN: Hitung ulang status remark setelah menghapus data
+                    calculateStatusRemarks();
                     
                     // Simpan perubahan lokal
                     saveToLocalStorage();
@@ -2995,7 +3099,7 @@
                 }
             }
             
-            // Fungsi untuk menampilkan data master dalam tabel
+            // PERBAIKAN: Fungsi untuk menampilkan data master dalam tabel
             function renderMasterTable() {
                 // Kosongkan tabel
                 if (masterTableBody) masterTableBody.innerHTML = '';
@@ -3013,7 +3117,7 @@
                 });
             }
             
-            // Fungsi untuk menambahkan baris ke tabel master data
+            // PERBAIKAN: Fungsi untuk menambahkan baris ke tabel master data
             function addMasterTableRow(data, index) {
                 if (!masterTableBody) return;
                 
@@ -3053,7 +3157,7 @@
                 }
             }
             
-            // Fungsi untuk menampilkan modal edit master data
+            // PERBAIKAN: Fungsi untuk menampilkan modal edit master data
             function showEditMasterModal(index) {
                 const data = masterData[index];
                 
@@ -3065,13 +3169,13 @@
                 editMasterModal.style.display = 'flex';
             }
             
-            // Fungsi untuk menyembunyikan modal edit master data
+            // PERBAIKAN: Fungsi untuk menyembunyikan modal edit master data
             function hideEditMasterModal() {
                 editMasterModal.style.display = 'none';
                 editMasterForm.reset();
             }
             
-            // Fungsi untuk menyimpan perubahan master data
+            // PERBAIKAN: Fungsi untuk menyimpan perubahan master data
             function saveEditedMasterData(e) {
                 e.preventDefault();
                 
@@ -3088,8 +3192,8 @@
                 masterData[index] = updatedData;
                 saveToLocalStorage();
                 
-                // Update data finding yang terkait
-                updateFindingData();
+                // PERBAIKAN: Hitung ulang status remark setelah mengubah master data
+                calculateStatusRemarks();
                 
                 showNotification('Data master berhasil diupdate!');
                 
@@ -3097,7 +3201,7 @@
                 renderMasterTable();
             }
             
-            // Fungsi untuk menghapus master data
+            // PERBAIKAN: Fungsi untuk menghapus master data
             function deleteMasterData(index) {
                 if (confirm('Apakah Anda yakin ingin menghapus data master ini?')) {
                     // Hapus data dari array
@@ -3106,12 +3210,15 @@
                     // Simpan perubahan lokal
                     saveToLocalStorage();
                     
+                    // PERBAIKAN: Hitung ulang status remark setelah menghapus master data
+                    calculateStatusRemarks();
+                    
                     renderMasterTable();
                     showNotification('Data master berhasil dihapus!');
                 }
             }
             
-            // Fungsi untuk menghapus master data yang dipilih
+            // PERBAIKAN: Fungsi untuk menghapus master data yang dipilih
             function deleteSelectedMasterData() {
                 const checkboxes = document.querySelectorAll('#masterTableBody .data-checkbox:checked');
                 
@@ -3137,6 +3244,9 @@
                 // Simpan perubahan lokal
                 saveToLocalStorage();
                 
+                // PERBAIKAN: Hitung ulang status remark setelah menghapus master data
+                calculateStatusRemarks();
+                
                 renderMasterTable();
                 showNotification(`${indexesToDelete.length} data master berhasil dihapus!`);
                 
@@ -3144,7 +3254,7 @@
                 selectAllMasterCheckbox.checked = false;
             }
             
-            // Fungsi untuk menambah master data
+            // PERBAIKAN: Fungsi untuk menambah master data
             function addMasterData(e) {
                 e.preventDefault();
                 
@@ -3174,8 +3284,8 @@
                 masterData.push(newData);
                 saveToLocalStorage();
                 
-                // Update data finding yang terkait
-                updateFindingData();
+                // PERBAIKAN: Hitung ulang status remark setelah menambah master data
+                calculateStatusRemarks();
                 
                 showNotification('Data master berhasil ditambahkan!');
                 
@@ -3184,7 +3294,7 @@
                 renderMasterTable();
             }
             
-            // Fungsi untuk memproses upload file master data
+            // PERBAIKAN: Fungsi untuk memproses upload file master data
             function processMasterDataUpload(file) {
                 const reader = new FileReader();
                 
@@ -3251,10 +3361,11 @@
                         
                         // Simpan perubahan
                         saveToLocalStorage();
-                        renderMasterTable();
                         
-                        // Update data finding yang terkait
-                        updateFindingData();
+                        // PERBAIKAN: Hitung ulang status remark setelah upload master data
+                        calculateStatusRemarks();
+                        
+                        renderMasterTable();
                         
                         showNotification(`${message} Ditambahkan: ${addedCount}, Diupdate: ${updatedCount}`);
                         
@@ -3274,20 +3385,20 @@
                 reader.readAsArrayBuffer(file);
             }
             
-            // Fungsi untuk menampilkan modal upload master data
+            // PERBAIKAN: Fungsi untuk menampilkan modal upload master data
             function showUploadMasterModal() {
                 uploadMasterModal.style.display = 'flex';
                 fileNameSpan.textContent = 'Belum ada file dipilih';
                 processUploadBtn.disabled = true;
             }
             
-            // Fungsi untuk menyembunyikan modal upload master data
+            // PERBAIKAN: Fungsi untuk menyembunyikan modal upload master data
             function hideUploadMasterModal() {
                 uploadMasterModal.style.display = 'none';
                 masterFileInput.value = '';
             }
             
-            // Fungsi untuk mengupdate total EAN
+            // PERBAIKAN: Fungsi untuk mengupdate total EAN
             function updateTotalEan() {
                 let total = 0;
                 
@@ -3301,7 +3412,7 @@
                 if (totalEanSpan) totalEanSpan.textContent = total;
             }
             
-            // Fungsi untuk mengupdate total Container
+            // PERBAIKAN: Fungsi untuk mengupdate total Container
             function updateTotalContainer() {
                 let total = 0;
                 
@@ -3315,7 +3426,7 @@
                 if (totalContainerSpan) totalContainerSpan.textContent = total;
             }
             
-            // Fungsi untuk mengupdate dashboard summary dengan logika finding
+            // PERBAIKAN: Fungsi untuk mengupdate dashboard summary dengan logika finding
             function updateDashboardSummary() {
                 // Gunakan data yang difilter jika filter aktif
                 const dataToUse = dashboardFilterActive ? 
@@ -3355,11 +3466,17 @@
                             palletEanMap.set(palletKey, {
                                 container: item.container,
                                 pallet: item.pallet,
-                                eans: new Set()
+                                eans: new Set(),
+                                status: 'OK'
                             });
                         }
                         
                         palletEanMap.get(palletKey).eans.add(item.ean);
+                        
+                        // Update status pallet berdasarkan status item
+                        if (item.status !== 'OK') {
+                            palletEanMap.get(palletKey).status = item.status;
+                        }
                     }
                 });
                 
@@ -3367,17 +3484,18 @@
                 if (totalContainerDashboardSpan) totalContainerDashboardSpan.textContent = containerMap.size;
                 if (totalQtyDashboardSpan) totalQtyDashboardSpan.textContent = totalQty;
                 
-                // Hitung finding (pallet dengan lebih dari 1 EAN)
+                // Hitung finding (data dengan status bukan 'OK')
                 let totalFindings = 0;
                 const findings = [];
                 
                 palletEanMap.forEach(palletData => {
-                    if (palletData.eans.size > 1) {
+                    if (palletData.status !== 'OK') {
                         totalFindings++;
                         findings.push({
                             container: palletData.container,
                             pallet: palletData.pallet,
                             eanCount: palletData.eans.size,
+                            status: palletData.status,
                             eans: Array.from(palletData.eans)
                         });
                     }
@@ -3408,7 +3526,7 @@
                             <td>${finding.container}</td>
                             <td>${finding.pallet}</td>
                             <td>${finding.eanCount}</td>
-                            <td><span class="finding-highlight">Finding</span></td>
+                            <td><span class="finding-highlight">${finding.status}</span></td>
                             <td><span class="finding-link" data-container="${finding.container}" data-pallet="${finding.pallet}">Lihat Detail</span></td>
                         `;
                         findingTableBody.appendChild(row);
@@ -3440,38 +3558,7 @@
                 }
             }
             
-            // Fungsi untuk memperbarui data scan yang statusnya "Finding" ketika master data diperbarui
-            function updateFindingData() {
-                let updatedCount = 0;
-                
-                // Loop melalui semua data scan yang statusnya "Finding"
-                scannedData.forEach(item => {
-                    if (item.status === 'Finding') {
-                        // Cari apakah EAN sekarang ada di master data
-                        const masterItem = findMasterData(item.ean);
-                        if (masterItem) {
-                            // Update data scan dengan informasi dari master data
-                            item.sku = masterItem.sku;
-                            item.description = masterItem.description;
-                            item.status = 'OK';
-                            item.lastModified = new Date().toISOString();
-                            item.version = (item.version || 1) + 1;
-                            updatedCount++;
-                        }
-                    }
-                });
-                
-                if (updatedCount > 0) {
-                    saveToLocalStorage();
-                    renderTable();
-                    updateDashboardSummary();
-                    showNotification(`${updatedCount} data finding berhasil diupdate menjadi OK!`);
-                }
-                
-                return updatedCount;
-            }
-            
-            // Event listeners
+            // PERBAIKAN: Event listeners
             if (form) {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
@@ -3503,7 +3590,7 @@
                         } else {
                             skuInput.value = '';
                             descriptionInput.value = '';
-                            statusInput.value = 'Finding';
+                            statusInput.value = 'Update Master Data';
                         }
                     }
                     
@@ -3845,7 +3932,7 @@
                 resetDashboardFilterBtn.addEventListener('click', resetDashboardFilter);
             }
             
-            // Fungsi untuk menangani login
+            // PERBAIKAN: Fungsi untuk menangani login
             function handleLogin() {
                 const username = usernameInput.value.trim();
                 
@@ -3879,7 +3966,7 @@
                 showNotification(`Selamat datang, ${username}!`);
             }
             
-            // Fungsi untuk menampilkan notifikasi
+            // PERBAIKAN: Fungsi untuk menampilkan notifikasi
             function showNotification(message, type = 'success') {
                 if (!notification) return;
                 
@@ -3898,7 +3985,7 @@
                 }, 3000);
             }
             
-            // Inisialisasi aplikasi
+            // PERBAIKAN: Inisialisasi aplikasi
             function init() {
                 // Setup mobile menu
                 setupMobileMenu();
@@ -3925,7 +4012,7 @@
                 usernameInput.focus();
             }
             
-            // Jalankan inisialisasi
+            // PERBAIKAN: Jalankan inisialisasi
             init();
         });
     </script>
