@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MODULE SCAN </title>
+    <title>MODULE SCAN</title>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Semua CSS yang ada dipertahankan */
+        /* CSS styles tetap sama seperti sebelumnya */
         :root {
             --spark-primary: #3490dc;
             --spark-primary-dark: #2779bd;
@@ -1876,7 +1876,7 @@
                 autoSyncInterval: 1
             };
 
-            // ========== FUNGSI-FUNGSI YANG HILANG ==========
+            // ========== FUNGSI-FUNGSI YANG DIPERBAIKI ==========
 
             // Fungsi untuk memperbarui status data berdasarkan kondisi pallet
             function updateDataStatus() {
@@ -2170,7 +2170,7 @@
 
             // ========== FUNGSI-FUNGSI UTAMA ==========
             
-            // Fungsi untuk generate ID unik untuk setiap data - DIPERBAIKI
+            // Fungsi untuk generate ID unik untuk setiap data
             function generateId() {
                 // Menggunakan timestamp + random number + user identifier untuk memastikan unik di semua perangkat
                 const timestamp = Date.now().toString(36);
@@ -3211,11 +3211,10 @@
                 }
             }
 
-            // ========== FUNGSI-FUNGSI TAMBAHAN YANG DIBUTUHKAN ==========
+            // ========== FUNGSI-FUNGSI TAMBAHAN YANG DIPERBAIKI ==========
 
             // Fungsi untuk render tabel data
             function renderTable() {
-                // Implementasi render tabel
                 if (!tableBody) return;
                 
                 tableBody.innerHTML = '';
@@ -3321,7 +3320,6 @@
 
             // Fungsi untuk render tabel master data
             function renderMasterTable() {
-                // Implementasi render tabel master data
                 if (!masterTableBody) return;
                 
                 masterTableBody.innerHTML = '';
@@ -3391,6 +3389,82 @@
                 editMasterModal.style.display = 'flex';
             }
 
+            // Fungsi untuk menyembunyikan modal edit master data
+            function hideEditMasterModal() {
+                editMasterModal.style.display = 'none';
+                editMasterForm.reset();
+            }
+
+            // Fungsi untuk menyimpan perubahan master data
+            function saveEditedMasterData(e) {
+                e.preventDefault();
+                
+                const index = parseInt(editMasterIndexInput.value);
+                
+                if (index === -1) return;
+                
+                const updatedData = {
+                    ...masterData[index],
+                    ean: editMasterEanInput.value,
+                    sku: editMasterSkuInput.value,
+                    description: editMasterDescriptionInput.value
+                };
+                
+                // Update data master
+                masterData[index] = updatedData;
+                saveToLocalStorage();
+                
+                // Update status data yang terkait
+                updateDataStatus();
+                
+                showNotification('Data master berhasil diupdate!');
+                
+                hideEditMasterModal();
+                renderMasterTable();
+            }
+
+            // Fungsi untuk menambah master data
+            function addMasterData(e) {
+                e.preventDefault();
+                
+                const ean = masterEanInput.value.trim();
+                const sku = masterSkuInput.value.trim();
+                const description = masterDescriptionInput.value.trim();
+                
+                if (!ean || !sku || !description) {
+                    showNotification('Harap isi semua field!', 'error');
+                    return;
+                }
+                
+                // Cek apakah EAN sudah ada
+                if (masterData.some(item => item.ean === ean)) {
+                    showNotification('EAN sudah ada dalam master data!', 'error');
+                    return;
+                }
+                
+                // Tambahkan data master baru
+                masterData.push({
+                    ean,
+                    sku,
+                    description,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Simpan ke localStorage
+                saveToLocalStorage();
+                
+                // Update status data yang terkait
+                updateDataStatus();
+                
+                // Reset form
+                masterDataForm.reset();
+                
+                // Update tabel
+                renderMasterTable();
+                
+                showNotification('Data master berhasil ditambahkan!');
+            }
+
             // Fungsi untuk menghapus master data
             function deleteMasterData(index) {
                 if (confirm('Apakah Anda yakin ingin menghapus data master ini?')) {
@@ -3408,9 +3482,44 @@
                 }
             }
 
-            // Fungsi untuk filter data
+            // Fungsi untuk menghapus master data yang dipilih
+            function deleteSelectedMasterData() {
+                const checkboxes = document.querySelectorAll('#masterTableBody .data-checkbox:checked');
+                
+                if (checkboxes.length === 0) {
+                    showNotification('Tidak ada data master yang dipilih untuk dihapus!', 'error');
+                    return;
+                }
+                
+                if (!confirm(`Apakah Anda yakin ingin menghapus ${checkboxes.length} data master terpilih?`)) {
+                    return;
+                }
+                
+                // Dapatkan indeks data yang dipilih (dalam urutan terbalik untuk menghindari masalah indeks saat menghapus)
+                const indexesToDelete = Array.from(checkboxes)
+                    .map(checkbox => parseInt(checkbox.dataset.index))
+                    .sort((a, b) => b - a);
+                
+                // Hapus data dari array
+                for (const index of indexesToDelete) {
+                    masterData.splice(index, 1);
+                }
+                
+                // Simpan perubahan lokal
+                saveToLocalStorage();
+                
+                // Update data status yang terkait
+                updateDataStatus();
+                
+                renderMasterTable();
+                showNotification(`${indexesToDelete.length} data master berhasil dihapus!`);
+                
+                // Reset select all checkbox
+                selectAllMasterCheckbox.checked = false;
+            }
+
+            // Fungsi untuk filter data - DIPERBAIKI
             function filterData() {
-                // Implementasi filter data
                 const pallet = filterPallet.value.toLowerCase();
                 
                 // Jika tidak ada filter yang diterapkan
@@ -3441,7 +3550,6 @@
 
             // Fungsi untuk render tabel yang sudah difilter
             function renderFilteredTable() {
-                // Implementasi render tabel yang difilter
                 if (!tableBody) return;
                 
                 tableBody.innerHTML = '';
@@ -3457,6 +3565,35 @@
                 filteredData.forEach((item, index) => {
                     addTableRow(item, index);
                 });
+            }
+
+            // Fungsi untuk reset filter
+            function resetFilter() {
+                filterPallet.value = '';
+                isFilterActive = false;
+                renderTable();
+            }
+
+            // Fungsi untuk filter dashboard
+            function filterDashboard() {
+                const dateFrom = dashboardDateFrom.value;
+                const dateTo = dashboardDateTo.value;
+                
+                if (!dateFrom && !dateTo) {
+                    dashboardFilterActive = false;
+                } else {
+                    dashboardFilterActive = true;
+                }
+                
+                updateDashboardSummary();
+            }
+
+            // Fungsi untuk reset filter dashboard
+            function resetDashboardFilter() {
+                dashboardDateFrom.value = '';
+                dashboardDateTo.value = '';
+                dashboardFilterActive = false;
+                updateDashboardSummary();
             }
 
             // Fungsi untuk menangani login
@@ -3809,6 +3946,24 @@
             // Event listener untuk tombol delete selected master data
             if (deleteSelectedMasterBtn) {
                 deleteSelectedMasterBtn.addEventListener('click', deleteSelectedMasterData);
+            }
+
+            // Event listener untuk filter
+            if (applyFilterBtn) {
+                applyFilterBtn.addEventListener('click', filterData);
+            }
+            
+            if (resetFilterBtn) {
+                resetFilterBtn.addEventListener('click', resetFilter);
+            }
+            
+            // Event listener untuk filter dashboard
+            if (applyDashboardFilterBtn) {
+                applyDashboardFilterBtn.addEventListener('click', filterDashboard);
+            }
+            
+            if (resetDashboardFilterBtn) {
+                resetDashboardFilterBtn.addEventListener('click', resetDashboardFilter);
             }
 
             // ========== INISIALISASI APLIKASI ==========
