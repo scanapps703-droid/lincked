@@ -31781,16 +31781,16 @@
       "customer": "Samsonite",
       "pallet": "DID2509250858",
       "container": "B9778WI",
-      "ean": "p",
+      "ean": "5400520330017",
       "sku": "",
       "description": "",
       "status": "Finding",
       "qty": "1",
-      "timestamp": "2025-09-29T14:09:03.809Z",
+      "timestamp": "2025-10-09T13:54:42.744Z",
       "user": "fajarakmalf",
       "date": "2025-09-29",
-      "version": 1,
-      "lastModified": "2025-09-29T14:09:03.809Z"
+      "version": 2,
+      "lastModified": "2025-10-09T13:54:42.744Z"
     },
     {
       "id": "mg57gex9fke2p",
@@ -35900,5 +35900,5 @@
     "mfm2f45mkf0a7",
     "mfm2f3o34fnl7"
   ],
-  "lastUpdated": "2025-10-09T13:54:37.815Z"
+  "lastUpdated": "2025-10-09T13:55:38.637Z"
 }
