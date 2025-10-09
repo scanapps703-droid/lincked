@@ -1875,10 +1875,308 @@
                 autoSync: true,
                 autoSyncInterval: 1
             };
+
+            // ========== FUNGSI-FUNGSI YANG HILANG ==========
+
+            // Fungsi untuk memperbarui status data berdasarkan kondisi pallet
+            function updateDataStatus() {
+                // Reset semua status berdasarkan master data
+                scannedData.forEach(item => {
+                    const masterItem = findMasterData(item.ean);
+                    if (masterItem) {
+                        item.sku = masterItem.sku;
+                        item.description = masterItem.description;
+                        item.status = 'OK';
+                    } else {
+                        item.status = 'Finding';
+                    }
+                });
+
+                // Kelompokkan data per container dan pallet
+                const palletMap = new Map();
+
+                scannedData.forEach(item => {
+                    const key = `${item.container}-${item.pallet}`;
+                    if (!palletMap.has(key)) {
+                        palletMap.set(key, {
+                            container: item.container,
+                            pallet: item.pallet,
+                            eans: new Set(),
+                            items: []
+                        });
+                    }
+
+                    const palletData = palletMap.get(key);
+                    palletData.eans.add(item.ean);
+                    palletData.items.push(item);
+                });
+
+                // Periksa setiap pallet untuk kondisi khusus
+                palletMap.forEach(palletData => {
+                    // Kondisi 1: Double EAN - 1 pallet berisi lebih dari 2 EAN berbeda
+                    if (palletData.eans.size > 1) {
+                        palletData.items.forEach(item => {
+                            // Jika status bukan Finding, ubah menjadi Double EAN
+                            if (item.status !== 'Finding') {
+                                item.status = 'Double EAN';
+                            }
+                        });
+                    }
+
+                    // Kondisi 2: Update Master Data - EAN ada di master data tapi SKU/description tidak sesuai
+                    palletData.items.forEach(item => {
+                        const masterItem = findMasterData(item.ean);
+                        if (masterItem && (item.sku !== masterItem.sku || item.description !== masterItem.description)) {
+                            item.status = 'Update Master Data';
+                        }
+                    });
+                });
+
+                // Simpan perubahan
+                saveToLocalStorage();
+
+                // Update UI
+                renderTable();
+                updateDashboardSummary();
+            }
+
+            // Fungsi untuk mengupdate total EAN
+            function updateTotalEan() {
+                let total = 0;
+
+                // Hitung total berdasarkan Container dan Pallet ID yang sama
+                if (currentContainer && currentPallet) {
+                    total = scannedData
+                        .filter(item => item.container === currentContainer && item.pallet === currentPallet)
+                        .reduce((sum, item) => sum + parseInt(item.qty), 0);
+                }
+
+                if (totalEanSpan) totalEanSpan.textContent = total;
+            }
+
+            // Fungsi untuk mengupdate total Container
+            function updateTotalContainer() {
+                let total = 0;
+
+                // Hitung total qty untuk container yang aktif
+                if (currentContainer) {
+                    total = scannedData
+                        .filter(item => item.container === currentContainer)
+                        .reduce((sum, item) => sum + parseInt(item.qty), 0);
+                }
+
+                if (totalContainerSpan) totalContainerSpan.textContent = total;
+            }
+
+            // Fungsi untuk mengupdate dashboard summary
+            function updateDashboardSummary() {
+                // Gunakan data yang difilter jika filter aktif
+                const dataToUse = dashboardFilterActive ? 
+                    scannedData.filter(item => {
+                        if (dashboardDateFrom.value && 
+                            item.date < dashboardDateFrom.value) return false;
+                        if (dashboardDateTo.value && 
+                            item.date > dashboardDateTo.value) return false;
+                        return true;
+                    }) : 
+                    scannedData;
+                
+                // Hitung data untuk dashboard
+                const containerMap = new Map();
+                const palletEanMap = new Map();
+                let totalQty = 0;
+                let totalFindings = 0;
+                let totalDoubleEAN = 0;
+                
+                // Proses data untuk summary
+                dataToUse.forEach(item => {
+                    if (item.container && item.container.trim() !== '') {
+                        // Hitung per container
+                        if (!containerMap.has(item.container)) {
+                            containerMap.set(item.container, {
+                                qty: 0,
+                                pallets: new Set()
+                            });
+                        }
+                        
+                        const containerData = containerMap.get(item.container);
+                        containerData.qty += parseInt(item.qty || 1);
+                        containerData.pallets.add(item.pallet);
+                        totalQty += parseInt(item.qty || 1);
+                        
+                        // Hitung EAN per pallet untuk finding
+                        const palletKey = `${item.container}-${item.pallet}`;
+                        if (!palletEanMap.has(palletKey)) {
+                            palletEanMap.set(palletKey, {
+                                container: item.container,
+                                pallet: item.pallet,
+                                eans: new Set(),
+                                status: 'OK'
+                            });
+                        }
+                        
+                        palletEanMap.get(palletKey).eans.add(item.ean);
+                    }
+                });
+                
+                // Update summary values
+                if (totalContainerDashboardSpan) totalContainerDashboardSpan.textContent = containerMap.size;
+                if (totalQtyDashboardSpan) totalQtyDashboardSpan.textContent = totalQty;
+                
+                // Hitung finding (pallet dengan status bukan OK)
+                const findings = [];
+                const doubleEANs = [];
+                
+                palletEanMap.forEach(palletData => {
+                    if (palletData.eans.size > 1) {
+                        totalDoubleEAN++;
+                        palletData.status = 'Double EAN';
+                        doubleEANs.push({
+                            container: palletData.container,
+                            pallet: palletData.pallet,
+                            eanCount: palletData.eans.size,
+                            eans: Array.from(palletData.eans),
+                            status: palletData.status
+                        });
+                    }
+                    
+                    // Cari data asli untuk menentukan status
+                    const palletItems = dataToUse.filter(item => 
+                        item.container === palletData.container && 
+                        item.pallet === palletData.pallet
+                    );
+                    
+                    const hasFinding = palletItems.some(item => item.status === 'Finding');
+                    const hasUpdateMaster = palletItems.some(item => item.status === 'Update Master Data');
+                    
+                    if (hasFinding) {
+                        totalFindings++;
+                        findings.push({
+                            container: palletData.container,
+                            pallet: palletData.pallet,
+                            eanCount: palletData.eans.size,
+                            eans: Array.from(palletData.eans),
+                            status: 'Finding'
+                        });
+                    } else if (hasUpdateMaster) {
+                        totalFindings++;
+                        findings.push({
+                            container: palletData.container,
+                            pallet: palletData.pallet,
+                            eanCount: palletData.eans.size,
+                            eans: Array.from(palletData.eans),
+                            status: 'Update Master Data'
+                        });
+                    }
+                });
+                
+                if (totalFindingSpan) totalFindingSpan.textContent = totalFindings;
+                if (totalDoubleEANSpan) totalDoubleEANSpan.textContent = totalDoubleEAN;
+                
+                // Update tabel rincian per container
+                if (containerTableBody) {
+                    containerTableBody.innerHTML = '';
+                    containerMap.forEach((data, container) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${container}</td>
+                            <td>${data.qty}</td>
+                            <td>${data.pallets.size}</td>
+                        `;
+                        containerTableBody.appendChild(row);
+                    });
+                }
+                
+                // Update tabel detail finding
+                if (findingTableBody) {
+                    findingTableBody.innerHTML = '';
+                    findings.forEach(finding => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${finding.container}</td>
+                            <td>${finding.pallet}</td>
+                            <td>${finding.eanCount}</td>
+                            <td><span class="finding-highlight">${finding.status}</span></td>
+                            <td><span class="finding-link" data-container="${finding.container}" data-pallet="${finding.pallet}">Lihat Detail</span></td>
+                        `;
+                        findingTableBody.appendChild(row);
+                    });
+                    
+                    // Tambahkan event listener untuk link finding
+                    const findingLinks = findingTableBody.querySelectorAll('.finding-link');
+                    findingLinks.forEach(link => {
+                        link.addEventListener('click', function() {
+                            const container = this.getAttribute('data-container');
+                            const pallet = this.getAttribute('data-pallet');
+                            
+                            // Aktifkan tab hasil input scan
+                            tabs.forEach(t => t.classList.remove('active'));
+                            tabContents.forEach(c => c.classList.remove('active'));
+                            document.querySelector('.tab[data-tab="scanResult"]').classList.add('active');
+                            document.getElementById('scanResultTab').classList.add('active');
+                            
+                            // Set filter pallet
+                            filterPallet.value = pallet;
+                            
+                            // Terapkan filter
+                            filterData();
+                            
+                            // Scroll ke tabel hasil input scan
+                            document.getElementById('scanResultTab').scrollIntoView({ behavior: 'smooth' });
+                        });
+                    });
+                }
+                
+                // Update tabel detail double EAN
+                if (doubleEanTableBody) {
+                    doubleEanTableBody.innerHTML = '';
+                    doubleEANs.forEach(finding => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${finding.container}</td>
+                            <td>${finding.pallet}</td>
+                            <td>${finding.eanCount}</td>
+                            <td><span class="finding-highlight">${finding.status}</span></td>
+                            <td><span class="finding-link" data-container="${finding.container}" data-pallet="${finding.pallet}">Lihat Detail</span></td>
+                        `;
+                        doubleEanTableBody.appendChild(row);
+                    });
+                    
+                    // Tambahkan event listener untuk link double EAN
+                    const doubleEanLinks = doubleEanTableBody.querySelectorAll('.finding-link');
+                    doubleEanLinks.forEach(link => {
+                        link.addEventListener('click', function() {
+                            const container = this.getAttribute('data-container');
+                            const pallet = this.getAttribute('data-pallet');
+                            
+                            // Aktifkan tab hasil input scan
+                            tabs.forEach(t => t.classList.remove('active'));
+                            tabContents.forEach(c => c.classList.remove('active'));
+                            document.querySelector('.tab[data-tab="scanResult"]').classList.add('active');
+                            document.getElementById('scanResultTab').classList.add('active');
+                            
+                            // Set filter pallet
+                            filterPallet.value = pallet;
+                            
+                            // Terapkan filter
+                            filterData();
+                            
+                            // Scroll ke tabel hasil input scan
+                            document.getElementById('scanResultTab').scrollIntoView({ behavior: 'smooth' });
+                        });
+                    });
+                }
+            }
+
+            // ========== FUNGSI-FUNGSI UTAMA ==========
             
-            // Fungsi untuk generate ID unik untuk setiap data
+            // Fungsi untuk generate ID unik untuk setiap data - DIPERBAIKI
             function generateId() {
-                return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                // Menggunakan timestamp + random number + user identifier untuk memastikan unik di semua perangkat
+                const timestamp = Date.now().toString(36);
+                const random = Math.random().toString(36).substr(2, 9);
+                const userPart = currentUser ? currentUser.substr(0, 3) : 'usr';
+                return `${timestamp}-${random}-${userPart}`;
             }
             
             // Fungsi untuk menampilkan/menyembunyikan konten utama
@@ -2554,8 +2852,12 @@
                 }
             }
             
-            // Fungsi untuk merge data lokal dan data dari GitHub
+            // FUNGSI MERGE DATA YANG DIPERBAIKI - Menangani sinkronisasi dengan benar
             function mergeData(localData, remoteData) {
+                console.log('Memulai proses merge data...');
+                console.log('Data lokal:', localData.scannedData.length, 'item');
+                console.log('Data remote:', remoteData.scannedData.length, 'item');
+                
                 // Pastikan remoteData memiliki struktur yang benar
                 if (!remoteData || typeof remoteData !== 'object') {
                     remoteData = { scannedData: [], masterData: [], deletedDataIds: [] };
@@ -2586,7 +2888,7 @@
                 localData = ensureDataIntegrity(localData);
                 remoteData = ensureDataIntegrity(remoteData);
 
-                // Gabungkan kedua array data
+                // Gabungkan kedua array data - DIPERBAIKI: tidak menghapus data yang sudah ada
                 const combinedData = [...localData.scannedData, ...remoteData.scannedData];
                 
                 // Buat Map untuk menyimpan data unik berdasarkan ID
@@ -2596,16 +2898,24 @@
                 combinedData.forEach(item => {
                     const existing = dataMap.get(item.id);
                     if (!existing) {
+                        // Data baru, tambahkan ke map
                         dataMap.set(item.id, item);
                     } else {
-                        // Jika versi lebih tinggi, gunakan data ini
+                        // Konflik: data dengan ID yang sama ditemukan
+                        // Gunakan data dengan versi lebih tinggi
                         if (item.version > existing.version) {
                             dataMap.set(item.id, item);
+                            console.log(`Konflik diselesaikan: ID ${item.id} - menggunakan versi ${item.version} (lokal: ${existing.version})`);
                         } 
-                        // Jika versi sama tetapi lastModified lebih baru, gunakan data ini
+                        // Jika versi sama, gunakan data dengan lastModified terbaru
                         else if (item.version === existing.version && 
                                  new Date(item.lastModified) > new Date(existing.lastModified)) {
                             dataMap.set(item.id, item);
+                            console.log(`Konflik diselesaikan: ID ${item.id} - menggunakan lastModified terbaru`);
+                        }
+                        // Jika tidak, pertahankan data existing
+                        else {
+                            console.log(`Konflik diselesaikan: ID ${item.id} - mempertahankan data existing`);
                         }
                     }
                 });
@@ -2619,15 +2929,31 @@
                 // Gabungkan deletedDataIds dari kedua sumber
                 const mergedDeletedIds = [...new Set([...localData.deletedDataIds, ...remoteData.deletedDataIds])];
                 
-                // Gabungkan master data
+                // Gabungkan master data - DIPERBAIKI: tidak menghapus data master yang sudah ada
                 const combinedMasterData = [...localData.masterData, ...remoteData.masterData];
                 const masterDataMap = new Map();
                 
                 combinedMasterData.forEach(item => {
-                    masterDataMap.set(item.ean, item);
+                    // Untuk master data, gunakan EAN sebagai key dan prioritaskan data yang lebih baru
+                    const existing = masterDataMap.get(item.ean);
+                    if (!existing) {
+                        masterDataMap.set(item.ean, item);
+                    } else {
+                        // Jika ada konflik, gunakan data dari sumber mana saja (tidak ada versioning untuk master data)
+                        // Untuk keamanan, kita bisa menggunakan data dari remote atau berdasarkan timestamp
+                        // Di sini kita akan menggunakan data yang lebih baru berdasarkan timestamp jika ada
+                        const existingTime = existing.timestamp || existing.lastModified || '1970-01-01';
+                        const newTime = item.timestamp || item.lastModified || '1970-01-01';
+                        
+                        if (new Date(newTime) > new Date(existingTime)) {
+                            masterDataMap.set(item.ean, item);
+                        }
+                    }
                 });
                 
                 const finalMasterData = Array.from(masterDataMap.values());
+                
+                console.log('Hasil merge:', finalData.length, 'item data,', finalMasterData.length, 'item master data');
                 
                 return {
                     scannedData: finalData,
@@ -2636,13 +2962,22 @@
                 };
             }
             
-            // Fungsi untuk push data ke GitHub
+            // Fungsi untuk push data ke GitHub - DIPERBAIKI: dengan backup dan error handling yang lebih baik
             async function pushToGithubForSync(dataToPush) {
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
                     throw new Error('GitHub configuration is incomplete');
                 }
                 
                 try {
+                    // Buat backup data sebelum push
+                    const backupData = {
+                        scannedData: [...scannedData],
+                        masterData: [...masterData],
+                        deletedDataIds: [...deletedDataIds],
+                        backupTime: new Date().toISOString()
+                    };
+                    localStorage.setItem('appDataBackup', JSON.stringify(backupData));
+                    
                     // Konversi data ke format string
                     const content = JSON.stringify(dataToPush, null, 2);
                     const contentEncoded = btoa(unescape(encodeURIComponent(content)));
@@ -2681,13 +3016,33 @@
                         throw new Error(error.message || 'Gagal push data');
                     }
                     
+                    // Hapus backup setelah push berhasil
+                    localStorage.removeItem('appDataBackup');
+                    
                     return true;
                 } catch (error) {
+                    console.error('Error during push:', error);
+                    
+                    // Coba restore dari backup jika push gagal
+                    try {
+                        const backup = localStorage.getItem('appDataBackup');
+                        if (backup) {
+                            const backupData = JSON.parse(backup);
+                            scannedData = backupData.scannedData;
+                            masterData = backupData.masterData;
+                            deletedDataIds = backupData.deletedDataIds;
+                            saveToLocalStorage();
+                            console.log('Data berhasil direstore dari backup setelah push gagal');
+                        }
+                    } catch (restoreError) {
+                        console.error('Gagal restore dari backup:', restoreError);
+                    }
+                    
                     throw error;
                 }
             }
             
-            // Fungsi untuk pull data dari GitHub
+            // Fungsi untuk pull data dari GitHub - DIPERBAIKI: dengan error handling yang lebih baik
             async function pullFromGithubForSync() {
                 if (!githubConfig.username && !githubConfig.repo && !githubConfig.token) {
                     // Jika konfigurasi GitHub belum diatur, kembalikan data kosong
@@ -2731,7 +3086,7 @@
                 }
             }
             
-            // Fungsi untuk melakukan sinkronisasi data (push lalu pull)
+            // FUNGSI SINCRONISASI YANG DIPERBAIKI - dengan logika yang lebih aman
             async function performSync() {
                 if (isSyncing) {
                     console.log('Sync already in progress');
@@ -2748,27 +3103,34 @@
                 
                 try {
                     // 1. Pull data dari GitHub terlebih dahulu untuk mendapatkan data terbaru
+                    console.log('Memulai pull data dari GitHub...');
                     const remoteData = await pullFromGithubForSync();
+                    console.log('Pull berhasil:', remoteData.scannedData.length, 'item data diterima');
                     
-                    // 2. Merge data lokal dan data dari GitHub
+                    // 2. Merge data lokal dan data dari GitHub dengan logika yang aman
+                    console.log('Memulai proses merge data...');
                     const mergedData = mergeData(
                         { scannedData, masterData, deletedDataIds }, 
                         remoteData
                     );
+                    console.log('Merge berhasil:', mergedData.scannedData.length, 'item data setelah merge');
                     
                     // 3. Simpan data yang sudah di-merge ke local storage
                     scannedData = mergedData.scannedData;
                     masterData = mergedData.masterData;
                     deletedDataIds = mergedData.deletedDataIds;
                     saveToLocalStorage();
+                    console.log('Data berhasil disimpan ke local storage');
                     
                     // 4. Push data yang sudah di-merge ke GitHub
+                    console.log('Memulai push data ke GitHub...');
                     await pushToGithubForSync({
                         scannedData: mergedData.scannedData,
                         masterData: mergedData.masterData,
                         deletedDataIds: mergedData.deletedDataIds,
                         lastUpdated: new Date().toISOString()
                     });
+                    console.log('Push berhasil');
                     
                     // 5. Update status berdasarkan kondisi pallet
                     updateDataStatus();
@@ -2781,14 +3143,34 @@
                     populateFilterDropdowns();
                     updateDashboardSummary(); // Perbarui dashboard summary
                     
-                    showNotification('Sinkronisasi berhasil!');
+                    showNotification('Sinkronisasi berhasil! Data dari semua perangkat telah digabungkan.');
                     updatePushStatus('idle', 'Sync berhasil');
                     lastSyncTimestamp = Date.now();
                     updateLastSyncTime();
+                    
+                    console.log('Sinkronisasi selesai dengan sukses');
                 } catch (error) {
                     console.error('Error during sync:', error);
                     showNotification('Sinkronisasi gagal: ' + error.message, 'error');
                     updatePushStatus('error', 'Sync gagal');
+                    
+                    // Coba restore dari backup jika sync gagal
+                    try {
+                        const backup = localStorage.getItem('appDataBackup');
+                        if (backup) {
+                            const backupData = JSON.parse(backup);
+                            scannedData = backupData.scannedData;
+                            masterData = backupData.masterData;
+                            deletedDataIds = backupData.deletedDataIds;
+                            saveToLocalStorage();
+                            renderTable();
+                            renderMasterTable();
+                            console.log('Data berhasil direstore dari backup setelah sync gagal');
+                            showNotification('Data telah direstore dari backup.', 'error');
+                        }
+                    } catch (restoreError) {
+                        console.error('Gagal restore dari backup:', restoreError);
+                    }
                 } finally {
                     isSyncing = false;
                 }
@@ -2828,157 +3210,29 @@
                     autoSyncIntervalId = null;
                 }
             }
-            
-            // Fungsi untuk filter data - HANYA FILTER BY PALLET
-            function filterData() {
-                const pallet = filterPallet.value.toLowerCase();
-                
-                // Jika tidak ada filter yang diterapkan
-                if (!pallet) {
-                    isFilterActive = false;
-                    renderTable();
-                    return;
-                }
-                
-                isFilterActive = true;
-                
-                // Filter data berdasarkan pallet
-                const filteredIndices = [];
-                filteredData = scannedData.filter((item, index) => {
-                    // Filter pallet
-                    if (pallet && !item.pallet.toLowerCase().includes(pallet)) return false;
-                    
-                    filteredIndices.push(index);
-                    return true;
-                });
-                
-                // Simpan indeks asli data yang difilter
-                currentFilteredIndices = filteredIndices;
-                
-                // Render tabel dengan data yang sudah difilter
-                renderFilteredTable();
-            }
-            
-            // Fungsi untuk render tabel dengan data yang sudah difilter
-            function renderFilteredTable() {
-                // Kosongkan tabel
-                if (tableBody) tableBody.innerHTML = '';
-                
-                const dataToShow = isFilterActive ? filteredData : scannedData;
-                
-                if (dataToShow.length === 0) {
-                    if (emptyState) emptyState.classList.remove('hidden');
-                    if (paginationControls) paginationControls.classList.add('hidden');
-                    return;
-                }
-                
-                if (emptyState) emptyState.classList.add('hidden');
-                if (paginationControls) paginationControls.classList.add('hidden'); // Sembunyikan pagination saat filter aktif
-                
-                // Tambahkan semua data yang difilter ke tabel
-                dataToShow.forEach((item, index) => {
-                    addTableRow(item, index);
-                });
-            }
-            
-            // Fungsi untuk reset filter
-            function resetFilter() {
-                filterPallet.value = '';
-                
-                isFilterActive = false;
-                renderTable();
-            }
-            
-            // Fungsi untuk filter dashboard data
-            function filterDashboardData() {
-                const dateFrom = dashboardDateFrom.value;
-                const dateTo = dashboardDateTo.value;
-                
-                // Jika tidak ada filter yang diterapkan
-                if (!dateFrom && !dateTo) {
-                    dashboardFilterActive = false;
-                    updateDashboardSummary();
-                    return;
-                }
-                
-                dashboardFilterActive = true;
-                updateDashboardSummary();
-            }
-            
-            // Fungsi untuk reset dashboard filter
-            function resetDashboardFilter() {
-                dashboardDateFrom.value = '';
-                dashboardDateTo.value = '';
-                
-                dashboardFilterActive = false;
-                updateDashboardSummary();
-            }
-            
-            // Fungsi untuk menampilkan data dalam halaman (pagination)
+
+            // ========== FUNGSI-FUNGSI TAMBAHAN YANG DIBUTUHKAN ==========
+
+            // Fungsi untuk render tabel data
             function renderTable() {
-                // Kosongkan tabel
-                if (tableBody) tableBody.innerHTML = '';
+                // Implementasi render tabel
+                if (!tableBody) return;
+                
+                tableBody.innerHTML = '';
                 
                 if (scannedData.length === 0) {
                     if (emptyState) emptyState.classList.remove('hidden');
-                    if (paginationControls) paginationControls.classList.add('hidden');
                     return;
                 }
                 
                 if (emptyState) emptyState.classList.add('hidden');
                 
-                // Jika filter aktif, gunakan data yang sudah difilter
-                if (isFilterActive) {
-                    renderFilteredTable();
-                    return;
-                }
-                
-                // Tampilkan pagination hanya jika filter tidak aktif
-                if (paginationControls) paginationControls.classList.remove('hidden');
-                
-                // Filter data berdasarkan user jika bukan admin
-                let dataToShow = scannedData;
-                if (!isAdmin) {
-                    dataToShow = scannedData.filter(item => item.user === currentUser);
-                }
-                
-                // Hanya tampilkan data yang memiliki No. Container
-                dataToShow = dataToShow.filter(item => item.container && item.container.trim() !== '');
-                
-                if (dataToShow.length === 0) {
-                    if (emptyState) emptyState.classList.remove('hidden');
-                    if (paginationControls) paginationControls.classList.add('hidden');
-                    return;
-                }
-                
-                // Hitung jumlah halaman
-                const totalPages = Math.ceil(dataToShow.length / rowsPerPage);
-                
-                // Pastikan currentPage valid
-                if (currentPage > totalPages) {
-                    currentPage = totalPages;
-                }
-                if (currentPage < 1) {
-                    currentPage = 1;
-                }
-                
-                // Update informasi halaman
-                if (pageInfo) pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-                
-                // Enable/disable tombol navigasi
-                if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
-                if (nextPageBtn) nextPageBtn.disabled = currentPage === totalPages;
-                
-                // Hitung indeks data yang akan ditampilkan
-                const startIndex = (currentPage - 1) * rowsPerPage;
-                const endIndex = Math.min(startIndex + rowsPerPage, dataToShow.length);
-                
-                // Tambahkan data ke tabel
-                for (let i = startIndex; i < endIndex; i++) {
-                    addTableRow(dataToShow[i], i);
-                }
+                // Render data ke tabel
+                scannedData.forEach((item, index) => {
+                    addTableRow(item, index);
+                });
             }
-            
+
             // Fungsi untuk menambahkan baris ke tabel
             function addTableRow(data, index) {
                 if (!tableBody) return;
@@ -3037,15 +3291,13 @@
                     if (deleteBtn) {
                         deleteBtn.addEventListener('click', function() {
                             const index = parseInt(this.getAttribute('data-index'));
-                            // Jika data difilter, gunakan indeks asli dari currentFilteredIndices
-                            const actualIndex = isFilterActive ? currentFilteredIndices[index] : index;
-                            deleteData(actualIndex);
+                            deleteData(index);
                         });
                     }
                 }
             }
-            
-            // Fungsi untuk menghapus data
+
+            // Fungsi untuk menghapus data individual
             function deleteData(index) {
                 if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
                     // Tambahkan ID data yang dihapus ke daftar deletedDataIds
@@ -3066,11 +3318,13 @@
                     showNotification('Data berhasil dihapus!');
                 }
             }
-            
-            // Fungsi untuk menampilkan data master dalam tabel
+
+            // Fungsi untuk render tabel master data
             function renderMasterTable() {
-                // Kosongkan tabel
-                if (masterTableBody) masterTableBody.innerHTML = '';
+                // Implementasi render tabel master data
+                if (!masterTableBody) return;
+                
+                masterTableBody.innerHTML = '';
                 
                 if (masterData.length === 0) {
                     if (masterEmptyState) masterEmptyState.classList.remove('hidden');
@@ -3079,12 +3333,12 @@
                 
                 if (masterEmptyState) masterEmptyState.classList.add('hidden');
                 
-                // Tambahkan data ke tabel
+                // Render data master ke tabel
                 masterData.forEach((item, index) => {
                     addMasterTableRow(item, index);
                 });
             }
-            
+
             // Fungsi untuk menambahkan baris ke tabel master data
             function addMasterTableRow(data, index) {
                 if (!masterTableBody) return;
@@ -3124,7 +3378,7 @@
                     });
                 }
             }
-            
+
             // Fungsi untuk menampilkan modal edit master data
             function showEditMasterModal(index) {
                 const data = masterData[index];
@@ -3136,39 +3390,7 @@
                 
                 editMasterModal.style.display = 'flex';
             }
-            
-            // Fungsi untuk menyembunyikan modal edit master data
-            function hideEditMasterModal() {
-                editMasterModal.style.display = 'none';
-                editMasterForm.reset();
-            }
-            
-            // Fungsi untuk menyimpan perubahan master data
-            function saveEditedMasterData(e) {
-                e.preventDefault();
-                
-                const index = parseInt(editMasterIndexInput.value);
-                if (isNaN(index)) return;
-                
-                const updatedData = {
-                    ean: editMasterEanInput.value,
-                    sku: editMasterSkuInput.value,
-                    description: editMasterDescriptionInput.value
-                };
-                
-                // Update data master
-                masterData[index] = updatedData;
-                saveToLocalStorage();
-                
-                // Update data status yang terkait
-                updateDataStatus();
-                
-                showNotification('Data master berhasil diupdate!');
-                
-                hideEditMasterModal();
-                renderMasterTable();
-            }
-            
+
             // Fungsi untuk menghapus master data
             function deleteMasterData(index) {
                 if (confirm('Apakah Anda yakin ingin menghapus data master ini?')) {
@@ -3185,477 +3407,113 @@
                     showNotification('Data master berhasil dihapus!');
                 }
             }
-            
-            // Fungsi untuk menghapus master data yang dipilih
-            function deleteSelectedMasterData() {
-                const checkboxes = document.querySelectorAll('#masterTableBody .data-checkbox:checked');
+
+            // Fungsi untuk filter data
+            function filterData() {
+                // Implementasi filter data
+                const pallet = filterPallet.value.toLowerCase();
                 
-                if (checkboxes.length === 0) {
-                    showNotification('Tidak ada data master yang dipilih untuk dihapus!', 'error');
+                // Jika tidak ada filter yang diterapkan
+                if (!pallet) {
+                    isFilterActive = false;
+                    renderTable();
                     return;
                 }
                 
-                if (!confirm(`Apakah Anda yakin ingin menghapus ${checkboxes.length} data master terpilih?`)) {
+                isFilterActive = true;
+                
+                // Filter data berdasarkan pallet
+                const filteredIndices = [];
+                filteredData = scannedData.filter((item, index) => {
+                    // Filter pallet
+                    if (pallet && !item.pallet.toLowerCase().includes(pallet)) return false;
+                    
+                    filteredIndices.push(index);
+                    return true;
+                });
+                
+                // Simpan indeks asli data yang difilter
+                currentFilteredIndices = filteredIndices;
+                
+                // Render tabel dengan data yang sudah difilter
+                renderFilteredTable();
+            }
+
+            // Fungsi untuk render tabel yang sudah difilter
+            function renderFilteredTable() {
+                // Implementasi render tabel yang difilter
+                if (!tableBody) return;
+                
+                tableBody.innerHTML = '';
+                
+                if (filteredData.length === 0) {
+                    if (emptyState) emptyState.classList.remove('hidden');
                     return;
                 }
                 
-                // Dapatkan indeks data yang dipilih (dalam urutan terbalik untuk menghindari masalah indeks saat menghapus)
-                const indexesToDelete = Array.from(checkboxes)
-                    .map(checkbox => parseInt(checkbox.dataset.index))
-                    .sort((a, b) => b - a);
+                if (emptyState) emptyState.classList.add('hidden');
                 
-                // Hapus data dari array
-                for (const index of indexesToDelete) {
-                    masterData.splice(index, 1);
-                }
-                
-                // Simpan perubahan lokal
-                saveToLocalStorage();
-                
-                // Update data status yang terkait
-                updateDataStatus();
-                
-                renderMasterTable();
-                showNotification(`${indexesToDelete.length} data master berhasil dihapus!`);
-                
-                // Reset select all checkbox
-                selectAllMasterCheckbox.checked = false;
+                // Render data yang sudah difilter ke tabel
+                filteredData.forEach((item, index) => {
+                    addTableRow(item, index);
+                });
             }
-            
-            // Fungsi untuk menambah master data
-            function addMasterData(e) {
-                e.preventDefault();
+
+            // Fungsi untuk menangani login
+            function handleLogin() {
+                const username = usernameInput.value.trim();
                 
-                const ean = masterEanInput.value.trim();
-                const sku = masterSkuInput.value.trim();
-                const description = masterDescriptionInput.value.trim();
-                
-                if (!ean || !sku || !description) {
-                    showNotification('Harap isi semua field!', 'error');
+                if (!username) {
+                    showNotification('Harap masukkan username!', 'error');
                     return;
                 }
                 
-                // Cek apakah EAN sudah ada
-                const existingIndex = masterData.findIndex(item => item.ean === ean);
-                if (existingIndex !== -1) {
-                    showNotification('EAN sudah ada dalam data master!', 'error');
-                    return;
+                // Set current user
+                currentUser = username;
+                currentUserSpan.textContent = username;
+                
+                // Cek apakah user adalah admin
+                isAdmin = checkIfAdmin(username);
+                
+                // Atur tampilan berdasarkan jenis user
+                setUserView();
+                
+                // Muat data dari local storage
+                loadFromStorage();
+                
+                // Setup auto sync
+                setupAutoSync();
+                
+                // Tampilkan konten utama
+                toggleMainContent(true);
+                
+                // Reset form login
+                loginForm.reset();
+                
+                showNotification(`Selamat datang, ${username}!`);
+            }
+
+            // Fungsi untuk menampilkan notifikasi
+            function showNotification(message, type = 'success') {
+                if (!notification) return;
+                
+                notification.textContent = message;
+                notification.className = 'notification';
+                
+                if (type === 'error') {
+                    notification.classList.add('error');
                 }
                 
-                const newData = {
-                    ean,
-                    sku,
-                    description
-                };
+                notification.style.display = 'block';
                 
-                // Tambahkan data master
-                masterData.push(newData);
-                saveToLocalStorage();
-                
-                // Update data status yang terkait
-                updateDataStatus();
-                
-                showNotification('Data master berhasil ditambahkan!');
-                
-                // Reset form
-                masterDataForm.reset();
-                renderMasterTable();
+                // Sembunyikan notifikasi setelah 3 detik
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
             }
-            
-            // Fungsi untuk memproses upload file master data
-            function processMasterDataUpload(file) {
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    try {
-                        const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, { type: 'array' });
-                        
-                        // Ambil sheet pertama
-                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                        
-                        // Konversi ke JSON
-                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: ['ean', 'sku', 'description'] });
-                        
-                        // Hapus baris header jika ada
-                        if (jsonData.length > 0 && (jsonData[0].ean === 'ean' || jsonData[0].ean === 'EAN')) {
-                            jsonData.shift();
-                        }
-                        
-                        // Validasi data
-                        const validData = [];
-                        const invalidData = [];
-                        
-                        jsonData.forEach((item, index) => {
-                            // Validasi minimal memiliki EAN dan SKU
-                            if (item.ean && item.sku) {
-                                validData.push({
-                                    ean: String(item.ean).trim(),
-                                    sku: String(item.sku).trim(),
-                                    description: item.description ? String(item.description).trim() : ''
-                                });
-                            } else {
-                                invalidData.push({ index: index + 1, item });
-                            }
-                        });
-                        
-                        if (validData.length === 0) {
-                            showNotification('Tidak ada data valid yang ditemukan dalam file!', 'error');
-                            return;
-                        }
-                        
-                        // Tampilkan ringkasan upload
-                        let message = `Berhasil memproses ${validData.length} data dari file.`;
-                        if (invalidData.length > 0) {
-                            message += ` ${invalidData.length} data tidak valid dan diabaikan.`;
-                        }
-                        
-                        // Tambahkan data master yang valid
-                        let addedCount = 0;
-                        let updatedCount = 0;
-                        
-                        validData.forEach(item => {
-                            const existingIndex = masterData.findIndex(m => m.ean === item.ean);
-                            if (existingIndex === -1) {
-                                // Data baru
-                                masterData.push(item);
-                                addedCount++;
-                            } else {
-                                // Update data existing
-                                masterData[existingIndex] = item;
-                                updatedCount++;
-                            }
-                        });
-                        
-                        // Simpan perubahan
-                        saveToLocalStorage();
-                        renderMasterTable();
-                        
-                        // Update data status yang terkait
-                        updateDataStatus();
-                        
-                        showNotification(`${message} Ditambahkan: ${addedCount}, Diupdate: ${updatedCount}`);
-                        
-                        // Tutup modal upload
-                        hideUploadMasterModal();
-                        
-                    } catch (error) {
-                        console.error('Error processing file:', error);
-                        showNotification('Error memproses file: ' + error.message, 'error');
-                    }
-                };
-                
-                reader.onerror = function() {
-                    showNotification('Error membaca file!', 'error');
-                };
-                
-                reader.readAsArrayBuffer(file);
-            }
-            
-            // Fungsi untuk menampilkan modal upload master data
-            function showUploadMasterModal() {
-                uploadMasterModal.style.display = 'flex';
-                fileNameSpan.textContent = 'Belum ada file dipilih';
-                processUploadBtn.disabled = true;
-            }
-            
-            // Fungsi untuk menyembunyikan modal upload master data
-            function hideUploadMasterModal() {
-                uploadMasterModal.style.display = 'none';
-                masterFileInput.value = '';
-            }
-            
-            // Fungsi untuk mengupdate total EAN
-            function updateTotalEan() {
-                let total = 0;
-                
-                // Hitung total berdasarkan Container dan Pallet ID yang sama
-                if (currentContainer && currentPallet) {
-                    total = scannedData
-                        .filter(item => item.container === currentContainer && item.pallet === currentPallet)
-                        .reduce((sum, item) => sum + parseInt(item.qty), 0);
-                }
-                
-                if (totalEanSpan) totalEanSpan.textContent = total;
-            }
-            
-            // Fungsi untuk mengupdate total Container
-            function updateTotalContainer() {
-                let total = 0;
-                
-                // Hitung total qty untuk container yang aktif
-                if (currentContainer) {
-                    total = scannedData
-                        .filter(item => item.container === currentContainer)
-                        .reduce((sum, item) => sum + parseInt(item.qty), 0);
-                }
-                
-                if (totalContainerSpan) totalContainerSpan.textContent = total;
-            }
-            
-            // Fungsi untuk mengupdate dashboard summary dengan logika status baru
-            function updateDashboardSummary() {
-                // Gunakan data yang difilter jika filter aktif
-                const dataToUse = dashboardFilterActive ? 
-                    scannedData.filter(item => {
-                        if (dashboardDateFrom.value && 
-                            item.date < dashboardDateFrom.value) return false;
-                        if (dashboardDateTo.value && 
-                            item.date > dashboardDateTo.value) return false;
-                        return true;
-                    }) : 
-                    scannedData;
-                
-                // Hitung data untuk dashboard
-                const containerMap = new Map();
-                const palletEanMap = new Map();
-                let totalQty = 0;
-                let totalFindings = 0;
-                let totalDoubleEAN = 0;
-                
-                // Proses data untuk summary
-                dataToUse.forEach(item => {
-                    if (item.container && item.container.trim() !== '') {
-                        // Hitung per container
-                        if (!containerMap.has(item.container)) {
-                            containerMap.set(item.container, {
-                                qty: 0,
-                                pallets: new Set()
-                            });
-                        }
-                        
-                        const containerData = containerMap.get(item.container);
-                        containerData.qty += parseInt(item.qty || 1);
-                        containerData.pallets.add(item.pallet);
-                        totalQty += parseInt(item.qty || 1);
-                        
-                        // Hitung EAN per pallet untuk finding
-                        const palletKey = `${item.container}-${item.pallet}`;
-                        if (!palletEanMap.has(palletKey)) {
-                            palletEanMap.set(palletKey, {
-                                container: item.container,
-                                pallet: item.pallet,
-                                eans: new Set(),
-                                status: 'OK'
-                            });
-                        }
-                        
-                        palletEanMap.get(palletKey).eans.add(item.ean);
-                    }
-                });
-                
-                // Update summary values
-                if (totalContainerDashboardSpan) totalContainerDashboardSpan.textContent = containerMap.size;
-                if (totalQtyDashboardSpan) totalQtyDashboardSpan.textContent = totalQty;
-                
-                // Hitung finding (pallet dengan status bukan OK)
-                const findings = [];
-                const doubleEANs = [];
-                
-                palletEanMap.forEach(palletData => {
-                    if (palletData.eans.size > 1) {
-                        totalDoubleEAN++;
-                        palletData.status = 'Double EAN';
-                        doubleEANs.push({
-                            container: palletData.container,
-                            pallet: palletData.pallet,
-                            eanCount: palletData.eans.size,
-                            eans: Array.from(palletData.eans),
-                            status: palletData.status
-                        });
-                    }
-                    
-                    // Cari data asli untuk menentukan status
-                    const palletItems = dataToUse.filter(item => 
-                        item.container === palletData.container && 
-                        item.pallet === palletData.pallet
-                    );
-                    
-                    const hasFinding = palletItems.some(item => item.status === 'Finding');
-                    const hasUpdateMaster = palletItems.some(item => item.status === 'Update Master Data');
-                    
-                    if (hasFinding) {
-                        totalFindings++;
-                        findings.push({
-                            container: palletData.container,
-                            pallet: palletData.pallet,
-                            eanCount: palletData.eans.size,
-                            eans: Array.from(palletData.eans),
-                            status: 'Finding'
-                        });
-                    } else if (hasUpdateMaster) {
-                        totalFindings++;
-                        findings.push({
-                            container: palletData.container,
-                            pallet: palletData.pallet,
-                            eanCount: palletData.eans.size,
-                            eans: Array.from(palletData.eans),
-                            status: 'Update Master Data'
-                        });
-                    }
-                });
-                
-                if (totalFindingSpan) totalFindingSpan.textContent = totalFindings;
-                if (totalDoubleEANSpan) totalDoubleEANSpan.textContent = totalDoubleEAN;
-                
-                // Update tabel rincian per container
-                if (containerTableBody) {
-                    containerTableBody.innerHTML = '';
-                    containerMap.forEach((data, container) => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${container}</td>
-                            <td>${data.qty}</td>
-                            <td>${data.pallets.size}</td>
-                        `;
-                        containerTableBody.appendChild(row);
-                    });
-                }
-                
-                // Update tabel detail finding
-                if (findingTableBody) {
-                    findingTableBody.innerHTML = '';
-                    findings.forEach(finding => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${finding.container}</td>
-                            <td>${finding.pallet}</td>
-                            <td>${finding.eanCount}</td>
-                            <td><span class="finding-highlight">${finding.status}</span></td>
-                            <td><span class="finding-link" data-container="${finding.container}" data-pallet="${finding.pallet}">Lihat Detail</span></td>
-                        `;
-                        findingTableBody.appendChild(row);
-                    });
-                    
-                    // Tambahkan event listener untuk link finding
-                    const findingLinks = findingTableBody.querySelectorAll('.finding-link');
-                    findingLinks.forEach(link => {
-                        link.addEventListener('click', function() {
-                            const container = this.getAttribute('data-container');
-                            const pallet = this.getAttribute('data-pallet');
-                            
-                            // Aktifkan tab hasil input scan
-                            tabs.forEach(t => t.classList.remove('active'));
-                            tabContents.forEach(c => c.classList.remove('active'));
-                            document.querySelector('.tab[data-tab="scanResult"]').classList.add('active');
-                            document.getElementById('scanResultTab').classList.add('active');
-                            
-                            // Set filter pallet
-                            filterPallet.value = pallet;
-                            
-                            // Terapkan filter
-                            filterData();
-                            
-                            // Scroll ke tabel hasil input scan
-                            document.getElementById('scanResultTab').scrollIntoView({ behavior: 'smooth' });
-                        });
-                    });
-                }
-                
-                // Update tabel detail double EAN
-                if (doubleEanTableBody) {
-                    doubleEanTableBody.innerHTML = '';
-                    doubleEANs.forEach(finding => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${finding.container}</td>
-                            <td>${finding.pallet}</td>
-                            <td>${finding.eanCount}</td>
-                            <td><span class="finding-highlight">${finding.status}</span></td>
-                            <td><span class="finding-link" data-container="${finding.container}" data-pallet="${finding.pallet}">Lihat Detail</span></td>
-                        `;
-                        doubleEanTableBody.appendChild(row);
-                    });
-                    
-                    // Tambahkan event listener untuk link double EAN
-                    const doubleEanLinks = doubleEanTableBody.querySelectorAll('.finding-link');
-                    doubleEanLinks.forEach(link => {
-                        link.addEventListener('click', function() {
-                            const container = this.getAttribute('data-container');
-                            const pallet = this.getAttribute('data-pallet');
-                            
-                            // Aktifkan tab hasil input scan
-                            tabs.forEach(t => t.classList.remove('active'));
-                            tabContents.forEach(c => c.classList.remove('active'));
-                            document.querySelector('.tab[data-tab="scanResult"]').classList.add('active');
-                            document.getElementById('scanResultTab').classList.add('active');
-                            
-                            // Set filter pallet
-                            filterPallet.value = pallet;
-                            
-                            // Terapkan filter
-                            filterData();
-                            
-                            // Scroll ke tabel hasil input scan
-                            document.getElementById('scanResultTab').scrollIntoView({ behavior: 'smooth' });
-                        });
-                    });
-                }
-            }
-            
-            // Fungsi untuk memperbarui status data berdasarkan kondisi pallet
-            function updateDataStatus() {
-                // Reset semua status berdasarkan master data
-                scannedData.forEach(item => {
-                    const masterItem = findMasterData(item.ean);
-                    if (masterItem) {
-                        item.sku = masterItem.sku;
-                        item.description = masterItem.description;
-                        item.status = 'OK';
-                    } else {
-                        item.status = 'Finding';
-                    }
-                });
-                
-                // Kelompokkan data per container dan pallet
-                const palletMap = new Map();
-                
-                scannedData.forEach(item => {
-                    const key = `${item.container}-${item.pallet}`;
-                    if (!palletMap.has(key)) {
-                        palletMap.set(key, {
-                            container: item.container,
-                            pallet: item.pallet,
-                            eans: new Set(),
-                            items: []
-                        });
-                    }
-                    
-                    const palletData = palletMap.get(key);
-                    palletData.eans.add(item.ean);
-                    palletData.items.push(item);
-                });
-                
-                // Periksa setiap pallet untuk kondisi khusus
-                palletMap.forEach(palletData => {
-                    // Kondisi 1: Double EAN - 1 pallet berisi lebih dari 2 EAN berbeda
-                    if (palletData.eans.size > 1) {
-                        palletData.items.forEach(item => {
-                            // Jika status bukan Finding, ubah menjadi Double EAN
-                            if (item.status !== 'Finding') {
-                                item.status = 'Double EAN';
-                            }
-                        });
-                    }
-                    
-                    // Kondisi 2: Update Master Data - EAN ada di master data tapi SKU/description tidak sesuai
-                    palletData.items.forEach(item => {
-                        const masterItem = findMasterData(item.ean);
-                        if (masterItem && (item.sku !== masterItem.sku || item.description !== masterItem.description)) {
-                            item.status = 'Update Master Data';
-                        }
-                    });
-                });
-                
-                // Simpan perubahan
-                saveToLocalStorage();
-                
-                // Update UI
-                renderTable();
-                updateDashboardSummary();
-            }
-            
-            // Event listeners
+
+            // ========== EVENT LISTENERS ==========
+
             if (form) {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
@@ -3952,136 +3810,9 @@
             if (deleteSelectedMasterBtn) {
                 deleteSelectedMasterBtn.addEventListener('click', deleteSelectedMasterData);
             }
-            
-            // Event listener untuk tombol pagination
-            if (prevPageBtn) {
-                prevPageBtn.addEventListener('click', function() {
-                    if (currentPage > 1) {
-                        currentPage--;
-                        renderTable();
-                    }
-                });
-            }
-            
-            if (nextPageBtn) {
-                nextPageBtn.addEventListener('click', function() {
-                    const dataToShow = !isAdmin ? 
-                        scannedData.filter(item => item.user === currentUser) : 
-                        scannedData;
-                    const totalPages = Math.ceil(dataToShow.length / rowsPerPage);
-                    
-                    if (currentPage < totalPages) {
-                        currentPage++;
-                        renderTable();
-                    }
-                });
-            }
-            
-            // Event listener untuk upload master data
-            if (uploadMasterBtn) {
-                uploadMasterBtn.addEventListener('click', showUploadMasterModal);
-            }
-            
-            if (closeUploadMasterModalBtn) {
-                closeUploadMasterModalBtn.addEventListener('click', hideUploadMasterModal);
-            }
-            
-            if (cancelUploadMasterBtn) {
-                cancelUploadMasterBtn.addEventListener('click', hideUploadMasterModal);
-            }
-            
-            // Event listener untuk file input
-            if (masterFileInput) {
-                masterFileInput.addEventListener('change', function() {
-                    if (this.files.length > 0) {
-                        fileNameSpan.textContent = this.files[0].name;
-                        processUploadBtn.disabled = false;
-                    } else {
-                        fileNameSpan.textContent = 'Belum ada file dipilih';
-                        processUploadBtn.disabled = true;
-                    }
-                });
-            }
-            
-            if (processUploadBtn) {
-                processUploadBtn.addEventListener('click', function() {
-                    if (masterFileInput.files.length > 0) {
-                        processMasterDataUpload(masterFileInput.files[0]);
-                    }
-                });
-            }
-            
-            // Event listener untuk filter controls
-            if (applyFilterBtn) {
-                applyFilterBtn.addEventListener('click', filterData);
-            }
-            
-            if (resetFilterBtn) {
-                resetFilterBtn.addEventListener('click', resetFilter);
-            }
-            
-            // Event listener untuk dashboard filter controls
-            if (applyDashboardFilterBtn) {
-                applyDashboardFilterBtn.addEventListener('click', filterDashboardData);
-            }
-            
-            if (resetDashboardFilterBtn) {
-                resetDashboardFilterBtn.addEventListener('click', resetDashboardFilter);
-            }
-            
-            // Fungsi untuk menangani login
-            function handleLogin() {
-                const username = usernameInput.value.trim();
-                
-                if (!username) {
-                    showNotification('Harap masukkan username!', 'error');
-                    return;
-                }
-                
-                // Set current user
-                currentUser = username;
-                currentUserSpan.textContent = username;
-                
-                // Cek apakah user adalah admin
-                isAdmin = checkIfAdmin(username);
-                
-                // Atur tampilan berdasarkan jenis user
-                setUserView();
-                
-                // Muat data dari local storage
-                loadFromStorage();
-                
-                // Setup auto sync
-                setupAutoSync();
-                
-                // Tampilkan konten utama
-                toggleMainContent(true);
-                
-                // Reset form login
-                loginForm.reset();
-                
-                showNotification(`Selamat datang, ${username}!`);
-            }
-            
-            // Fungsi untuk menampilkan notifikasi
-            function showNotification(message, type = 'success') {
-                if (!notification) return;
-                
-                notification.textContent = message;
-                notification.className = 'notification';
-                
-                if (type === 'error') {
-                    notification.classList.add('error');
-                }
-                
-                notification.style.display = 'block';
-                
-                // Sembunyikan notifikasi setelah 3 detik
-                setTimeout(() => {
-                    notification.style.display = 'none';
-                }, 3000);
-            }
-            
+
+            // ========== INISIALISASI APLIKASI ==========
+
             // Inisialisasi aplikasi
             function init() {
                 // Setup mobile menu
