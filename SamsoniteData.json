@@ -86223,6 +86223,86 @@
       "date": "2025-10-10",
       "version": 1,
       "lastModified": "2025-10-10T01:57:39.777Z"
+    },
+    {
+      "id": "mgk7dgr7-tcqczilvt-Muh",
+      "customer": "Samsonite",
+      "pallet": "DID2510021660",
+      "container": "TCNU3786666",
+      "ean": "5400520295217",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-10T02:03:56.563Z",
+      "user": "Muhdi",
+      "date": "2025-10-10",
+      "version": 1,
+      "lastModified": "2025-10-10T02:03:56.563Z"
+    },
+    {
+      "id": "mgk7dlfx-l7i7o05gb-Muh",
+      "customer": "Samsonite",
+      "pallet": "DID2510021660",
+      "container": "TCNU3786666",
+      "ean": "5400520295217",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-10T02:04:02.637Z",
+      "user": "Muhdi",
+      "date": "2025-10-10",
+      "version": 1,
+      "lastModified": "2025-10-10T02:04:02.637Z"
+    },
+    {
+      "id": "mgk7dr29-mtit7yj6f-Muh",
+      "customer": "Samsonite",
+      "pallet": "DID2510021660",
+      "container": "TCNU3786666",
+      "ean": "5400520295217",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-10T02:04:09.921Z",
+      "user": "Muhdi",
+      "date": "2025-10-10",
+      "version": 1,
+      "lastModified": "2025-10-10T02:04:09.921Z"
+    },
+    {
+      "id": "mgk7dv1y-yc13owbhi-Muh",
+      "customer": "Samsonite",
+      "pallet": "DID2510021660",
+      "container": "TCNU3786666",
+      "ean": "5400520295217",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-10T02:04:15.094Z",
+      "user": "Muhdi",
+      "date": "2025-10-10",
+      "version": 1,
+      "lastModified": "2025-10-10T02:04:15.094Z"
+    },
+    {
+      "id": "mgk7dz81-62lufwfvr-Muh",
+      "customer": "Samsonite",
+      "pallet": "DID2510021660",
+      "container": "TCNU3786666",
+      "ean": "5400520295217",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-10T02:04:20.497Z",
+      "user": "Muhdi",
+      "date": "2025-10-10",
+      "version": 1,
+      "lastModified": "2025-10-10T02:04:20.497Z"
     }
   ],
   "masterData": [
@@ -86385,5 +86465,5 @@
     "mghqjxvrd0awj",
     "mghqjyfpho368"
   ],
-  "lastUpdated": "2025-10-10T01:58:46.791Z"
+  "lastUpdated": "2025-10-10T02:04:28.098Z"
 }
