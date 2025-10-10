@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* CSS styles - tetap sama seperti sebelumnya */
+        /* CSS styles - dipertahankan sama seperti sebelumnya */
         :root {
             --spark-primary: #3490dc;
             --spark-primary-dark: #2779bd;
@@ -1454,7 +1454,7 @@
                             <button class="pagination-button" id="prevPageBtn" disabled>
                                 <i class="fas fa-chevron-left"></i> Previous
                             </button>
-                            <span class="pagination-info" id="pageInfo">Page 1 of 1</span>
+                            <span class="pagination-info" id="pageInfo">Page 1 of 10</span>
                             <button class="pagination-button" id="nextPageBtn" disabled>
                                 Next <i class="fas fa-chevron-right"></i>
                             </button>
@@ -1867,6 +1867,15 @@
             let dashboardFilterActive = false;
             let currentFilteredIndices = []; // Menyimpan indeks asli data yang difilter
             
+            // IndexedDB variables
+            let db = null;
+            const DB_NAME = 'ScanModuleDB';
+            const DB_VERSION = 1;
+            const SCANNED_STORE = 'scannedData';
+            const MASTER_STORE = 'masterData';
+            const DELETED_STORE = 'deletedData';
+            const CONFIG_STORE = 'config';
+            
             // Konfigurasi GitHub
             let githubConfig = {
                 username: '',
@@ -1876,6 +1885,195 @@
                 autoSync: true,
                 autoSyncInterval: 1
             };
+
+            // ========== INDEXEDDB IMPLEMENTATION ==========
+
+            // Fungsi untuk membuka koneksi IndexedDB
+            function openDatabase() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(DB_NAME, DB_VERSION);
+                    
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => resolve(request.result);
+                    
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        
+                        // Buat object store untuk data scan
+                        if (!db.objectStoreNames.contains(SCANNED_STORE)) {
+                            const scannedStore = db.createObjectStore(SCANNED_STORE, { keyPath: 'id' });
+                            scannedStore.createIndex('timestamp', 'timestamp', { unique: false });
+                            scannedStore.createIndex('user', 'user', { unique: false });
+                            scannedStore.createIndex('container', 'container', { unique: false });
+                            scannedStore.createIndex('pallet', 'pallet', { unique: false });
+                        }
+                        
+                        // Buat object store untuk master data
+                        if (!db.objectStoreNames.contains(MASTER_STORE)) {
+                            const masterStore = db.createObjectStore(MASTER_STORE, { keyPath: 'ean' });
+                            masterStore.createIndex('timestamp', 'timestamp', { unique: false });
+                        }
+                        
+                        // Buat object store untuk data yang dihapus
+                        if (!db.objectStoreNames.contains(DELETED_STORE)) {
+                            db.createObjectStore(DELETED_STORE, { keyPath: 'id' });
+                        }
+                        
+                        // Buat object store untuk konfigurasi
+                        if (!db.objectStoreNames.contains(CONFIG_STORE)) {
+                            db.createObjectStore(CONFIG_STORE, { keyPath: 'name' });
+                        }
+                    };
+                });
+            }
+
+            // Fungsi untuk mendapatkan semua data dari store
+            function getAllData(storeName) {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction([storeName], 'readonly');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.getAll();
+                    
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            // Fungsi untuk menyimpan data ke store
+            function saveDataToStore(storeName, data) {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction([storeName], 'readwrite');
+                    const store = transaction.objectStore(storeName);
+                    
+                    if (Array.isArray(data)) {
+                        // Jika data adalah array, simpan semua item
+                        const promises = data.map(item => {
+                            return new Promise((res, rej) => {
+                                const request = store.put(item);
+                                request.onsuccess = () => res();
+                                request.onerror = () => rej(request.error);
+                            });
+                        });
+                        
+                        Promise.all(promises)
+                            .then(() => resolve())
+                            .catch(error => reject(error));
+                    } else {
+                        // Jika data adalah objek tunggal
+                        const request = store.put(data);
+                        request.onsuccess = () => resolve();
+                        request.onerror = () => reject(request.error);
+                    }
+                });
+            }
+
+            // Fungsi untuk menghapus data dari store
+            function deleteDataFromStore(storeName, key) {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction([storeName], 'readwrite');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.delete(key);
+                    
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            // Fungsi untuk mendapatkan data dengan pagination
+            function getDataWithPagination(storeName, page, pageSize, filterFn = null) {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction([storeName], 'readonly');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.getAll();
+                    
+                    request.onsuccess = () => {
+                        let data = request.result;
+                        
+                        // Terapkan filter jika ada
+                        if (filterFn) {
+                            data = data.filter(filterFn);
+                        }
+                        
+                        // Hitung pagination
+                        const totalItems = data.length;
+                        const totalPages = Math.ceil(totalItems / pageSize);
+                        const startIndex = (page - 1) * pageSize;
+                        const endIndex = Math.min(startIndex + pageSize, totalItems);
+                        
+                        // Ambil data untuk halaman saat ini
+                        const paginatedData = data.slice(startIndex, endIndex);
+                        
+                        resolve({
+                            data: paginatedData,
+                            totalItems,
+                            totalPages,
+                            currentPage: page
+                        });
+                    };
+                    
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            // Fungsi untuk memuat semua data dari IndexedDB
+            async function loadAllData() {
+                try {
+                    // Muat data scan
+                    scannedData = await getAllData(SCANNED_STORE);
+                    
+                    // Muat master data
+                    masterData = await getAllData(MASTER_STORE);
+                    
+                    // Muat deleted data
+                    const deletedData = await getAllData(DELETED_STORE);
+                    deletedDataIds = deletedData.map(item => item.id);
+                    
+                    console.log('Data loaded from IndexedDB:', {
+                        scanned: scannedData.length,
+                        master: masterData.length,
+                        deleted: deletedDataIds.length
+                    });
+                    
+                    // Update data status
+                    updateDataStatus();
+                    
+                    // Update UI
+                    renderTable();
+                    renderMasterTable();
+                    updateTotalEan();
+                    updateTotalContainer();
+                    populateFilterDropdowns();
+                    updateDashboardSummary();
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Error loading data from IndexedDB:', error);
+                    showNotification('Gagal memuat data dari database lokal', 'error');
+                    return false;
+                }
+            }
+
+            // Fungsi untuk menyimpan semua data ke IndexedDB
+            async function saveAllData() {
+                try {
+                    // Simpan scanned data
+                    await saveDataToStore(SCANNED_STORE, scannedData);
+                    
+                    // Simpan master data
+                    await saveDataToStore(MASTER_STORE, masterData);
+                    
+                    // Simpan deleted data ids
+                    const deletedData = deletedDataIds.map(id => ({ id }));
+                    await saveDataToStore(DELETED_STORE, deletedData);
+                    
+                    console.log('All data saved to IndexedDB');
+                    return true;
+                } catch (error) {
+                    console.error('Error saving data to IndexedDB:', error);
+                    showNotification('Gagal menyimpan data ke database lokal', 'error');
+                    return false;
+                }
+            }
 
             // ========== FUNGSI UTAMA YANG DIPERBAIKI ==========
 
@@ -1933,8 +2131,8 @@
                     });
                 });
 
-                // Simpan perubahan
-                saveToLocalStorage();
+                // Simpan perubahan ke IndexedDB
+                saveAllData();
 
                 // Update UI
                 renderTable();
@@ -1970,17 +2168,19 @@
             }
 
             // Fungsi untuk mengupdate dashboard summary
-            function updateDashboardSummary() {
+            async function updateDashboardSummary() {
                 // Gunakan data yang difilter jika filter aktif
-                const dataToUse = dashboardFilterActive ? 
-                    scannedData.filter(item => {
+                let dataToUse = scannedData;
+                
+                if (dashboardFilterActive) {
+                    dataToUse = scannedData.filter(item => {
                         if (dashboardDateFrom.value && 
                             item.date < dashboardDateFrom.value) return false;
                         if (dashboardDateTo.value && 
                             item.date > dashboardDateTo.value) return false;
                         return true;
-                    }) : 
-                    scannedData;
+                    });
+                }
                 
                 // Hitung data untuk dashboard
                 const containerMap = new Map();
@@ -2213,7 +2413,7 @@
                 scannedData = uniqueScannedData;
                 
                 // Simpan perubahan
-                saveToLocalStorage();
+                saveAllData();
                 
                 console.log('Integritas data berhasil diperbaiki');
                 return true;
@@ -2233,7 +2433,7 @@
                         deletedDataIds: [...deletedDataIds],
                         backupTime: new Date().toISOString()
                     };
-                    localStorage.setItem('appDataBackup', JSON.stringify(backupData));
+                    await saveDataToStore(CONFIG_STORE, { name: 'backup', data: backupData });
                     
                     // Konversi data ke format string
                     const content = JSON.stringify(dataToPush, null, 2);
@@ -2278,7 +2478,7 @@
                     }
                     
                     // Hapus backup setelah push berhasil
-                    localStorage.removeItem('appDataBackup');
+                    await deleteDataFromStore(CONFIG_STORE, 'backup');
                     
                     return true;
                 } catch (error) {
@@ -2286,15 +2486,20 @@
                     
                     // Coba restore dari backup jika push gagal
                     try {
-                        const backup = localStorage.getItem('appDataBackup');
-                        if (backup) {
-                            const backupData = JSON.parse(backup);
-                            scannedData = backupData.scannedData;
-                            masterData = backupData.masterData;
-                            deletedDataIds = backupData.deletedDataIds;
-                            saveToLocalStorage();
-                            console.log('Data berhasil direstore dari backup setelah push gagal');
-                        }
+                        const transaction = db.transaction([CONFIG_STORE], 'readonly');
+                        const store = transaction.objectStore(CONFIG_STORE);
+                        const request = store.get('backup');
+                        
+                        request.onsuccess = () => {
+                            if (request.result) {
+                                const backupData = request.result.data;
+                                scannedData = backupData.scannedData;
+                                masterData = backupData.masterData;
+                                deletedDataIds = backupData.deletedDataIds;
+                                saveAllData();
+                                console.log('Data berhasil direstore dari backup setelah push gagal');
+                            }
+                        };
                     } catch (restoreError) {
                         console.error('Gagal restore dari backup:', restoreError);
                     }
@@ -2488,12 +2693,12 @@
                     );
                     console.log('Merge berhasil:', mergedData.scannedData.length, 'item data setelah merge');
                     
-                    // 3. Simpan data yang sudah di-merge ke local storage
+                    // 3. Simpan data yang sudah di-merge ke IndexedDB
                     scannedData = mergedData.scannedData;
                     masterData = mergedData.masterData;
                     deletedDataIds = mergedData.deletedDataIds;
-                    saveToLocalStorage();
-                    console.log('Data berhasil disimpan ke local storage');
+                    await saveAllData();
+                    console.log('Data berhasil disimpan ke IndexedDB');
                     
                     // 4. Push data yang sudah di-merge ke GitHub
                     console.log('Memulai push data ke GitHub...');
@@ -2529,18 +2734,23 @@
                     
                     // Coba restore dari backup jika sync gagal
                     try {
-                        const backup = localStorage.getItem('appDataBackup');
-                        if (backup) {
-                            const backupData = JSON.parse(backup);
-                            scannedData = backupData.scannedData;
-                            masterData = backupData.masterData;
-                            deletedDataIds = backupData.deletedDataIds;
-                            saveToLocalStorage();
-                            renderTable();
-                            renderMasterTable();
-                            console.log('Data berhasil direstore dari backup setelah sync gagal');
-                            showNotification('Data telah direstore dari backup.', 'error');
-                        }
+                        const transaction = db.transaction([CONFIG_STORE], 'readonly');
+                        const store = transaction.objectStore(CONFIG_STORE);
+                        const request = store.get('backup');
+                        
+                        request.onsuccess = () => {
+                            if (request.result) {
+                                const backupData = request.result.data;
+                                scannedData = backupData.scannedData;
+                                masterData = backupData.masterData;
+                                deletedDataIds = backupData.deletedDataIds;
+                                saveAllData();
+                                renderTable();
+                                renderMasterTable();
+                                console.log('Data berhasil direstore dari backup setelah sync gagal');
+                                showNotification('Data telah direstore dari backup.', 'error');
+                            }
+                        };
                     } catch (restoreError) {
                         console.error('Gagal restore dari backup:', restoreError);
                     }
@@ -2704,8 +2914,8 @@
                 }
             }
 
-            // Fungsi untuk menyimpan data (hanya ke local storage)
-            function saveData() {
+            // Fungsi untuk menyimpan data (hanya ke IndexedDB)
+            async function saveData() {
                 if (isSaving) return;
                 
                 const ean = eanInput.value.trim();
@@ -2771,8 +2981,8 @@
                 // Simpan data ke array sementara
                 scannedData.push(newData);
                 
-                // Simpan ke localStorage
-                saveToLocalStorage();
+                // Simpan ke IndexedDB
+                await saveDataToStore(SCANNED_STORE, newData);
                 
                 // Update status berdasarkan kondisi pallet
                 updateDataStatus();
@@ -2791,67 +3001,6 @@
                 isSaving = false;
                 
                 showNotification('Data berhasil disimpan!');
-            }
-
-            // Fungsi untuk menyimpan data ke localStorage
-            function saveToLocalStorage() {
-                const dataToSave = {
-                    scannedData: scannedData,
-                    masterData: masterData,
-                    deletedDataIds: deletedDataIds,
-                    lastUpdated: new Date().toISOString()
-                };
-                localStorage.setItem('appData', JSON.stringify(dataToSave));
-            }
-
-            // Fungsi untuk memuat data dari local storage - DIPERBAIKI
-            function loadFromStorage() {
-                const savedData = localStorage.getItem('appData');
-                if (savedData) {
-                    try {
-                        const parsedData = JSON.parse(savedData);
-                        scannedData = parsedData.scannedData || [];
-                        masterData = parsedData.masterData || [];
-                        deletedDataIds = parsedData.deletedDataIds || [];
-                        
-                        // Perbaiki integritas data saat load
-                        repairDataIntegrity();
-                        
-                        // Update data status saat load
-                        updateDataStatus();
-                        
-                    } catch (e) {
-                        console.error('Error parsing data from localStorage:', e);
-                        // Coba recover dari backup
-                        try {
-                            const backup = localStorage.getItem('appDataBackup');
-                            if (backup) {
-                                const backupData = JSON.parse(backup);
-                                scannedData = backupData.scannedData || [];
-                                masterData = backupData.masterData || [];
-                                deletedDataIds = backupData.deletedDataIds || [];
-                                repairDataIntegrity();
-                                showNotification('Data berhasil direcover dari backup', 'error');
-                            } else {
-                                // Reset data jika tidak ada backup
-                                scannedData = [];
-                                masterData = [];
-                                deletedDataIds = [];
-                            }
-                        } catch (backupError) {
-                            console.error('Error recovering from backup:', backupError);
-                            scannedData = [];
-                            masterData = [];
-                            deletedDataIds = [];
-                        }
-                        saveToLocalStorage();
-                    }
-                    populateFilterDropdowns();
-                    updateTotalContainer();
-                    renderTable();
-                    renderMasterTable();
-                    updateDashboardSummary(); // Pastikan dashboard diperbarui
-                }
             }
 
             // Fungsi untuk logout
@@ -2883,8 +3032,8 @@
                 // Reset status push
                 updatePushStatus('idle', 'Idle');
                 
-                // Muat data dari local storage
-                loadFromStorage();
+                // Muat data dari IndexedDB
+                loadAllData();
                 
                 // Tampilkan kembali form login
                 toggleMainContent(false);
@@ -3076,7 +3225,7 @@
             }
 
             // Fungsi untuk menyimpan konfigurasi GitHub
-            function saveGithubConfig() {
+            async function saveGithubConfig() {
                 githubConfig = {
                     username: document.getElementById('githubUsername').value.trim(),
                     repo: document.getElementById('githubRepo').value.trim(),
@@ -3086,7 +3235,7 @@
                     autoSyncInterval: parseInt(autoSyncInterval.value) || 1
                 };
                 
-                localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
+                await saveDataToStore(CONFIG_STORE, { name: 'githubConfig', data: githubConfig });
                 showNotification('Konfigurasi GitHub berhasil disimpan!');
                 
                 // Mulai ulang auto sync jika diperlukan
@@ -3096,33 +3245,38 @@
                 testGitHubConnection();
             }
 
-            // Fungsi untuk memuat konfigurasi GitHub dari local storage
-            function loadGithubConfig() {
-                const savedConfig = localStorage.getItem('githubConfig');
-                if (savedConfig) {
-                    try {
-                        githubConfig = JSON.parse(savedConfig);
-                        
-                        document.getElementById('githubUsername').value = githubConfig.username || '';
-                        document.getElementById('githubRepo').value = githubConfig.repo || '';
-                        document.getElementById('githubToken').value = githubConfig.token || '';
-                        document.getElementById('dataFilePath').value = githubConfig.dataFilePath || 'SamsoniteData.json';
-                        autoSyncToggle.checked = githubConfig.autoSync !== false;
-                        autoSyncInterval.value = githubConfig.autoSyncInterval || 1;
-                        
-                        if (githubConfig.username && githubConfig.repo && githubConfig.token) {
-                            githubStatusSpan.textContent = 'Terkonfigurasi';
-                            githubStatusSpan.style.color = '#27ae60';
-                            updateGitHubStatus(true, 'Terkoneksi');
-                        } else {
-                            githubStatusSpan.textContent = 'Belum dikonfigurasi';
-                            githubStatusSpan.style.color = '#7f8c8d';
-                            updateGitHubStatus(false, 'Tidak terkoneksi');
+            // Fungsi untuk memuat konfigurasi GitHub dari IndexedDB
+            async function loadGithubConfig() {
+                try {
+                    const transaction = db.transaction([CONFIG_STORE], 'readonly');
+                    const store = transaction.objectStore(CONFIG_STORE);
+                    const request = store.get('githubConfig');
+                    
+                    request.onsuccess = () => {
+                        if (request.result) {
+                            githubConfig = request.result.data;
+                            
+                            document.getElementById('githubUsername').value = githubConfig.username || '';
+                            document.getElementById('githubRepo').value = githubConfig.repo || '';
+                            document.getElementById('githubToken').value = githubConfig.token || '';
+                            document.getElementById('dataFilePath').value = githubConfig.dataFilePath || 'SamsoniteData.json';
+                            autoSyncToggle.checked = githubConfig.autoSync !== false;
+                            autoSyncInterval.value = githubConfig.autoSyncInterval || 1;
+                            
+                            if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                                githubStatusSpan.textContent = 'Terkonfigurasi';
+                                githubStatusSpan.style.color = '#27ae60';
+                                updateGitHubStatus(true, 'Terkoneksi');
+                            } else {
+                                githubStatusSpan.textContent = 'Belum dikonfigurasi';
+                                githubStatusSpan.style.color = '#7f8c8d';
+                                updateGitHubStatus(false, 'Tidak terkoneksi');
+                            }
                         }
-                    } catch (e) {
-                        console.error('Error parsing GitHub config:', e);
-                        showNotification('Error memuat konfigurasi GitHub', 'error');
-                    }
+                    };
+                } catch (e) {
+                    console.error('Error loading GitHub config:', e);
+                    showNotification('Error memuat konfigurasi GitHub', 'error');
                 }
             }
 
@@ -3152,7 +3306,7 @@
             }
 
             // Fungsi untuk menyimpan perubahan data
-            function saveEditedData(e) {
+            async function saveEditedData(e) {
                 e.preventDefault();
                 
                 if (currentEditingIndex === -1) return;
@@ -3170,7 +3324,7 @@
                 
                 // Update data lokal
                 scannedData[currentEditingIndex] = updatedData;
-                saveToLocalStorage();
+                await saveDataToStore(SCANNED_STORE, updatedData);
                 
                 // Update status berdasarkan kondisi pallet
                 updateDataStatus();
@@ -3183,7 +3337,7 @@
             }
 
             // Fungsi untuk menghapus data yang dipilih
-            function deleteSelectedData() {
+            async function deleteSelectedData() {
                 const checkboxes = document.querySelectorAll('.data-checkbox:checked');
                 
                 if (checkboxes.length === 0) {
@@ -3207,15 +3361,14 @@
                 // Tambahkan ID data yang dihapus ke daftar deletedDataIds
                 for (const index of indexesToDelete) {
                     deletedDataIds.push(scannedData[index].id);
+                    await saveDataToStore(DELETED_STORE, { id: scannedData[index].id });
                 }
                 
                 // Hapus data dari array
                 for (const index of indexesToDelete) {
+                    await deleteDataFromStore(SCANNED_STORE, scannedData[index].id);
                     scannedData.splice(index, 1);
                 }
-                
-                // Simpan perubahan lokal
-                saveToLocalStorage();
                 
                 // Update status berdasarkan kondisi pallet
                 updateDataStatus();
@@ -3276,22 +3429,37 @@
 
             // ========== FUNGSI TAMBAHAN YANG DIPERBAIKI ==========
 
-            // Fungsi untuk render tabel data
-            function renderTable() {
+            // Fungsi untuk render tabel data dengan pagination
+            async function renderTable() {
                 if (!tableBody) return;
                 
                 tableBody.innerHTML = '';
                 
                 if (scannedData.length === 0) {
                     if (emptyState) emptyState.classList.remove('hidden');
+                    if (paginationControls) paginationControls.classList.add('hidden');
                     return;
                 }
                 
                 if (emptyState) emptyState.classList.add('hidden');
+                if (paginationControls) paginationControls.classList.remove('hidden');
                 
-                // Render data ke tabel
-                scannedData.forEach((item, index) => {
-                    addTableRow(item, index);
+                // Hitung pagination
+                const totalItems = scannedData.length;
+                const totalPages = Math.ceil(totalItems / rowsPerPage);
+                const startIndex = (currentPage - 1) * rowsPerPage;
+                const endIndex = Math.min(startIndex + rowsPerPage, totalItems);
+                
+                // Update pagination controls
+                if (prevPageBtn) prevPageBtn.disabled = currentPage === 1;
+                if (nextPageBtn) nextPageBtn.disabled = currentPage === totalPages;
+                if (pageInfo) pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+                
+                // Render data untuk halaman saat ini
+                const dataToRender = scannedData.slice(startIndex, endIndex);
+                
+                dataToRender.forEach((item, index) => {
+                    addTableRow(item, startIndex + index);
                 });
             }
 
@@ -3360,16 +3528,15 @@
             }
 
             // Fungsi untuk menghapus data individual
-            function deleteData(index) {
+            async function deleteData(index) {
                 if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
                     // Tambahkan ID data yang dihapus ke daftar deletedDataIds
                     deletedDataIds.push(scannedData[index].id);
+                    await saveDataToStore(DELETED_STORE, { id: scannedData[index].id });
                     
-                    // Hapus data dari array
+                    // Hapus data dari array dan IndexedDB
+                    await deleteDataFromStore(SCANNED_STORE, scannedData[index].id);
                     scannedData.splice(index, 1);
-                    
-                    // Simpan perubahan lokal
-                    saveToLocalStorage();
                     
                     // Update status berdasarkan kondisi pallet
                     updateDataStatus();
@@ -3382,7 +3549,7 @@
             }
 
             // Fungsi untuk render tabel master data
-            function renderMasterTable() {
+            async function renderMasterTable() {
                 if (!masterTableBody) return;
                 
                 masterTableBody.innerHTML = '';
@@ -3459,7 +3626,7 @@
             }
 
             // Fungsi untuk menyimpan perubahan master data
-            function saveEditedMasterData(e) {
+            async function saveEditedMasterData(e) {
                 e.preventDefault();
                 
                 const index = parseInt(editMasterIndexInput.value);
@@ -3475,7 +3642,7 @@
                 
                 // Update data master
                 masterData[index] = updatedData;
-                saveToLocalStorage();
+                await saveDataToStore(MASTER_STORE, updatedData);
                 
                 // Update status data yang terkait
                 updateDataStatus();
@@ -3487,7 +3654,7 @@
             }
 
             // Fungsi untuk menambah master data
-            function addMasterData(e) {
+            async function addMasterData(e) {
                 e.preventDefault();
                 
                 const ean = masterEanInput.value.trim();
@@ -3506,15 +3673,17 @@
                 }
                 
                 // Tambahkan data master baru
-                masterData.push({
+                const newMasterData = {
                     ean,
                     sku,
                     description,
                     timestamp: new Date().toISOString()
-                });
+                };
                 
-                // Simpan ke localStorage
-                saveToLocalStorage();
+                masterData.push(newMasterData);
+                
+                // Simpan ke IndexedDB
+                await saveDataToStore(MASTER_STORE, newMasterData);
                 
                 // Update status data yang terkait
                 updateDataStatus();
@@ -3529,13 +3698,11 @@
             }
 
             // Fungsi untuk menghapus master data
-            function deleteMasterData(index) {
+            async function deleteMasterData(index) {
                 if (confirm('Apakah Anda yakin ingin menghapus data master ini?')) {
-                    // Hapus data dari array
+                    // Hapus data dari array dan IndexedDB
+                    await deleteDataFromStore(MASTER_STORE, masterData[index].ean);
                     masterData.splice(index, 1);
-                    
-                    // Simpan perubahan lokal
-                    saveToLocalStorage();
                     
                     // Update data status yang terkait
                     updateDataStatus();
@@ -3546,7 +3713,7 @@
             }
 
             // Fungsi untuk menghapus master data yang dipilih
-            function deleteSelectedMasterData() {
+            async function deleteSelectedMasterData() {
                 const checkboxes = document.querySelectorAll('#masterTableBody .data-checkbox:checked');
                 
                 if (checkboxes.length === 0) {
@@ -3563,13 +3730,11 @@
                     .map(checkbox => parseInt(checkbox.dataset.index))
                     .sort((a, b) => b - a);
                 
-                // Hapus data dari array
+                // Hapus data dari array dan IndexedDB
                 for (const index of indexesToDelete) {
+                    await deleteDataFromStore(MASTER_STORE, masterData[index].ean);
                     masterData.splice(index, 1);
                 }
-                
-                // Simpan perubahan lokal
-                saveToLocalStorage();
                 
                 // Update data status yang terkait
                 updateDataStatus();
@@ -3678,8 +3843,8 @@
                 // Atur tampilan berdasarkan jenis user
                 setUserView();
                 
-                // Muat data dari local storage
-                loadFromStorage();
+                // Muat data dari IndexedDB
+                loadAllData();
                 
                 // Setup auto sync
                 setupAutoSync();
@@ -3798,178 +3963,101 @@
                     if (currentPalletSpan) currentPalletSpan.textContent = 'Belum dipilih';
                     if (currentContainerSpan) currentContainerSpan.textContent = 'Belum dipilih';
                     if (currentCustomerSpan) currentCustomerSpan.textContent = 'Belum dipilih';
-                    if (palletInput) palletInput.value = '';
-                    if (containerInput) containerInput.value = '';
-                    if (customerSelect) customerSelect.value = '';
+                    
+                    // Reset form
+                    form.reset();
+                    qtyInput.value = 1;
+                    
                     toggleEanInput();
+                    
+                    // Update summary
+                    updateTotalEan();
+                    updateTotalContainer();
                 });
             }
             
+            // Event listener untuk tombol Save Pallet
             if (savePalletBtn) {
                 savePalletBtn.addEventListener('click', function() {
                     const pallet = palletInput.value.trim();
+                    
                     if (!pallet) {
-                        showNotification('Harap masukkan Pallet ID!', 'error');
+                        showNotification('Harap isi pallet ID!', 'error');
+                        return;
                     }
                     
                     currentPallet = pallet;
                     if (currentPalletSpan) currentPalletSpan.textContent = pallet;
-                    showNotification(`Pallet ID diatur menjadi: ${pallet}`);
-                    updateTotalEan();
-                    updateTotalContainer();
                     toggleEanInput();
+                    showNotification(`Pallet ID "${pallet}" berhasil disimpan!`);
                 });
             }
             
+            // Event listener untuk tombol Save Container
             if (saveContainerBtn) {
                 saveContainerBtn.addEventListener('click', function() {
                     const container = containerInput.value.trim();
+                    
                     if (!container) {
-                        showNotification('Harap masukkan No. Container!', 'error');
+                        showNotification('Harap isi no. container!', 'error');
+                        return;
                     }
                     
                     currentContainer = container;
                     if (currentContainerSpan) currentContainerSpan.textContent = container;
-                    showNotification(`No. Container diatur menjadi: ${container}`);
-                    
-                    // Reset total container ketika container diganti
-                    updateTotalContainer();
-                    updateTotalEan();
                     toggleEanInput();
+                    showNotification(`Container "${container}" berhasil disimpan!`);
                 });
             }
             
-            // Event listener untuk tombol export
+            // Event listener untuk tombol Export Selected
             if (exportSelectedBtn) {
                 exportSelectedBtn.addEventListener('click', exportToExcel);
             }
             
-            // Event listener untuk tombol export master data
-            if (exportMasterBtn) {
-                exportMasterBtn.addEventListener('click', exportMasterToExcel);
-            }
-            
-            // Event listener untuk perubahan dropdown user
-            if (userSelect) {
-                userSelect.addEventListener('change', function() {
-                    updateContainerDropdown();
-                });
-            }
-            
+            // Event listener untuk tombol Logout
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', logout);
             }
             
-            // Event listener untuk tekan Enter pada input username
-            if (usernameInput) {
-                usernameInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleLogin();
-                    }
-                });
-            }
-            
-            // Event listener untuk tab
+            // Event listener untuk tab navigation
             tabs.forEach(tab => {
                 tab.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-tab');
+                    const tabName = this.getAttribute('data-tab');
                     
-                    // Reset filter saat berpindah tab
-                    isFilterActive = false;
-                    dashboardFilterActive = false;
-                    
-                    // Jika tab GitHub diklik dan user bukan admin
-                    if (tabId === 'github' && !isAdmin) {
-                        showNotification('Hanya admin yang dapat mengakses menu GitHub Config!', 'error');
-                        return;
-                    }
-                    
-                    // Hapus kelas active dari semua tab dan konten
+                    // Update tab aktif
                     tabs.forEach(t => t.classList.remove('active'));
                     tabContents.forEach(c => c.classList.remove('active'));
                     
-                    // Tambahkan kelas active ke tab yang diklik
                     this.classList.add('active');
+                    document.getElementById(tabName + 'Tab').classList.add('active');
                     
-                    // Tampilkan konten yang sesuai
-                    document.getElementById(`${tabId}Tab`).classList.add('active');
-                    
-                    // Jika dashboard tab diklik, update summary
-                    if (tabId === 'dashboard') {
-                        updateDashboardSummary();
-                    }
-                    
-                    // Jika master data tab diklik, render master table
-                    if (tabId === 'master') {
-                        renderMasterTable();
-                    }
-                    
-                    // Jika hasil input scan tab diklik, render table normal
-                    if (tabId === 'scanResult') {
+                    // Update data saat beralih tab
+                    if (tabName === 'scanResult') {
                         renderTable();
+                    } else if (tabName === 'dashboard') {
+                        updateDashboardSummary();
+                    } else if (tabName === 'master') {
+                        renderMasterTable();
                     }
                 });
             });
             
-            // Event listener untuk tombol simpan konfigurasi GitHub
-            if (saveGithubConfigBtn) {
-                saveGithubConfigBtn.addEventListener('click', saveGithubConfig);
-            }
-            
-            // Event listener untuk tombol test koneksi GitHub
-            if (testGithubConnectionBtn) {
-                testGithubConnectionBtn.addEventListener('click', testGitHubConnection);
-            }
-            
             // Event listener untuk modal edit
-            if (closeModalBtn) {
-                closeModalBtn.addEventListener('click', hideEditModal);
-            }
-            
-            if (cancelEditBtn) {
-                cancelEditBtn.addEventListener('click', hideEditModal);
-            }
-            
-            if (editForm) {
-                editForm.addEventListener('submit', saveEditedData);
-            }
-            
-            // Tutup modal ketika klik di luar konten modal
-            if (editModal) {
-                editModal.addEventListener('click', function(e) {
-                    if (e.target === editModal) {
-                        hideEditModal();
-                    }
-                });
-            }
+            if (closeModalBtn) closeModalBtn.addEventListener('click', hideEditModal);
+            if (cancelEditBtn) cancelEditBtn.addEventListener('click', hideEditModal);
+            if (editForm) editForm.addEventListener('submit', saveEditedData);
             
             // Event listener untuk modal edit master data
-            if (closeMasterModalBtn) {
-                closeMasterModalBtn.addEventListener('click', hideEditMasterModal);
-            }
-            
-            if (cancelMasterEditBtn) {
-                cancelMasterEditBtn.addEventListener('click', hideEditMasterModal);
-            }
-            
-            if (editMasterForm) {
-                editMasterForm.addEventListener('submit', saveEditedMasterData);
-            }
-            
-            // Tutup modal ketika klik di luar konten modal
-            if (editMasterModal) {
-                editMasterModal.addEventListener('click', function(e) {
-                    if (e.target === editMasterModal) {
-                        hideEditMasterModal();
-                    }
-                });
-            }
+            if (closeMasterModalBtn) closeMasterModalBtn.addEventListener('click', hideEditMasterModal);
+            if (cancelMasterEditBtn) cancelMasterEditBtn.addEventListener('click', hideEditMasterModal);
+            if (editMasterForm) editMasterForm.addEventListener('submit', saveEditedMasterData);
             
             // Event listener untuk form master data
-            if (masterDataForm) {
-                masterDataForm.addEventListener('submit', addMasterData);
-            }
+            if (masterDataForm) masterDataForm.addEventListener('submit', addMasterData);
+            
+            // Event listener untuk tombol export master data
+            if (exportMasterBtn) exportMasterBtn.addEventListener('click', exportMasterToExcel);
             
             // Event listener untuk select all checkbox
             if (selectAllCheckbox) {
@@ -3986,16 +4074,6 @@
                 deleteSelectedBtn.addEventListener('click', deleteSelectedData);
             }
             
-            // Event listener untuk tombol push ke GitHub
-            if (pushButton) {
-                pushButton.addEventListener('click', pushToGithub);
-            }
-            
-            // Event listener untuk tombol pull dari GitHub
-            if (pullButton) {
-                pullButton.addEventListener('click', pullFromGithub);
-            }
-            
             // Event listener untuk select all checkbox master data
             if (selectAllMasterCheckbox) {
                 selectAllMasterCheckbox.addEventListener('change', function() {
@@ -4010,7 +4088,66 @@
             if (deleteSelectedMasterBtn) {
                 deleteSelectedMasterBtn.addEventListener('click', deleteSelectedMasterData);
             }
-
+            
+            // Event listener untuk tombol push ke GitHub
+            if (pushButton) {
+                pushButton.addEventListener('click', pushToGithub);
+            }
+            
+            // Event listener untuk tombol pull dari GitHub
+            if (pullButton) {
+                pullButton.addEventListener('click', pullFromGithub);
+            }
+            
+            // Event listener untuk tombol save GitHub config
+            if (saveGithubConfigBtn) {
+                saveGithubConfigBtn.addEventListener('click', saveGithubConfig);
+            }
+            
+            // Event listener untuk tombol test GitHub connection
+            if (testGithubConnectionBtn) {
+                testGithubConnectionBtn.addEventListener('click', testGitHubConnection);
+            }
+            
+            // Event listener untuk perubahan auto sync settings
+            if (autoSyncToggle) {
+                autoSyncToggle.addEventListener('change', function() {
+                    githubConfig.autoSync = this.checked;
+                    if (this.checked) {
+                        setupAutoSync();
+                    } else {
+                        stopAutoSync();
+                    }
+                });
+            }
+            
+            if (autoSyncInterval) {
+                autoSyncInterval.addEventListener('change', function() {
+                    githubConfig.autoSyncInterval = parseInt(this.value) || 1;
+                    setupAutoSync();
+                });
+            }
+            
+            // Event listener untuk pagination
+            if (prevPageBtn) {
+                prevPageBtn.addEventListener('click', function() {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderTable();
+                    }
+                });
+            }
+            
+            if (nextPageBtn) {
+                nextPageBtn.addEventListener('click', function() {
+                    const totalPages = Math.ceil(scannedData.length / rowsPerPage);
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderTable();
+                    }
+                });
+            }
+            
             // Event listener untuk filter
             if (applyFilterBtn) {
                 applyFilterBtn.addEventListener('click', filterData);
@@ -4028,38 +4165,213 @@
             if (resetDashboardFilterBtn) {
                 resetDashboardFilterBtn.addEventListener('click', resetDashboardFilter);
             }
-
-            // ========== INISIALISASI APLIKASI ==========
-
-            // Inisialisasi aplikasi
-            function init() {
-                // Setup mobile menu
-                setupMobileMenu();
-                
-                // Muat konfigurasi GitHub
-                loadGithubConfig();
-                
-                // Muat data dari local storage
-                loadFromStorage();
-                
-                // Update status sinkronisasi UI
-                updateSyncStatusUI();
-                
-                // Update waktu sync terakhir
-                updateLastSyncTime();
-                
-                // Setup auto sync
-                setupAutoSync();
-                
-                // Tampilkan form login
-                toggleMainContent(false);
-                
-                // Fokus ke input username
-                usernameInput.focus();
+            
+            // Event listener untuk dropdown user
+            if (userSelect) {
+                userSelect.addEventListener('change', updateContainerDropdown);
             }
             
-            // Jalankan inisialisasi
-            init();
+            // Event listener untuk tombol upload master data
+            if (uploadMasterBtn) {
+                uploadMasterBtn.addEventListener('click', function() {
+                    uploadMasterModal.style.display = 'flex';
+                });
+            }
+            
+            // Event listener untuk modal upload master data
+            if (closeUploadMasterModalBtn) {
+                closeUploadMasterModalBtn.addEventListener('click', function() {
+                    uploadMasterModal.style.display = 'none';
+                    masterFileInput.value = '';
+                    fileNameSpan.textContent = 'Belum ada file dipilih';
+                    processUploadBtn.disabled = true;
+                });
+            }
+            
+            if (cancelUploadMasterBtn) {
+                cancelUploadMasterBtn.addEventListener('click', function() {
+                    uploadMasterModal.style.display = 'none';
+                    masterFileInput.value = '';
+                    fileNameSpan.textContent = 'Belum ada file dipilih';
+                    processUploadBtn.disabled = true;
+                });
+            }
+            
+            // Event listener untuk file input
+            if (masterFileInput) {
+                masterFileInput.addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        fileNameSpan.textContent = this.files[0].name;
+                        processUploadBtn.disabled = false;
+                    } else {
+                        fileNameSpan.textContent = 'Belum ada file dipilih';
+                        processUploadBtn.disabled = true;
+                    }
+                });
+            }
+            
+            // Event listener untuk tombol process upload
+            if (processUploadBtn) {
+                processUploadBtn.addEventListener('click', async function() {
+                    const file = masterFileInput.files[0];
+                    if (!file) {
+                        showNotification('Pilih file terlebih dahulu!', 'error');
+                        return;
+                    }
+                    
+                    try {
+                        const data = await readExcelFile(file);
+                        await processMasterDataFromExcel(data);
+                        uploadMasterModal.style.display = 'none';
+                        masterFileInput.value = '';
+                        fileNameSpan.textContent = 'Belum ada file dipilih';
+                        processUploadBtn.disabled = true;
+                    } catch (error) {
+                        showNotification('Error memproses file: ' + error.message, 'error');
+                    }
+                });
+            }
+            
+            // ========== FUNGSI TAMBAHAN UNTUK UPLOAD MASTER DATA ==========
+            
+            // Fungsi untuk membaca file Excel
+            function readExcelFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        try {
+                            const data = new Uint8Array(e.target.result);
+                            const workbook = XLSX.read(data, { type: 'array' });
+                            
+                            // Ambil sheet pertama
+                            const firstSheetName = workbook.SheetNames[0];
+                            const worksheet = workbook.Sheets[firstSheetName];
+                            
+                            // Konversi ke JSON
+                            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: ['ean', 'sku', 'description'] });
+                            
+                            resolve(jsonData);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    };
+                    
+                    reader.onerror = function() {
+                        reject(new Error('Gagal membaca file'));
+                    };
+                    
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+            
+            // Fungsi untuk memproses data master dari Excel
+            async function processMasterDataFromExcel(data) {
+                // Lewati baris pertama (header)
+                const rows = data.slice(1);
+                
+                let successCount = 0;
+                let errorCount = 0;
+                
+                for (const row of rows) {
+                    const ean = row.ean ? row.ean.toString().trim() : '';
+                    const sku = row.sku ? row.sku.toString().trim() : '';
+                    const description = row.description ? row.description.toString().trim() : '';
+                    
+                    // Skip jika EAN kosong
+                    if (!ean) {
+                        errorCount++;
+                        continue;
+                    }
+                    
+                    // Cek apakah EAN sudah ada
+                    const existingIndex = masterData.findIndex(item => item.ean === ean);
+                    
+                    if (existingIndex >= 0) {
+                        // Update data yang sudah ada
+                        masterData[existingIndex] = {
+                            ...masterData[existingIndex],
+                            sku,
+                            description,
+                            timestamp: new Date().toISOString()
+                        };
+                    } else {
+                        // Tambah data baru
+                        masterData.push({
+                            ean,
+                            sku,
+                            description,
+                            timestamp: new Date().toISOString()
+                        });
+                    }
+                    
+                    successCount++;
+                }
+                
+                // Simpan ke IndexedDB
+                await saveDataToStore(MASTER_STORE, masterData);
+                
+                // Update status data yang terkait
+                updateDataStatus();
+                
+                // Update UI
+                renderMasterTable();
+                
+                showNotification(`Upload selesai: ${successCount} data berhasil diproses, ${errorCount} error`);
+            }
+            
+            // ========== INISIALISASI APLIKASI ==========
+            
+            // Fungsi untuk inisialisasi aplikasi
+            async function initializeApp() {
+                try {
+                    // Buka koneksi IndexedDB
+                    db = await openDatabase();
+                    console.log('IndexedDB berhasil dibuka');
+                    
+                    // Muat data dari IndexedDB
+                    await loadAllData();
+                    
+                    // Muat konfigurasi GitHub
+                    await loadGithubConfig();
+                    
+                    // Setup mobile menu
+                    setupMobileMenu();
+                    
+                    // Set default tanggal untuk filter
+                    const today = new Date();
+                    const oneWeekAgo = new Date();
+                    oneWeekAgo.setDate(today.getDate() - 7);
+                    
+                    if (dateFromInput) {
+                        dateFromInput.valueAsDate = oneWeekAgo;
+                    }
+                    
+                    if (dateToInput) {
+                        dateToInput.valueAsDate = today;
+                    }
+                    
+                    // Set default tanggal untuk dashboard filter
+                    if (dashboardDateFrom) {
+                        dashboardDateFrom.valueAsDate = oneWeekAgo;
+                    }
+                    
+                    if (dashboardDateTo) {
+                        dashboardDateTo.valueAsDate = today;
+                    }
+                    
+                    // Update dashboard summary
+                    updateDashboardSummary();
+                    
+                    console.log('Aplikasi berhasil diinisialisasi');
+                } catch (error) {
+                    console.error('Error inisialisasi aplikasi:', error);
+                    showNotification('Error inisialisasi aplikasi: ' + error.message, 'error');
+                }
+            }
+            
+            // Mulai inisialisasi aplikasi
+            initializeApp();
         });
     </script>
 </body>
