@@ -83919,6 +83919,70 @@
       "date": "2025-10-10",
       "version": 1,
       "lastModified": "2025-10-10T01:17:04.947Z"
+    },
+    {
+      "id": "mgk5rz9j-t929sfvwh-Muh",
+      "customer": "Samsonite",
+      "pallet": "DID2510021660",
+      "container": "TCNU3786666",
+      "ean": "5400520295217",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-10T01:19:14.503Z",
+      "user": "Muhdi",
+      "date": "2025-10-10",
+      "version": 1,
+      "lastModified": "2025-10-10T01:19:14.503Z"
+    },
+    {
+      "id": "mgk5s39u-06f93nl6q-Muh",
+      "customer": "Samsonite",
+      "pallet": "DID2510021660",
+      "container": "TCNU3786666",
+      "ean": "5400520295217",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-10T01:19:19.698Z",
+      "user": "Muhdi",
+      "date": "2025-10-10",
+      "version": 1,
+      "lastModified": "2025-10-10T01:19:19.698Z"
+    },
+    {
+      "id": "mgk5s878-uvgguv4ka-Muh",
+      "customer": "Samsonite",
+      "pallet": "DID2510021660",
+      "container": "TCNU3786666",
+      "ean": "5400520295217",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-10T01:19:26.084Z",
+      "user": "Muhdi",
+      "date": "2025-10-10",
+      "version": 1,
+      "lastModified": "2025-10-10T01:19:26.084Z"
+    },
+    {
+      "id": "mgk5sc1g-irrd1vz5a-Muh",
+      "customer": "Samsonite",
+      "pallet": "DID2510021660",
+      "container": "TCNU3786666",
+      "ean": "5400520295217",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-10T01:19:31.060Z",
+      "user": "Muhdi",
+      "date": "2025-10-10",
+      "version": 1,
+      "lastModified": "2025-10-10T01:19:31.060Z"
     }
   ],
   "masterData": [
@@ -84081,5 +84145,5 @@
     "mghqjxvrd0awj",
     "mghqjyfpho368"
   ],
-  "lastUpdated": "2025-10-10T01:18:12.322Z"
+  "lastUpdated": "2025-10-10T01:19:53.640Z"
 }
