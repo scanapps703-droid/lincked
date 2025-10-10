@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* CSS styles tetap sama seperti sebelumnya */
+        /* CSS styles - tetap sama seperti sebelumnya */
         :root {
             --spark-primary: #3490dc;
             --spark-primary-dark: #2779bd;
@@ -1700,7 +1700,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Variabel dan inisialisasi
+            // ========== VARIABEL GLOBAL ==========
             const form = document.getElementById('dataForm');
             const loginForm = document.getElementById('loginForm');
             const customerSelect = document.getElementById('customer');
@@ -1841,6 +1841,7 @@
             const applyDashboardFilterBtn = document.getElementById('applyDashboardFilterBtn');
             const resetDashboardFilterBtn = document.getElementById('resetDashboardFilterBtn');
             
+            // Variabel global
             let currentPallet = '';
             let currentContainer = '';
             let currentCustomer = '';
@@ -1876,7 +1877,7 @@
                 autoSyncInterval: 1
             };
 
-            // ========== FUNGSI-FUNGSI YANG DIPERBAIKI ==========
+            // ========== FUNGSI UTAMA YANG DIPERBAIKI ==========
 
             // Fungsi untuk memperbarui status data berdasarkan kondisi pallet
             function updateDataStatus() {
@@ -2168,462 +2169,150 @@
                 }
             }
 
-            // ========== FUNGSI-FUNGSI UTAMA ==========
-            
+            // ========== FUNGSI SINCRONISASI YANG DIPERBAIKI ==========
+
             // Fungsi untuk generate ID unik untuk setiap data
             function generateId() {
                 // Menggunakan timestamp + random number + user identifier untuk memastikan unik di semua perangkat
                 const timestamp = Date.now().toString(36);
                 const random = Math.random().toString(36).substr(2, 9);
-                const userPart = currentUser ? currentUser.substr(0, 3) : 'usr';
+                const userPart = currentUser ? currentUser.substr(0, 3).toLowerCase() : 'usr';
                 return `${timestamp}-${random}-${userPart}`;
             }
-            
-            // Fungsi untuk menampilkan/menyembunyikan konten utama
-            function toggleMainContent(show) {
-                try {
-                    if (show) {
-                        loginContainer.style.display = 'none';
-                        mainContainer.style.display = 'flex';
-                        // Setelah login, fokuskan ke input customer
-                        setTimeout(() => {
-                            customerSelect.focus();
-                        }, 100);
-                    } else {
-                        loginContainer.style.display = 'flex';
-                        mainContainer.style.display = 'none';
-                        // Reset ke form login, fokuskan ke input username
-                        usernameInput.focus();
+
+            // Fungsi untuk memperbaiki data yang rusak
+            function repairDataIntegrity() {
+                console.log('Memperbaiki integritas data...');
+                
+                // Perbaiki scannedData
+                scannedData = scannedData.filter(item => item && typeof item === 'object');
+                scannedData.forEach(item => {
+                    if (!item.id) item.id = generateId();
+                    if (!item.version) item.version = 1;
+                    if (!item.lastModified) item.lastModified = item.timestamp || new Date().toISOString();
+                    if (!item.customer) item.customer = 'Samsonite';
+                });
+                
+                // Perbaiki masterData
+                masterData = masterData.filter(item => item && typeof item === 'object' && item.ean);
+                
+                // Perbaiki deletedDataIds
+                deletedDataIds = deletedDataIds.filter(id => id && typeof id === 'string');
+                
+                // Hapus duplikat berdasarkan ID
+                const uniqueScannedData = [];
+                const idMap = new Map();
+                
+                scannedData.forEach(item => {
+                    if (!idMap.has(item.id)) {
+                        idMap.set(item.id, true);
+                        uniqueScannedData.push(item);
                     }
-                } catch (error) {
-                    console.error('Error in toggleMainContent:', error);
-                    // Fallback: Tampilkan login container jika ada error
-                    loginContainer.style.display = 'flex';
-                    mainContainer.style.display = 'none';
-                }
-            }
-            
-            // Fungsi untuk toggle menu pada perangkat mobile
-            function setupMobileMenu() {
-                if (mobileMenuBtn) {
-                    mobileMenuBtn.addEventListener('click', function() {
-                        sidebar.classList.toggle('collapsed');
-                    });
-                }
-            }
-            
-            // Fungsi untuk mengecek apakah user adalah admin
-            function checkIfAdmin(username) {
-                return username.toLowerCase() === 'admin';
-            }
-            
-            // Fungsi untuk mengatur tampilan berdasarkan jenis user
-            function setUserView() {
-                if (isAdmin) {
-                    userTypeBadge.textContent = '(Admin)';
-                    userTypeBadge.classList.remove('hidden');
-                    userTypeBadge.style.backgroundColor = '#e74c3c';
-                    userTypeBadge.style.color = 'white';
-                    userTypeBadge.style.padding = '3px 8px';
-                    userTypeBadge.style.borderRadius = '4px';
-                    userTypeBadge.style.fontSize = '12px';
-                    userTypeBadge.style.marginLeft = '5px';
-                    
-                    if (adminInterface) adminInterface.classList.remove('hidden');
-                    
-                    // Tampilkan export controls untuk admin
-                    const exportControls = document.getElementById('exportControls');
-                    if (exportControls) exportControls.classList.remove('hidden');
-                    
-                    // Tampilkan container tombol delete selected
-                    if (deleteSelectedContainer) deleteSelectedContainer.classList.remove('hidden');
-                    
-                    // Tampilkan container tombol delete selected untuk master data
-                    if (deleteSelectedMasterContainer) deleteSelectedMasterContainer.classList.remove('hidden');
-                } else {
-                    userTypeBadge.textContent = '(User)';
-                    userTypeBadge.classList.remove('hidden');
-                    userTypeBadge.style.backgroundColor = '#3498db';
-                    userTypeBadge.style.color = 'white';
-                    userTypeBadge.style.padding = '3px 8px';
-                    userTypeBadge.style.borderRadius = '4px';
-                    userTypeBadge.style.fontSize = '12px';
-                    userTypeBadge.style.marginLeft = '5px';
-                    
-                    if (adminInterface) adminInterface.classList.remove('hidden');
-                    
-                    // Sembunyikan export controls untuk user biasa
-                    const exportControls = document.getElementById('exportControls');
-                    if (exportControls) exportControls.classList.add('hidden');
-                    
-                    // Sembunyikan container tombol delete selected
-                    if (deleteSelectedContainer) deleteSelectedContainer.classList.add('hidden');
-                    
-                    // Sembunyikan container tombol delete selected untuk master data
-                    if (deleteSelectedMasterContainer) deleteSelectedMasterContainer.classList.add('hidden');
-                }
-            }
-            
-            // Fungsi untuk mengaktifkan/menonaktifkan input EAN
-            function toggleEanInput() {
-                if (currentPallet && currentContainer && currentCustomer) {
-                    eanInput.disabled = false;
-                    qtyInput.disabled = false;
-                    if (eanHelpText) eanHelpText.style.display = 'none';
-                    eanInput.focus();
-                } else {
-                    eanInput.disabled = true;
-                    qtyInput.disabled = true;
-                    if (eanHelpText) eanHelpText.style.display = 'block';
-                }
-            }
-            
-            // Fungsi untuk mencari data master berdasarkan EAN
-            function findMasterData(ean) {
-                return masterData.find(item => item.ean === ean);
-            }
-            
-            // Fungsi untuk memperbarui tampilan status sinkronisasi
-            function updateSyncStatusUI() {
-                // Sederhanakan UI status sinkronisasi
-                if (syncStatus) syncStatus.classList.add('hidden');
-                if (pendingSyncList) pendingSyncList.classList.add('hidden');
+                });
                 
-                // Perbarui status GitHub
-                if (githubConfig.username && githubConfig.repo && githubConfig.token) {
-                    updateGitHubStatus(true, 'Terkoneksi');
-                } else {
-                    updateGitHubStatus(false, 'Tidak terkoneksi');
-                }
-            }
-            
-            // Fungsi untuk menyimpan data (hanya ke local storage)
-            function saveData() {
-                if (isSaving) return;
+                scannedData = uniqueScannedData;
                 
-                const ean = eanInput.value.trim();
-                const qty = qtyInput.value;
-                
-                if (!currentCustomer) {
-                    showNotification('Harap pilih customer terlebih dahulu!', 'error');
-                    return;
-                }
-                
-                if (!currentPallet) {
-                    showNotification('Harap set pallet terlebih dahulu!', 'error');
-                    return;
-                }
-                
-                if (!currentContainer) {
-                    showNotification('Harap set container terlebih dahulu!', 'error');
-                    return;
-                }
-                
-                if (!ean) {
-                    showNotification('Harap isi kode EAN!', 'error');
-                    return;
-                }
-                
-                isSaving = true;
-                
-                // Cari data master berdasarkan EAN
-                const masterItem = findMasterData(ean);
-                let sku = '';
-                let description = '';
-                let status = 'OK';
-                
-                if (masterItem) {
-                    sku = masterItem.sku;
-                    description = masterItem.description;
-                } else {
-                    status = 'Finding';
-                    showNotification('EAN tidak ditemukan di master data! Status: Finding', 'error');
-                }
-                
-                // Membuat timestamp
-                const now = new Date();
-                const timestamp = now.toISOString();
-                
-                const newData = {
-                    id: generateId(), // ID unik untuk setiap data
-                    customer: currentCustomer,
-                    pallet: currentPallet,
-                    container: currentContainer,
-                    ean,
-                    sku,
-                    description,
-                    status,
-                    qty,
-                    timestamp: timestamp,
-                    user: currentUser,
-                    date: now.toISOString().split('T')[0],
-                    version: 1, // Version untuk conflict resolution
-                    lastModified: timestamp // Waktu modifikasi terakhir
-                };
-                
-                // Simpan data ke array sementara
-                scannedData.push(newData);
-                
-                // Simpan ke localStorage
+                // Simpan perubahan
                 saveToLocalStorage();
                 
-                // Update status berdasarkan kondisi pallet
-                updateDataStatus();
-                
-                // Update UI
-                updateTotalEan();
-                updateTotalContainer();
-                
-                // Reset hanya input EAN dan Qty, biarkan pallet dan container tetap
-                eanInput.value = '';
-                qtyInput.value = 1;
-                skuInput.value = '';
-                descriptionInput.value = '';
-                statusInput.value = '';
-                
-                isSaving = false;
-                
-                showNotification('Data berhasil disimpan!');
+                console.log('Integritas data berhasil diperbaiki');
+                return true;
             }
-            
-            // Fungsi untuk menyimpan data ke localStorage
-            function saveToLocalStorage() {
-                const dataToSave = {
-                    scannedData: scannedData,
-                    masterData: masterData,
-                    deletedDataIds: deletedDataIds,
-                    lastUpdated: new Date().toISOString()
-                };
-                localStorage.setItem('appData', JSON.stringify(dataToSave));
-            }
-            
-            // Fungsi untuk memuat data dari local storage
-            function loadFromStorage() {
-                const savedData = localStorage.getItem('appData');
-                if (savedData) {
-                    try {
-                        const parsedData = JSON.parse(savedData);
-                        scannedData = parsedData.scannedData || [];
-                        masterData = parsedData.masterData || [];
-                        deletedDataIds = parsedData.deletedDataIds || [];
-                        
-                        // Pastikan semua data memiliki version dan lastModified
-                        scannedData.forEach(item => {
-                            if (!item.version) item.version = 1;
-                            if (!item.lastModified) item.lastModified = item.timestamp || new Date().toISOString();
-                            if (!item.customer) item.customer = 'Samsonite'; // Default value untuk data lama
-                        });
-                        
-                        // Update data status saat load
-                        updateDataStatus();
-                        
-                    } catch (e) {
-                        console.error('Error parsing data from localStorage:', e);
-                        scannedData = [];
-                        masterData = [];
-                        deletedDataIds = [];
-                        saveToLocalStorage();
-                    }
-                    populateFilterDropdowns();
-                    updateTotalContainer();
-                    renderTable();
-                    renderMasterTable();
-                    updateDashboardSummary(); // Pastikan dashboard diperbarui
-                }
-            }
-            
-            // Fungsi untuk logout
-            function logout() {
-                currentUser = 'Guest';
-                currentUserSpan.textContent = 'Guest';
-                isAdmin = false;
-                setUserView();
-                
-                // Hentikan auto sync
-                stopAutoSync();
-                
-                showNotification('Anda telah logout');
-                
-                // Reset form
-                form.reset();
-                qtyInput.value = 1;
-                currentPallet = '';
-                currentPalletSpan.textContent = 'Belum dipilih';
-                currentContainer = '';
-                currentContainerSpan.textContent = 'Belum dipilih';
-                currentCustomer = '';
-                currentCustomerSpan.textContent = 'Belum dipilih';
-                toggleEanInput();
-                
-                // Update status GitHub
-                updateGitHubStatus(false, 'Tidak terkoneksi');
-                
-                // Reset status push
-                updatePushStatus('idle', 'Idle');
-                
-                // Muat data dari local storage
-                loadFromStorage();
-                
-                // Tampilkan kembali form login
-                toggleMainContent(false);
-            }
-            
-            // Fungsi untuk mengisi dropdown filter
-            function populateFilterDropdowns() {
-                // Kosongkan dropdown
-                if (userSelect) userSelect.innerHTML = '<option value="">Pilih User</option>';
-                if (containerSelect) containerSelect.innerHTML = '<option value="">Pilih Container</option>';
-                
-                // Dapatkan nilai unik untuk setiap filter
-                const users = [...new Set(scannedData.map(item => item.user))];
-                
-                // Isi dropdown user
-                if (userSelect) {
-                    users.forEach(user => {
-                        const option = document.createElement('option');
-                        option.value = user;
-                        option.textContent = user;
-                        userSelect.appendChild(option);
-                    });
-                }
-                
-                // Update container dropdown berdasarkan user yang dipilih
-                updateContainerDropdown();
-            }
-            
-            // Fungsi untuk memperbarui dropdown container berdasarkan user yang dipilih
-            function updateContainerDropdown() {
-                const selectedUser = userSelect.value;
-                
-                // Kosongkan dropdown container
-                if (containerSelect) containerSelect.innerHTML = '<option value="">Pilih Container</option>';
-                
-                // Jika user dipilih, filter container berdasarkan user tersebut
-                if (selectedUser && containerSelect) {
-                    const userContainers = [...new Set(scannedData
-                        .filter(item => item.user === selectedUser && item.container)
-                        .map(item => item.container))];
-                    
-                    // Isi dropdown container
-                    userContainers.forEach(container => {
-                        const option = document.createElement('option');
-                        option.value = container;
-                        option.textContent = container;
-                        containerSelect.appendChild(option);
-                    });
-                }
-            }
-            
-            // Fungsi untuk export data ke Excel
-            function exportToExcel() {
-                const selectedUser = userSelect.value;
-                const selectedContainer = containerSelect.value;
-                const dateFrom = dateFromInput.value;
-                const dateTo = dateToInput.value;
-                
-                // Filter data berdasarkan pilihan
-                let filteredData = scannedData;
-                
-                // Jika admin, tampilkan semua data atau data user tertentu
-                // Jika bukan admin, hanya tampilkan data user tersebut
-                if (!isAdmin) {
-                    filteredData = filteredData.filter(item => item.user === currentUser);
-                } else if (selectedUser) {
-                    filteredData = filteredData.filter(item => item.user === selectedUser);
-                }
-                
-                if (selectedContainer) {
-                    filteredData = filteredData.filter(item => item.container === selectedContainer);
-                }
-                
-                // Filter berdasarkan tanggal
-                if (dateFrom) {
-                    filteredData = filteredData.filter(item => item.date >= dateFrom);
-                }
-                
-                if (dateTo) {
-                    filteredData = filteredData.filter(item => item.date <= dateTo);
-                }
-                
-                // Hanya tampilkan data yang memiliki No. Container
-                filteredData = filteredData.filter(item => item.container && item.container.trim() !== '');
-                
-                if (filteredData.length === 0) {
-                    showNotification('Tidak ada data untuk diekspor!', 'error');
-                    return;
-                }
-                
-                // Siapkan data untuk Excel
-                const excelData = filteredData.map(item => ({
-                    'Customer': item.customer,
-                    'No. Container': item.container,
-                    'Pallet ID': item.pallet,
-                    'EAN': item.ean,
-                    'SKU': item.sku,
-                    'Description': item.description,
-                    'Status': item.status,
-                    'Qty': item.qty,
-                    'Timestamp': item.timestamp,
-                    'User': item.user,
-                    'Date': item.date
-                }));
-                
-                // Buat worksheet
-                const ws = XLSX.utils.json_to_sheet(excelData);
-                
-                // Buat workbook
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, 'Data Scan');
-                
-                // Buat nama file
-                const fileName = `Data_Scan_${selectedUser || 'All'}_${selectedContainer || 'All'}_${new Date().getTime()}.xlsx`;
-                
-                // Export ke file Excel
-                XLSX.writeFile(wb, fileName);
-                
-                showNotification('Data berhasil diekspor ke Excel!');
-            }
-            
-            // Fungsi untuk export master data ke Excel
-            function exportMasterToExcel() {
-                if (masterData.length === 0) {
-                    showNotification('Tidak ada data master untuk diekspor!', 'error');
-                    return;
-                }
-                
-                // Siapkan data untuk Excel
-                const excelData = masterData.map(item => ({
-                    'EAN': item.ean,
-                    'SKU': item.sku,
-                    'Description': item.description
-                }));
-                
-                // Buat worksheet
-                const ws = XLSX.utils.json_to_sheet(excelData);
-                
-                // Buat workbook
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, 'Master Data');
-                
-                // Buat nama file
-                const fileName = `Master_Data_${new Date().getTime()}.xlsx`;
-                
-                // Export ke file Excel
-                XLSX.writeFile(wb, fileName);
-                
-                showNotification('Data master berhasil diekspor ke Excel!');
-            }
-            
-            // Fungsi untuk menguji koneksi GitHub
-            async function testGitHubConnection() {
+
+            // Fungsi untuk push data ke GitHub - DIPERBAIKI: dengan backup dan error handling yang lebih baik
+            async function pushToGithubForSync(dataToPush) {
                 if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    showNotification('Harap isi semua field konfigurasi GitHub!', 'error');
-                    updateGitHubStatus(false, 'Konfigurasi tidak lengkap');
-                    return false;
+                    throw new Error('GitHub configuration is incomplete');
                 }
                 
                 try {
-                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}`, {
+                    // Buat backup data sebelum push
+                    const backupData = {
+                        scannedData: [...scannedData],
+                        masterData: [...masterData],
+                        deletedDataIds: [...deletedDataIds],
+                        backupTime: new Date().toISOString()
+                    };
+                    localStorage.setItem('appDataBackup', JSON.stringify(backupData));
+                    
+                    // Konversi data ke format string
+                    const content = JSON.stringify(dataToPush, null, 2);
+                    const contentEncoded = btoa(unescape(encodeURIComponent(content)));
+                    
+                    // Cek apakah file sudah ada di GitHub
+                    const fileUrl = `https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`;
+                    const fileResponse = await fetch(fileUrl, {
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+                    
+                    let sha = null;
+                    if (fileResponse.ok) {
+                        const fileInfo = await fileResponse.json();
+                        sha = fileInfo.sha;
+                    } else if (fileResponse.status !== 404) {
+                        // Jika error selain "file not found", lempar error
+                        const error = await fileResponse.json();
+                        throw new Error(error.message || 'Gagal memeriksa file GitHub');
+                    }
+                    
+                    // Buat permintaan untuk mengupload file
+                    const response = await fetch(fileUrl, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: `Sync data dari ${currentUser} pada ${new Date().toISOString()}`,
+                            content: contentEncoded,
+                            sha: sha
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Gagal push data');
+                    }
+                    
+                    // Hapus backup setelah push berhasil
+                    localStorage.removeItem('appDataBackup');
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Error during push:', error);
+                    
+                    // Coba restore dari backup jika push gagal
+                    try {
+                        const backup = localStorage.getItem('appDataBackup');
+                        if (backup) {
+                            const backupData = JSON.parse(backup);
+                            scannedData = backupData.scannedData;
+                            masterData = backupData.masterData;
+                            deletedDataIds = backupData.deletedDataIds;
+                            saveToLocalStorage();
+                            console.log('Data berhasil direstore dari backup setelah push gagal');
+                        }
+                    } catch (restoreError) {
+                        console.error('Gagal restore dari backup:', restoreError);
+                    }
+                    
+                    throw error;
+                }
+            }
+
+            // Fungsi untuk pull data dari GitHub - DIPERBAIKI: dengan error handling yang lebih baik
+            async function pullFromGithubForSync() {
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    // Jika konfigurasi GitHub belum diatur, kembalikan data kosong
+                    return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
+                }
+                
+                try {
+                    const fileUrl = `https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`;
+                    const response = await fetch(fileUrl, {
                         headers: {
                             'Authorization': `token ${githubConfig.token}`,
                             'Accept': 'application/vnd.github.v3+json'
@@ -2631,227 +2320,34 @@
                     });
                     
                     if (response.ok) {
-                        showNotification('Koneksi GitHub berhasil!', 'success');
-                        githubStatusSpan.textContent = 'Terkoneksi';
-                        githubStatusSpan.style.color = '#27ae60';
-                        updateGitHubStatus(true, 'Terkoneksi');
-                        return true;
+                        const fileInfo = await response.json();
+                        const content = decodeURIComponent(escape(atob(fileInfo.content)));
+                        const parsedData = JSON.parse(content);
+                        
+                        // Ensure the data has the correct structure
+                        return {
+                            scannedData: Array.isArray(parsedData.scannedData) ? parsedData.scannedData : [],
+                            masterData: Array.isArray(parsedData.masterData) ? parsedData.masterData : [],
+                            deletedDataIds: Array.isArray(parsedData.deletedDataIds) ? parsedData.deletedDataIds : [],
+                            lastUpdated: parsedData.lastUpdated || new Date().toISOString()
+                        };
                     } else {
-                        const errorData = await response.json();
-                        showNotification('Gagal terhubung ke GitHub: ' + errorData.message, 'error');
-                        githubStatusSpan.textContent = 'Gagal terkoneksi';
-                        githubStatusSpan.style.color = '#e74c3c';
-                        updateGitHubStatus(false, 'Gagal terkoneksi');
-                        return false;
+                        // If file not found, return empty object with correct structure
+                        if (response.status === 404) {
+                            console.log('File data tidak ditemukan di GitHub, menggunakan data kosong');
+                            return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
+                        }
+                        
+                        const error = await response.json();
+                        throw new Error(error.message || 'Gagal pull data');
                     }
                 } catch (error) {
-                    showNotification('Error testing koneksi GitHub: ' + error.message, 'error');
-                    githubStatusSpan.textContent = 'Error';
-                    githubStatusSpan.style.color = '#e74c3c';
-                    updateGitHubStatus(false, 'Error koneksi');
-                    return false;
+                    console.error('Error pulling data:', error);
+                    // Return empty object with correct structure if error occurs
+                    return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
                 }
             }
-            
-            // Fungsi untuk menyimpan konfigurasi GitHub
-            function saveGithubConfig() {
-                githubConfig = {
-                    username: document.getElementById('githubUsername').value.trim(),
-                    repo: document.getElementById('githubRepo').value.trim(),
-                    token: document.getElementById('githubToken').value.trim(),
-                    dataFilePath: document.getElementById('dataFilePath').value.trim() || 'SamsoniteData.json',
-                    autoSync: autoSyncToggle.checked,
-                    autoSyncInterval: parseInt(autoSyncInterval.value) || 1
-                };
-                
-                localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
-                showNotification('Konfigurasi GitHub berhasil disimpan!');
-                
-                // Mulai ulang auto sync jika diperlukan
-                setupAutoSync();
-                
-                // Test koneksi setelah menyimpan konfigurasi
-                testGitHubConnection();
-            }
-            
-            // Fungsi untuk memuat konfigurasi GitHub dari local storage
-            function loadGithubConfig() {
-                const savedConfig = localStorage.getItem('githubConfig');
-                if (savedConfig) {
-                    try {
-                        githubConfig = JSON.parse(savedConfig);
-                        
-                        document.getElementById('githubUsername').value = githubConfig.username || '';
-                        document.getElementById('githubRepo').value = githubConfig.repo || '';
-                        document.getElementById('githubToken').value = githubConfig.token || '';
-                        document.getElementById('dataFilePath').value = githubConfig.dataFilePath || 'SamsoniteData.json';
-                        autoSyncToggle.checked = githubConfig.autoSync !== false;
-                        autoSyncInterval.value = githubConfig.autoSyncInterval || 1;
-                        
-                        if (githubConfig.username && githubConfig.repo && githubConfig.token) {
-                            githubStatusSpan.textContent = 'Terkonfigurasi';
-                            githubStatusSpan.style.color = '#27ae60';
-                            updateGitHubStatus(true, 'Terkoneksi');
-                        } else {
-                            githubStatusSpan.textContent = 'Belum dikonfigurasi';
-                            githubStatusSpan.style.color = '#7f8c8d';
-                            updateGitHubStatus(false, 'Tidak terkoneksi');
-                        }
-                    } catch (e) {
-                        console.error('Error parsing GitHub config:', e);
-                        showNotification('Error memuat konfigurasi GitHub', 'error');
-                    }
-                }
-            }
-            
-            // Fungsi untuk menampilkan modal edit data
-            function showEditModal(index) {
-                // Jika data difilter, gunakan indeks asli dari currentFilteredIndices
-                const actualIndex = isFilterActive ? currentFilteredIndices[index] : index;
-                
-                const data = scannedData[actualIndex];
-                currentEditingIndex = actualIndex;
-                
-                editIndexInput.value = actualIndex;
-                editContainerInput.value = data.container;
-                editPalletInput.value = data.pallet;
-                editEanInput.value = data.ean;
-                editQtyInput.value = data.qty;
-                editVersionInput.value = data.version;
-                
-                editModal.style.display = 'flex';
-            }
-            
-            // Fungsi untuk menyembunyikan modal edit data
-            function hideEditModal() {
-                editModal.style.display = 'none';
-                currentEditingIndex = -1;
-                editForm.reset();
-            }
-            
-            // Fungsi untuk menyimpan perubahan data
-            function saveEditedData(e) {
-                e.preventDefault();
-                
-                if (currentEditingIndex === -1) return;
-                
-                const updatedData = {
-                    ...scannedData[currentEditingIndex],
-                    container: editContainerInput.value,
-                    pallet: editPalletInput.value,
-                    ean: editEanInput.value,
-                    qty: editQtyInput.value,
-                    timestamp: new Date().toISOString(),
-                    version: parseInt(editVersionInput.value) + 1,
-                    lastModified: new Date().toISOString()
-                };
-                
-                // Update data lokal
-                scannedData[currentEditingIndex] = updatedData;
-                saveToLocalStorage();
-                
-                // Update status berdasarkan kondisi pallet
-                updateDataStatus();
-                
-                showNotification('Data berhasil diupdate!');
-                
-                hideEditModal();
-                renderTable();
-                updateDashboardSummary();
-            }
-            
-            // Fungsi untuk menghapus data yang dipilih
-            function deleteSelectedData() {
-                const checkboxes = document.querySelectorAll('.data-checkbox:checked');
-                
-                if (checkboxes.length === 0) {
-                    showNotification('Tidak ada data yang dipilih untuk dihapus!', 'error');
-                    return;
-                }
-                
-                if (!confirm(`Apakah Anda yakin ingin menghapus ${checkboxes.length} data terpilih?`)) {
-                    return;
-                }
-                
-                // Dapatkan indeks data yang dipilih (dalam urutan terbalik untuk menghindari masalah indeks saat menghapus)
-                const indexesToDelete = Array.from(checkboxes)
-                    .map(checkbox => {
-                        const index = parseInt(checkbox.dataset.index);
-                        // Jika data difilter, gunakan indeks asli dari currentFilteredIndices
-                        return isFilterActive ? currentFilteredIndices[index] : index;
-                    })
-                    .sort((a, b) => b - a);
-                
-                // Tambahkan ID data yang dihapus ke daftar deletedDataIds
-                for (const index of indexesToDelete) {
-                    deletedDataIds.push(scannedData[index].id);
-                }
-                
-                // Hapus data dari array
-                for (const index of indexesToDelete) {
-                    scannedData.splice(index, 1);
-                }
-                
-                // Simpan perubahan lokal
-                saveToLocalStorage();
-                
-                // Update status berdasarkan kondisi pallet
-                updateDataStatus();
-                
-                renderTable();
-                updateTotalEan();
-                updateTotalContainer();
-                showNotification(`${indexesToDelete.length} data berhasil dihapus!`);
-                
-                // Reset select all checkbox
-                selectAllCheckbox.checked = false;
-            }
-            
-            // Fungsi untuk memperbarui status indikator koneksi GitHub
-            function updateGitHubStatus(isConnected, message) {
-                if (isConnected) {
-                    githubStatusIndicator.className = 'github-connection-status github-connected';
-                    githubStatusText.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
-                } else {
-                    githubStatusIndicator.className = 'github-connection-status github-disconnected';
-                    githubStatusText.innerHTML = `<i class="fas fa-times-circle"></i> ${message}`;
-                }
-                
-                // Sembunyikan indikator jika tidak ada konfigurasi GitHub
-                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    githubStatusIndicator.style.display = 'none';
-                } else {
-                    githubStatusIndicator.style.display = 'inline-flex';
-                }
-            }
-            
-            // Fungsi untuk memperbarui status tombol push
-            function updatePushStatus(status, message) {
-                pushStatusIndicator.className = `sync-indicator ${status}`;
-                pushStatusIcon.className = status === 'active' ? 'fas fa-sync fa-spin' : 'fas fa-circle';
-                pushStatusText.textContent = message;
-            }
-            
-            // Fungsi untuk memperbarui waktu sync terakhir
-            function updateLastSyncTime() {
-                if (lastSyncTimestamp) {
-                    const timeDiff = Math.floor((Date.now() - lastSyncTimestamp) / 1000);
-                    let timeText;
-                    
-                    if (timeDiff < 60) {
-                        timeText = `${timeDiff} detik yang lalu`;
-                    } else if (timeDiff < 3600) {
-                        timeText = `${Math.floor(timeDiff / 60)} menit yang lalu`;
-                    } else {
-                        timeText = `${Math.floor(timeDiff / 3600)} jam yang lalu`;
-                    }
-                    
-                    lastSyncTime.textContent = `Terakhir sync: ${timeText}`;
-                } else {
-                    lastSyncTime.textContent = 'Terakhir sync: -';
-                }
-            }
-            
+
             // FUNGSI MERGE DATA YANG DIPERBAIKI - Menangani sinkronisasi dengan benar
             function mergeData(localData, remoteData) {
                 console.log('Memulai proses merge data...');
@@ -2881,6 +2377,7 @@
                         if (!item.version) item.version = 1;
                         if (!item.lastModified) item.lastModified = item.timestamp || new Date().toISOString();
                         if (!item.customer) item.customer = 'Samsonite'; // Default value untuk data lama
+                        if (!item.id) item.id = generateId(); // Generate ID jika tidak ada
                     });
                     return data;
                 };
@@ -2961,131 +2458,7 @@
                     deletedDataIds: mergedDeletedIds
                 };
             }
-            
-            // Fungsi untuk push data ke GitHub - DIPERBAIKI: dengan backup dan error handling yang lebih baik
-            async function pushToGithubForSync(dataToPush) {
-                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
-                    throw new Error('GitHub configuration is incomplete');
-                }
-                
-                try {
-                    // Buat backup data sebelum push
-                    const backupData = {
-                        scannedData: [...scannedData],
-                        masterData: [...masterData],
-                        deletedDataIds: [...deletedDataIds],
-                        backupTime: new Date().toISOString()
-                    };
-                    localStorage.setItem('appDataBackup', JSON.stringify(backupData));
-                    
-                    // Konversi data ke format string
-                    const content = JSON.stringify(dataToPush, null, 2);
-                    const contentEncoded = btoa(unescape(encodeURIComponent(content)));
-                    
-                    // Cek apakah file sudah ada di GitHub
-                    const fileUrl = `https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`;
-                    const fileResponse = await fetch(fileUrl, {
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    });
-                    
-                    let sha = null;
-                    if (fileResponse.ok) {
-                        const fileInfo = await fileResponse.json();
-                        sha = fileInfo.sha;
-                    }
-                    
-                    // Buat permintaan untuk mengupload file
-                    const response = await fetch(fileUrl, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            message: `Sync data dari ${currentUser} pada ${new Date().toISOString()}`,
-                            content: contentEncoded,
-                            sha: sha
-                        })
-                    });
-                    
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(error.message || 'Gagal push data');
-                    }
-                    
-                    // Hapus backup setelah push berhasil
-                    localStorage.removeItem('appDataBackup');
-                    
-                    return true;
-                } catch (error) {
-                    console.error('Error during push:', error);
-                    
-                    // Coba restore dari backup jika push gagal
-                    try {
-                        const backup = localStorage.getItem('appDataBackup');
-                        if (backup) {
-                            const backupData = JSON.parse(backup);
-                            scannedData = backupData.scannedData;
-                            masterData = backupData.masterData;
-                            deletedDataIds = backupData.deletedDataIds;
-                            saveToLocalStorage();
-                            console.log('Data berhasil direstore dari backup setelah push gagal');
-                        }
-                    } catch (restoreError) {
-                        console.error('Gagal restore dari backup:', restoreError);
-                    }
-                    
-                    throw error;
-                }
-            }
-            
-            // Fungsi untuk pull data dari GitHub - DIPERBAIKI: dengan error handling yang lebih baik
-            async function pullFromGithubForSync() {
-                if (!githubConfig.username && !githubConfig.repo && !githubConfig.token) {
-                    // Jika konfigurasi GitHub belum diatur, kembalikan data kosong
-                    return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
-                }
-                
-                try {
-                    const fileUrl = `https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}/contents/${githubConfig.dataFilePath}`;
-                    const response = await fetch(fileUrl, {
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const fileInfo = await response.json();
-                        const content = decodeURIComponent(escape(atob(fileInfo.content)));
-                        const parsedData = JSON.parse(content);
-                        
-                        // Ensure the data has the correct structure
-                        return {
-                            scannedData: Array.isArray(parsedData.scannedData) ? parsedData.scannedData : [],
-                            masterData: Array.isArray(parsedData.masterData) ? parsedData.masterData : [],
-                            deletedDataIds: Array.isArray(parsedData.deletedDataIds) ? parsedData.deletedDataIds : [],
-                            lastUpdated: parsedData.lastUpdated || new Date().toISOString()
-                        };
-                    } else {
-                        // If file not found, return empty object with correct structure
-                        if (response.status === 404) {
-                            return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
-                        }
-                        
-                        const error = await response.json();
-                        throw new Error(error.message || 'Gagal pull data');
-                    }
-                } catch (error) {
-                    console.error('Error pulling data:', error);
-                    // Return empty object with correct structure if error occurs
-                    return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
-                }
-            }
-            
+
             // FUNGSI SINCRONISASI YANG DIPERBAIKI - dengan logika yang lebih aman
             async function performSync() {
                 if (isSyncing) {
@@ -3175,17 +2548,17 @@
                     isSyncing = false;
                 }
             }
-            
+
             // Fungsi untuk push data ke GitHub (manual)
             async function pushToGithub() {
                 await performSync();
             }
-            
+
             // Fungsi untuk pull data dari GitHub (manual)
             async function pullFromGithub() {
                 await performSync();
             }
-            
+
             // Fungsi untuk setup auto sync
             function setupAutoSync() {
                 // Hentikan interval sebelumnya jika ada
@@ -3202,7 +2575,7 @@
                     showNotification(`Auto sync diaktifkan setiap ${githubConfig.autoSyncInterval} menit`);
                 }
             }
-            
+
             // Fungsi untuk menghentikan auto sync
             function stopAutoSync() {
                 if (autoSyncIntervalId) {
@@ -3211,7 +2584,697 @@
                 }
             }
 
-            // ========== FUNGSI-FUNGSI TAMBAHAN YANG DIPERBAIKI ==========
+            // ========== FUNGSI LAINNYA ==========
+
+            // Fungsi untuk menampilkan/menyembunyikan konten utama
+            function toggleMainContent(show) {
+                try {
+                    if (show) {
+                        loginContainer.style.display = 'none';
+                        mainContainer.style.display = 'flex';
+                        // Setelah login, fokuskan ke input customer
+                        setTimeout(() => {
+                            customerSelect.focus();
+                        }, 100);
+                    } else {
+                        loginContainer.style.display = 'flex';
+                        mainContainer.style.display = 'none';
+                        // Reset ke form login, fokuskan ke input username
+                        usernameInput.focus();
+                    }
+                } catch (error) {
+                    console.error('Error in toggleMainContent:', error);
+                    // Fallback: Tampilkan login container jika ada error
+                    loginContainer.style.display = 'flex';
+                    mainContainer.style.display = 'none';
+                }
+            }
+
+            // Fungsi untuk toggle menu pada perangkat mobile
+            function setupMobileMenu() {
+                if (mobileMenuBtn) {
+                    mobileMenuBtn.addEventListener('click', function() {
+                        sidebar.classList.toggle('collapsed');
+                    });
+                }
+            }
+
+            // Fungsi untuk mengecek apakah user adalah admin
+            function checkIfAdmin(username) {
+                return username.toLowerCase() === 'admin';
+            }
+
+            // Fungsi untuk mengatur tampilan berdasarkan jenis user
+            function setUserView() {
+                if (isAdmin) {
+                    userTypeBadge.textContent = '(Admin)';
+                    userTypeBadge.classList.remove('hidden');
+                    userTypeBadge.style.backgroundColor = '#e74c3c';
+                    userTypeBadge.style.color = 'white';
+                    userTypeBadge.style.padding = '3px 8px';
+                    userTypeBadge.style.borderRadius = '4px';
+                    userTypeBadge.style.fontSize = '12px';
+                    userTypeBadge.style.marginLeft = '5px';
+                    
+                    if (adminInterface) adminInterface.classList.remove('hidden');
+                    
+                    // Tampilkan export controls untuk admin
+                    const exportControls = document.getElementById('exportControls');
+                    if (exportControls) exportControls.classList.remove('hidden');
+                    
+                    // Tampilkan container tombol delete selected
+                    if (deleteSelectedContainer) deleteSelectedContainer.classList.remove('hidden');
+                    
+                    // Tampilkan container tombol delete selected untuk master data
+                    if (deleteSelectedMasterContainer) deleteSelectedMasterContainer.classList.remove('hidden');
+                } else {
+                    userTypeBadge.textContent = '(User)';
+                    userTypeBadge.classList.remove('hidden');
+                    userTypeBadge.style.backgroundColor = '#3498db';
+                    userTypeBadge.style.color = 'white';
+                    userTypeBadge.style.padding = '3px 8px';
+                    userTypeBadge.style.borderRadius = '4px';
+                    userTypeBadge.style.fontSize = '12px';
+                    userTypeBadge.style.marginLeft = '5px';
+                    
+                    if (adminInterface) adminInterface.classList.remove('hidden');
+                    
+                    // Sembunyikan export controls untuk user biasa
+                    const exportControls = document.getElementById('exportControls');
+                    if (exportControls) exportControls.classList.add('hidden');
+                    
+                    // Sembunyikan container tombol delete selected
+                    if (deleteSelectedContainer) deleteSelectedContainer.classList.add('hidden');
+                    
+                    // Sembunyikan container tombol delete selected untuk master data
+                    if (deleteSelectedMasterContainer) deleteSelectedMasterContainer.classList.add('hidden');
+                }
+            }
+
+            // Fungsi untuk mengaktifkan/menonaktifkan input EAN
+            function toggleEanInput() {
+                if (currentPallet && currentContainer && currentCustomer) {
+                    eanInput.disabled = false;
+                    qtyInput.disabled = false;
+                    if (eanHelpText) eanHelpText.style.display = 'none';
+                    eanInput.focus();
+                } else {
+                    eanInput.disabled = true;
+                    qtyInput.disabled = true;
+                    if (eanHelpText) eanHelpText.style.display = 'block';
+                }
+            }
+
+            // Fungsi untuk mencari data master berdasarkan EAN
+            function findMasterData(ean) {
+                return masterData.find(item => item.ean === ean);
+            }
+
+            // Fungsi untuk memperbarui tampilan status sinkronisasi
+            function updateSyncStatusUI() {
+                // Sederhanakan UI status sinkronisasi
+                if (syncStatus) syncStatus.classList.add('hidden');
+                if (pendingSyncList) pendingSyncList.classList.add('hidden');
+                
+                // Perbarui status GitHub
+                if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                    updateGitHubStatus(true, 'Terkoneksi');
+                } else {
+                    updateGitHubStatus(false, 'Tidak terkoneksi');
+                }
+            }
+
+            // Fungsi untuk menyimpan data (hanya ke local storage)
+            function saveData() {
+                if (isSaving) return;
+                
+                const ean = eanInput.value.trim();
+                const qty = qtyInput.value;
+                
+                if (!currentCustomer) {
+                    showNotification('Harap pilih customer terlebih dahulu!', 'error');
+                    return;
+                }
+                
+                if (!currentPallet) {
+                    showNotification('Harap set pallet terlebih dahulu!', 'error');
+                    return;
+                }
+                
+                if (!currentContainer) {
+                    showNotification('Harap set container terlebih dahulu!', 'error');
+                    return;
+                }
+                
+                if (!ean) {
+                    showNotification('Harap isi kode EAN!', 'error');
+                    return;
+                }
+                
+                isSaving = true;
+                
+                // Cari data master berdasarkan EAN
+                const masterItem = findMasterData(ean);
+                let sku = '';
+                let description = '';
+                let status = 'OK';
+                
+                if (masterItem) {
+                    sku = masterItem.sku;
+                    description = masterItem.description;
+                } else {
+                    status = 'Finding';
+                    showNotification('EAN tidak ditemukan di master data! Status: Finding', 'error');
+                }
+                
+                // Membuat timestamp
+                const now = new Date();
+                const timestamp = now.toISOString();
+                
+                const newData = {
+                    id: generateId(), // ID unik untuk setiap data
+                    customer: currentCustomer,
+                    pallet: currentPallet,
+                    container: currentContainer,
+                    ean,
+                    sku,
+                    description,
+                    status,
+                    qty,
+                    timestamp: timestamp,
+                    user: currentUser,
+                    date: now.toISOString().split('T')[0],
+                    version: 1, // Version untuk conflict resolution
+                    lastModified: timestamp // Waktu modifikasi terakhir
+                };
+                
+                // Simpan data ke array sementara
+                scannedData.push(newData);
+                
+                // Simpan ke localStorage
+                saveToLocalStorage();
+                
+                // Update status berdasarkan kondisi pallet
+                updateDataStatus();
+                
+                // Update UI
+                updateTotalEan();
+                updateTotalContainer();
+                
+                // Reset hanya input EAN dan Qty, biarkan pallet dan container tetap
+                eanInput.value = '';
+                qtyInput.value = 1;
+                skuInput.value = '';
+                descriptionInput.value = '';
+                statusInput.value = '';
+                
+                isSaving = false;
+                
+                showNotification('Data berhasil disimpan!');
+            }
+
+            // Fungsi untuk menyimpan data ke localStorage
+            function saveToLocalStorage() {
+                const dataToSave = {
+                    scannedData: scannedData,
+                    masterData: masterData,
+                    deletedDataIds: deletedDataIds,
+                    lastUpdated: new Date().toISOString()
+                };
+                localStorage.setItem('appData', JSON.stringify(dataToSave));
+            }
+
+            // Fungsi untuk memuat data dari local storage - DIPERBAIKI
+            function loadFromStorage() {
+                const savedData = localStorage.getItem('appData');
+                if (savedData) {
+                    try {
+                        const parsedData = JSON.parse(savedData);
+                        scannedData = parsedData.scannedData || [];
+                        masterData = parsedData.masterData || [];
+                        deletedDataIds = parsedData.deletedDataIds || [];
+                        
+                        // Perbaiki integritas data saat load
+                        repairDataIntegrity();
+                        
+                        // Update data status saat load
+                        updateDataStatus();
+                        
+                    } catch (e) {
+                        console.error('Error parsing data from localStorage:', e);
+                        // Coba recover dari backup
+                        try {
+                            const backup = localStorage.getItem('appDataBackup');
+                            if (backup) {
+                                const backupData = JSON.parse(backup);
+                                scannedData = backupData.scannedData || [];
+                                masterData = backupData.masterData || [];
+                                deletedDataIds = backupData.deletedDataIds || [];
+                                repairDataIntegrity();
+                                showNotification('Data berhasil direcover dari backup', 'error');
+                            } else {
+                                // Reset data jika tidak ada backup
+                                scannedData = [];
+                                masterData = [];
+                                deletedDataIds = [];
+                            }
+                        } catch (backupError) {
+                            console.error('Error recovering from backup:', backupError);
+                            scannedData = [];
+                            masterData = [];
+                            deletedDataIds = [];
+                        }
+                        saveToLocalStorage();
+                    }
+                    populateFilterDropdowns();
+                    updateTotalContainer();
+                    renderTable();
+                    renderMasterTable();
+                    updateDashboardSummary(); // Pastikan dashboard diperbarui
+                }
+            }
+
+            // Fungsi untuk logout
+            function logout() {
+                currentUser = 'Guest';
+                currentUserSpan.textContent = 'Guest';
+                isAdmin = false;
+                setUserView();
+                
+                // Hentikan auto sync
+                stopAutoSync();
+                
+                showNotification('Anda telah logout');
+                
+                // Reset form
+                form.reset();
+                qtyInput.value = 1;
+                currentPallet = '';
+                currentPalletSpan.textContent = 'Belum dipilih';
+                currentContainer = '';
+                currentContainerSpan.textContent = 'Belum dipilih';
+                currentCustomer = '';
+                currentCustomerSpan.textContent = 'Belum dipilih';
+                toggleEanInput();
+                
+                // Update status GitHub
+                updateGitHubStatus(false, 'Tidak terkoneksi');
+                
+                // Reset status push
+                updatePushStatus('idle', 'Idle');
+                
+                // Muat data dari local storage
+                loadFromStorage();
+                
+                // Tampilkan kembali form login
+                toggleMainContent(false);
+            }
+
+            // Fungsi untuk mengisi dropdown filter
+            function populateFilterDropdowns() {
+                // Kosongkan dropdown
+                if (userSelect) userSelect.innerHTML = '<option value="">Pilih User</option>';
+                if (containerSelect) containerSelect.innerHTML = '<option value="">Pilih Container</option>';
+                
+                // Dapatkan nilai unik untuk setiap filter
+                const users = [...new Set(scannedData.map(item => item.user))];
+                
+                // Isi dropdown user
+                if (userSelect) {
+                    users.forEach(user => {
+                        const option = document.createElement('option');
+                        option.value = user;
+                        option.textContent = user;
+                        userSelect.appendChild(option);
+                    });
+                }
+                
+                // Update container dropdown berdasarkan user yang dipilih
+                updateContainerDropdown();
+            }
+
+            // Fungsi untuk memperbarui dropdown container berdasarkan user yang dipilih
+            function updateContainerDropdown() {
+                const selectedUser = userSelect.value;
+                
+                // Kosongkan dropdown container
+                if (containerSelect) containerSelect.innerHTML = '<option value="">Pilih Container</option>';
+                
+                // Jika user dipilih, filter container berdasarkan user tersebut
+                if (selectedUser && containerSelect) {
+                    const userContainers = [...new Set(scannedData
+                        .filter(item => item.user === selectedUser && item.container)
+                        .map(item => item.container))];
+                    
+                    // Isi dropdown container
+                    userContainers.forEach(container => {
+                        const option = document.createElement('option');
+                        option.value = container;
+                        option.textContent = container;
+                        containerSelect.appendChild(option);
+                    });
+                }
+            }
+
+            // Fungsi untuk export data ke Excel
+            function exportToExcel() {
+                const selectedUser = userSelect.value;
+                const selectedContainer = containerSelect.value;
+                const dateFrom = dateFromInput.value;
+                const dateTo = dateToInput.value;
+                
+                // Filter data berdasarkan pilihan
+                let filteredData = scannedData;
+                
+                // Jika admin, tampilkan semua data atau data user tertentu
+                // Jika bukan admin, hanya tampilkan data user tersebut
+                if (!isAdmin) {
+                    filteredData = filteredData.filter(item => item.user === currentUser);
+                } else if (selectedUser) {
+                    filteredData = filteredData.filter(item => item.user === selectedUser);
+                }
+                
+                if (selectedContainer) {
+                    filteredData = filteredData.filter(item => item.container === selectedContainer);
+                }
+                
+                // Filter berdasarkan tanggal
+                if (dateFrom) {
+                    filteredData = filteredData.filter(item => item.date >= dateFrom);
+                }
+                
+                if (dateTo) {
+                    filteredData = filteredData.filter(item => item.date <= dateTo);
+                }
+                
+                // Hanya tampilkan data yang memiliki No. Container
+                filteredData = filteredData.filter(item => item.container && item.container.trim() !== '');
+                
+                if (filteredData.length === 0) {
+                    showNotification('Tidak ada data untuk diekspor!', 'error');
+                    return;
+                }
+                
+                // Siapkan data untuk Excel
+                const excelData = filteredData.map(item => ({
+                    'Customer': item.customer,
+                    'No. Container': item.container,
+                    'Pallet ID': item.pallet,
+                    'EAN': item.ean,
+                    'SKU': item.sku,
+                    'Description': item.description,
+                    'Status': item.status,
+                    'Qty': item.qty,
+                    'Timestamp': item.timestamp,
+                    'User': item.user,
+                    'Date': item.date
+                }));
+                
+                // Buat worksheet
+                const ws = XLSX.utils.json_to_sheet(excelData);
+                
+                // Buat workbook
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Data Scan');
+                
+                // Buat nama file
+                const fileName = `Data_Scan_${selectedUser || 'All'}_${selectedContainer || 'All'}_${new Date().getTime()}.xlsx`;
+                
+                // Export ke file Excel
+                XLSX.writeFile(wb, fileName);
+                
+                showNotification('Data berhasil diekspor ke Excel!');
+            }
+
+            // Fungsi untuk export master data ke Excel
+            function exportMasterToExcel() {
+                if (masterData.length === 0) {
+                    showNotification('Tidak ada data master untuk diekspor!', 'error');
+                    return;
+                }
+                
+                // Siapkan data untuk Excel
+                const excelData = masterData.map(item => ({
+                    'EAN': item.ean,
+                    'SKU': item.sku,
+                    'Description': item.description
+                }));
+                
+                // Buat worksheet
+                const ws = XLSX.utils.json_to_sheet(excelData);
+                
+                // Buat workbook
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Master Data');
+                
+                // Buat nama file
+                const fileName = `Master_Data_${new Date().getTime()}.xlsx`;
+                
+                // Export ke file Excel
+                XLSX.writeFile(wb, fileName);
+                
+                showNotification('Data master berhasil diekspor ke Excel!');
+            }
+
+            // Fungsi untuk menguji koneksi GitHub
+            async function testGitHubConnection() {
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    showNotification('Harap isi semua field konfigurasi GitHub!', 'error');
+                    updateGitHubStatus(false, 'Konfigurasi tidak lengkap');
+                    return false;
+                }
+                
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${githubConfig.username}/${githubConfig.repo}`, {
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        showNotification('Koneksi GitHub berhasil!', 'success');
+                        githubStatusSpan.textContent = 'Terkoneksi';
+                        githubStatusSpan.style.color = '#27ae60';
+                        updateGitHubStatus(true, 'Terkoneksi');
+                        return true;
+                    } else {
+                        const errorData = await response.json();
+                        showNotification('Gagal terhubung ke GitHub: ' + errorData.message, 'error');
+                        githubStatusSpan.textContent = 'Gagal terkoneksi';
+                        githubStatusSpan.style.color = '#e74c3c';
+                        updateGitHubStatus(false, 'Gagal terkoneksi');
+                        return false;
+                    }
+                } catch (error) {
+                    showNotification('Error testing koneksi GitHub: ' + error.message, 'error');
+                    githubStatusSpan.textContent = 'Error';
+                    githubStatusSpan.style.color = '#e74c3c';
+                    updateGitHubStatus(false, 'Error koneksi');
+                    return false;
+                }
+            }
+
+            // Fungsi untuk menyimpan konfigurasi GitHub
+            function saveGithubConfig() {
+                githubConfig = {
+                    username: document.getElementById('githubUsername').value.trim(),
+                    repo: document.getElementById('githubRepo').value.trim(),
+                    token: document.getElementById('githubToken').value.trim(),
+                    dataFilePath: document.getElementById('dataFilePath').value.trim() || 'SamsoniteData.json',
+                    autoSync: autoSyncToggle.checked,
+                    autoSyncInterval: parseInt(autoSyncInterval.value) || 1
+                };
+                
+                localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
+                showNotification('Konfigurasi GitHub berhasil disimpan!');
+                
+                // Mulai ulang auto sync jika diperlukan
+                setupAutoSync();
+                
+                // Test koneksi setelah menyimpan konfigurasi
+                testGitHubConnection();
+            }
+
+            // Fungsi untuk memuat konfigurasi GitHub dari local storage
+            function loadGithubConfig() {
+                const savedConfig = localStorage.getItem('githubConfig');
+                if (savedConfig) {
+                    try {
+                        githubConfig = JSON.parse(savedConfig);
+                        
+                        document.getElementById('githubUsername').value = githubConfig.username || '';
+                        document.getElementById('githubRepo').value = githubConfig.repo || '';
+                        document.getElementById('githubToken').value = githubConfig.token || '';
+                        document.getElementById('dataFilePath').value = githubConfig.dataFilePath || 'SamsoniteData.json';
+                        autoSyncToggle.checked = githubConfig.autoSync !== false;
+                        autoSyncInterval.value = githubConfig.autoSyncInterval || 1;
+                        
+                        if (githubConfig.username && githubConfig.repo && githubConfig.token) {
+                            githubStatusSpan.textContent = 'Terkonfigurasi';
+                            githubStatusSpan.style.color = '#27ae60';
+                            updateGitHubStatus(true, 'Terkoneksi');
+                        } else {
+                            githubStatusSpan.textContent = 'Belum dikonfigurasi';
+                            githubStatusSpan.style.color = '#7f8c8d';
+                            updateGitHubStatus(false, 'Tidak terkoneksi');
+                        }
+                    } catch (e) {
+                        console.error('Error parsing GitHub config:', e);
+                        showNotification('Error memuat konfigurasi GitHub', 'error');
+                    }
+                }
+            }
+
+            // Fungsi untuk menampilkan modal edit data
+            function showEditModal(index) {
+                // Jika data difilter, gunakan indeks asli dari currentFilteredIndices
+                const actualIndex = isFilterActive ? currentFilteredIndices[index] : index;
+                
+                const data = scannedData[actualIndex];
+                currentEditingIndex = actualIndex;
+                
+                editIndexInput.value = actualIndex;
+                editContainerInput.value = data.container;
+                editPalletInput.value = data.pallet;
+                editEanInput.value = data.ean;
+                editQtyInput.value = data.qty;
+                editVersionInput.value = data.version;
+                
+                editModal.style.display = 'flex';
+            }
+
+            // Fungsi untuk menyembunyikan modal edit data
+            function hideEditModal() {
+                editModal.style.display = 'none';
+                currentEditingIndex = -1;
+                editForm.reset();
+            }
+
+            // Fungsi untuk menyimpan perubahan data
+            function saveEditedData(e) {
+                e.preventDefault();
+                
+                if (currentEditingIndex === -1) return;
+                
+                const updatedData = {
+                    ...scannedData[currentEditingIndex],
+                    container: editContainerInput.value,
+                    pallet: editPalletInput.value,
+                    ean: editEanInput.value,
+                    qty: editQtyInput.value,
+                    timestamp: new Date().toISOString(),
+                    version: parseInt(editVersionInput.value) + 1,
+                    lastModified: new Date().toISOString()
+                };
+                
+                // Update data lokal
+                scannedData[currentEditingIndex] = updatedData;
+                saveToLocalStorage();
+                
+                // Update status berdasarkan kondisi pallet
+                updateDataStatus();
+                
+                showNotification('Data berhasil diupdate!');
+                
+                hideEditModal();
+                renderTable();
+                updateDashboardSummary();
+            }
+
+            // Fungsi untuk menghapus data yang dipilih
+            function deleteSelectedData() {
+                const checkboxes = document.querySelectorAll('.data-checkbox:checked');
+                
+                if (checkboxes.length === 0) {
+                    showNotification('Tidak ada data yang dipilih untuk dihapus!', 'error');
+                    return;
+                }
+                
+                if (!confirm(`Apakah Anda yakin ingin menghapus ${checkboxes.length} data terpilih?`)) {
+                    return;
+                }
+                
+                // Dapatkan indeks data yang dipilih (dalam urutan terbalik untuk menghindari masalah indeks saat menghapus)
+                const indexesToDelete = Array.from(checkboxes)
+                    .map(checkbox => {
+                        const index = parseInt(checkbox.dataset.index);
+                        // Jika data difilter, gunakan indeks asli dari currentFilteredIndices
+                        return isFilterActive ? currentFilteredIndices[index] : index;
+                    })
+                    .sort((a, b) => b - a);
+                
+                // Tambahkan ID data yang dihapus ke daftar deletedDataIds
+                for (const index of indexesToDelete) {
+                    deletedDataIds.push(scannedData[index].id);
+                }
+                
+                // Hapus data dari array
+                for (const index of indexesToDelete) {
+                    scannedData.splice(index, 1);
+                }
+                
+                // Simpan perubahan lokal
+                saveToLocalStorage();
+                
+                // Update status berdasarkan kondisi pallet
+                updateDataStatus();
+                
+                renderTable();
+                updateTotalEan();
+                updateTotalContainer();
+                showNotification(`${indexesToDelete.length} data berhasil dihapus!`);
+                
+                // Reset select all checkbox
+                selectAllCheckbox.checked = false;
+            }
+
+            // Fungsi untuk memperbarui status indikator koneksi GitHub
+            function updateGitHubStatus(isConnected, message) {
+                if (isConnected) {
+                    githubStatusIndicator.className = 'github-connection-status github-connected';
+                    githubStatusText.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+                } else {
+                    githubStatusIndicator.className = 'github-connection-status github-disconnected';
+                    githubStatusText.innerHTML = `<i class="fas fa-times-circle"></i> ${message}`;
+                }
+                
+                // Sembunyikan indikator jika tidak ada konfigurasi GitHub
+                if (!githubConfig.username || !githubConfig.repo || !githubConfig.token) {
+                    githubStatusIndicator.style.display = 'none';
+                } else {
+                    githubStatusIndicator.style.display = 'inline-flex';
+                }
+            }
+
+            // Fungsi untuk memperbarui status tombol push
+            function updatePushStatus(status, message) {
+                pushStatusIndicator.className = `sync-indicator ${status}`;
+                pushStatusIcon.className = status === 'active' ? 'fas fa-sync fa-spin' : 'fas fa-circle';
+                pushStatusText.textContent = message;
+            }
+
+            // Fungsi untuk memperbarui waktu sync terakhir
+            function updateLastSyncTime() {
+                if (lastSyncTimestamp) {
+                    const timeDiff = Math.floor((Date.now() - lastSyncTimestamp) / 1000);
+                    let timeText;
+                    
+                    if (timeDiff < 60) {
+                        timeText = `${timeDiff} detik yang lalu`;
+                    } else if (timeDiff < 3600) {
+                        timeText = `${Math.floor(timeDiff / 60)} menit yang lalu`;
+                    } else {
+                        timeText = `${Math.floor(timeDiff / 3600)} jam yang lalu`;
+                    }
+                    
+                    lastSyncTime.textContent = `Terakhir sync: ${timeText}`;
+                } else {
+                    lastSyncTime.textContent = 'Terakhir sync: -';
+                }
+            }
+
+            // ========== FUNGSI TAMBAHAN YANG DIPERBAIKI ==========
 
             // Fungsi untuk render tabel data
             function renderTable() {
