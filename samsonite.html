@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* CSS styles - tetap sama seperti sebelumnya */
         :root {
             --spark-primary: #3490dc;
             --spark-primary-dark: #2779bd;
@@ -691,10 +690,9 @@
                 min-width: 100%;
             }
 
-            /* Responsivitas untuk form di modal */
             .modal-form-group input,
             .modal-form-group select {
-                font-size: 16px; /* Mencegah zoom pada iOS */
+                font-size: 16px;
                 padding: 0.875rem;
             }
         }
@@ -842,7 +840,6 @@
             border-bottom: none;
         }
 
-        /* New styles for Google Sheets sync features */
         .sync-indicator {
             display: inline-flex;
             align-items: center;
@@ -896,7 +893,6 @@
             margin-bottom: 0;
         }
         
-        /* New styles for Dashboard Summary */
         .dashboard-summary {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -938,7 +934,6 @@
             font-weight: 600;
         }
         
-        /* Pagination styles */
         .pagination {
             display: flex;
             justify-content: center;
@@ -972,7 +967,6 @@
             color: var(--spark-gray);
         }
 
-        /* Finding highlight */
         .finding-highlight {
             background-color: #fff3cd;
             color: #856404;
@@ -981,7 +975,6 @@
             font-weight: 600;
         }
 
-        /* New styles for Master Data tab */
         .master-data-form {
             margin-bottom: 1.5rem;
         }
@@ -1003,7 +996,6 @@
             color: #155724;
         }
 
-        /* Status baru untuk remark */
         .status-double-ean {
             background-color: #f8d7da;
             color: #721c24;
@@ -1014,7 +1006,6 @@
             color: #0c5460;
         }
 
-        /* Highlight untuk finding di hasil scan */
         .finding-row {
             background-color: #fff3cd !important;
             border-left: 4px solid #ffc107;
@@ -1024,7 +1015,6 @@
             background-color: #ffeaa7 !important;
         }
 
-        /* New styles for upload feature */
         .upload-container {
             margin-bottom: 1.5rem;
             padding: 1.25rem;
@@ -1081,7 +1071,6 @@
             color: var(--spark-gray);
         }
 
-        /* New styles for filter controls */
         .filter-controls {
             background-color: #fff;
             padding: 1.25rem;
@@ -1100,7 +1089,6 @@
             gap: 10px;
         }
 
-        /* New styles for finding links */
         .finding-link {
             color: var(--spark-primary);
             cursor: pointer;
@@ -1112,6 +1100,27 @@
         .finding-link:hover {
             color: var(--spark-primary-dark);
             text-decoration: none;
+        }
+
+        .debug-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: var(--spark-radius);
+            border: 1px solid var(--spark-border);
+        }
+
+        .debug-info h4 {
+            margin-bottom: 0.5rem;
+            color: var(--spark-dark);
+        }
+
+        .debug-info pre {
+            background-color: #e9ecef;
+            padding: 0.75rem;
+            border-radius: var(--spark-radius);
+            overflow-x: auto;
+            font-size: 0.75rem;
         }
     </style>
 </head>
@@ -1679,6 +1688,12 @@
                         <div class="summary">
                             <i class="fas fa-info-circle"></i> Status Koneksi: <span id="googleStatus">Belum dikonfigurasi</span>
                         </div>
+                        
+                        <!-- Tambahan: Debug Information -->
+                        <div class="debug-info" id="debugInfo" style="display: none;">
+                            <h4><i class="fas fa-bug"></i> Informasi Debug</h4>
+                            <div id="debugDetails"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1829,6 +1844,10 @@
             const dashboardDateTo = document.getElementById('dashboardDateTo');
             const applyDashboardFilterBtn = document.getElementById('applyDashboardFilterBtn');
             const resetDashboardFilterBtn = document.getElementById('resetDashboardFilterBtn');
+            
+            // Elements untuk debug info
+            const debugInfo = document.getElementById('debugInfo');
+            const debugDetails = document.getElementById('debugDetails');
             
             // Variabel global
             let currentPallet = '';
@@ -2386,57 +2405,119 @@
                 }
             }
 
-            // ========== FUNGSI SINCRONISASI DENGAN GOOGLE SHEETS ==========
+            // ========== FUNGSI SINCRONISASI DENGAN GOOGLE SHEETS YANG DIPERBAIKI ==========
 
-            // Fungsi untuk generate ID unik untuk setiap data
-            function generateId() {
-                // Menggunakan timestamp + random number + user identifier untuk memastikan unik di semua perangkat
-                const timestamp = Date.now().toString(36);
-                const random = Math.random().toString(36).substr(2, 9);
-                const userPart = currentUser ? currentUser.substr(0, 3).toLowerCase() : 'usr';
-                return `${timestamp}-${random}-${userPart}`;
-            }
-
-            // Fungsi untuk memperbaiki data yang rusak
-            function repairDataIntegrity() {
-                console.log('Memperbaiki integritas data...');
+            // Fungsi untuk menguji koneksi Google Sheets - DIPERBAIKI
+            async function testGoogleConnection() {
+                if (!googleConfig.scriptUrl) {
+                    showNotification('Harap isi Google Apps Script URL!', 'error');
+                    updateGoogleStatus(false, 'Konfigurasi tidak lengkap');
+                    return false;
+                }
                 
-                // Perbaiki scannedData
-                scannedData = scannedData.filter(item => item && typeof item === 'object');
-                scannedData.forEach(item => {
-                    if (!item.id) item.id = generateId();
-                    if (!item.version) item.version = 1;
-                    if (!item.lastModified) item.lastModified = item.timestamp || new Date().toISOString();
-                    if (!item.customer) item.customer = 'Samsonite';
-                });
-                
-                // Perbaiki masterData
-                masterData = masterData.filter(item => item && typeof item === 'object' && item.ean);
-                
-                // Perbaiki deletedDataIds
-                deletedDataIds = deletedDataIds.filter(id => id && typeof id === 'string');
-                
-                // Hapus duplikat berdasarkan ID
-                const uniqueScannedData = [];
-                const idMap = new Map();
-                
-                scannedData.forEach(item => {
-                    if (!idMap.has(item.id)) {
-                        idMap.set(item.id, true);
-                        uniqueScannedData.push(item);
+                try {
+                    // Validasi URL
+                    let scriptUrl = googleConfig.scriptUrl.trim();
+                    if (!scriptUrl.startsWith('https://')) {
+                        showNotification('URL harus menggunakan HTTPS!', 'error');
+                        return false;
                     }
-                });
-                
-                scannedData = uniqueScannedData;
-                
-                // Simpan perubahan
-                saveToIndexDB();
-                
-                console.log('Integritas data berhasil diperbaiki');
-                return true;
+                    
+                    // Test koneksi dengan timeout
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 10000); // Timeout 10 detik
+                    
+                    const response = await fetch(scriptUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            action: 'testConnection',
+                            timestamp: new Date().toISOString()
+                        }),
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success) {
+                            showNotification('Koneksi Google Sheets berhasil!', 'success');
+                            googleStatusSpan.textContent = 'Terkoneksi';
+                            googleStatusSpan.style.color = '#27ae60';
+                            updateGoogleStatus(true, 'Terkoneksi');
+                            return true;
+                        } else {
+                            showNotification('Gagal terhubung ke Google Sheets: ' + (result.message || 'Respons tidak valid'), 'error');
+                            googleStatusSpan.textContent = 'Gagal terkoneksi';
+                            googleStatusSpan.style.color = '#e74c3c';
+                            updateGoogleStatus(false, 'Gagal terkoneksi');
+                            return false;
+                        }
+                    } else {
+                        const errorText = await response.text();
+                        showNotification(`Gagal terhubung ke Google Sheets: HTTP ${response.status} - ${errorText || 'Tidak ada respons'}`, 'error');
+                        googleStatusSpan.textContent = 'Gagal terkoneksi';
+                        googleStatusSpan.style.color = '#e74c3c';
+                        updateGoogleStatus(false, 'Gagal terkoneksi');
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Error testing koneksi Google Sheets:', error);
+                    
+                    let errorMessage = 'Error testing koneksi Google Sheets: ';
+                    if (error.name === 'AbortError') {
+                        errorMessage += 'Timeout - koneksi terlalu lama. Periksa koneksi internet atau URL.';
+                    } else if (error.name === 'TypeError') {
+                        errorMessage += 'Gagal mengambil data. Periksa: \n';
+                        errorMessage += '1. Koneksi internet\n';
+                        errorMessage += '2. URL Google Apps Script benar\n';
+                        errorMessage += '3. Google Apps Script sudah di-deploy sebagai web app\n';
+                        errorMessage += '4. Deployment setting: "Execute as me" dan "Anyone" access';
+                    } else {
+                        errorMessage += error.message;
+                    }
+                    
+                    showNotification(errorMessage, 'error');
+                    googleStatusSpan.textContent = 'Error';
+                    googleStatusSpan.style.color = '#e74c3c';
+                    updateGoogleStatus(false, 'Error koneksi');
+                    
+                    // Tampilkan informasi debug
+                    showDebugInfo(error);
+                    return false;
+                }
             }
 
-            // Fungsi untuk push data ke Google Sheets
+            // Fungsi untuk menampilkan informasi debug
+            function showDebugInfo(error) {
+                if (debugInfo && debugDetails) {
+                    debugInfo.style.display = 'block';
+                    debugDetails.innerHTML = `
+                        <p><strong>Error Details:</strong> ${error.toString()}</p>
+                        <p><strong>URL:</strong> ${googleConfig.scriptUrl}</p>
+                        <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
+                        <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
+                        <div class="conflict-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>
+                                <p><strong>Penyebab umum "Failed to fetch":</strong></p>
+                                <ul>
+                                    <li>Google Apps Script belum di-deploy sebagai web app</li>
+                                    <li>URL tidak valid atau salah</li>
+                                    <li>Koneksi internet terputus</li>
+                                    <li>Blokir CORS (pastikan deployment setting: "Anyone")</li>
+                                    <li>Google Apps Script membutuhkan otorisasi</li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            // Fungsi untuk push data ke Google Sheets - DIPERBAIKI dengan error handling yang lebih baik
             async function pushToGoogleSheets() {
                 if (!googleConfig.scriptUrl) {
                     throw new Error('Google Apps Script URL belum dikonfigurasi');
@@ -2462,17 +2543,24 @@
                         user: currentUser
                     };
                     
-                    // Kirim data ke Google Apps Script
+                    // Kirim data ke Google Apps Script dengan timeout
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 30000); // Timeout 30 detik
+                    
                     const response = await fetch(googleConfig.scriptUrl, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify(dataToSend)
+                        body: JSON.stringify(dataToSend),
+                        signal: controller.signal
                     });
                     
+                    clearTimeout(timeoutId);
+                    
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        const errorText = await response.text();
+                        throw new Error(`HTTP error! status: ${response.status}, response: ${errorText}`);
                     }
                     
                     const result = await response.json();
@@ -2506,7 +2594,7 @@
                 }
             }
 
-            // Fungsi untuk pull data dari Google Sheets
+            // Fungsi untuk pull data dari Google Sheets - DIPERBAIKI
             async function pullFromGoogleSheets() {
                 if (!googleConfig.scriptUrl) {
                     // Jika konfigurasi Google Sheets belum diatur, kembalikan data kosong
@@ -2514,7 +2602,10 @@
                 }
                 
                 try {
-                    // Siapkan permintaan untuk mengambil data
+                    // Siapkan permintaan untuk mengambil data dengan timeout
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 30000); // Timeout 30 detik
+                    
                     const dataToSend = {
                         action: 'getData',
                         timestamp: new Date().toISOString(),
@@ -2526,8 +2617,11 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify(dataToSend)
+                        body: JSON.stringify(dataToSend),
+                        signal: controller.signal
                     });
+                    
+                    clearTimeout(timeoutId);
                     
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
@@ -2548,8 +2642,19 @@
                     }
                 } catch (error) {
                     console.error('Error pulling data:', error);
-                    // Return empty object with correct structure if error occurs
-                    return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
+                    
+                    // Jika error karena timeout atau network, gunakan data lokal
+                    if (error.name === 'AbortError' || error.name === 'TypeError') {
+                        console.warn('Menggunakan data lokal karena gagal mengambil dari Google Sheets');
+                        return {
+                            scannedData: [],
+                            masterData: [],
+                            deletedDataIds: [],
+                            lastUpdated: new Date().toISOString()
+                        };
+                    }
+                    
+                    throw error;
                 }
             }
 
@@ -2664,7 +2769,7 @@
                 };
             }
 
-            // FUNGSI SINCRONISASI YANG DIPERBAIKI - dengan logika yang lebih aman
+            // FUNGSI SINCRONISASI YANG DIPERBAIKI - dengan error handling yang lebih robust
             async function performSync() {
                 if (isSyncing) {
                     console.log('Sync already in progress');
@@ -2680,12 +2785,18 @@
                 updateSyncStatus('active', 'Syncing...');
                 
                 try {
-                    // 1. Pull data dari Google Sheets terlebih dahulu untuk mendapatkan data terbaru
+                    // 1. Test koneksi terlebih dahulu
+                    const isConnected = await testGoogleConnection();
+                    if (!isConnected) {
+                        throw new Error('Tidak dapat terhubung ke Google Sheets. Periksa konfigurasi.');
+                    }
+                    
+                    // 2. Pull data dari Google Sheets
                     console.log('Memulai pull data dari Google Sheets...');
                     const remoteData = await pullFromGoogleSheets();
                     console.log('Pull berhasil:', remoteData.scannedData.length, 'item data diterima');
                     
-                    // 2. Merge data lokal dan data dari Google Sheets dengan logika yang aman
+                    // 3. Merge data lokal dan remote
                     console.log('Memulai proses merge data...');
                     const mergedData = mergeData(
                         { scannedData, masterData, deletedDataIds }, 
@@ -2693,28 +2804,26 @@
                     );
                     console.log('Merge berhasil:', mergedData.scannedData.length, 'item data setelah merge');
                     
-                    // 3. Simpan data yang sudah di-merge ke IndexDB
+                    // 4. Simpan data yang sudah di-merge
                     scannedData = mergedData.scannedData;
                     masterData = mergedData.masterData;
                     deletedDataIds = mergedData.deletedDataIds;
                     await saveToIndexDB();
                     console.log('Data berhasil disimpan ke IndexDB');
                     
-                    // 4. Push data yang sudah di-merge ke Google Sheets
+                    // 5. Push data yang sudah di-merge ke Google Sheets
                     console.log('Memulai push data ke Google Sheets...');
                     await pushToGoogleSheets();
                     console.log('Push berhasil');
                     
-                    // 5. Update status berdasarkan kondisi pallet
+                    // 6. Update status dan UI
                     await updateDataStatus();
-                    
-                    // 6. Update UI
                     renderTable();
                     renderMasterTable();
                     updateTotalEan();
                     updateTotalContainer();
                     populateFilterDropdowns();
-                    updateDashboardSummary(); // Perbarui dashboard summary
+                    updateDashboardSummary();
                     
                     showNotification('Sinkronisasi berhasil! Data dari semua perangkat telah digabungkan.');
                     updateSyncStatus('idle', 'Sync berhasil');
@@ -2724,7 +2833,17 @@
                     console.log('Sinkronisasi selesai dengan sukses');
                 } catch (error) {
                     console.error('Error during sync:', error);
-                    showNotification('Sinkronisasi gagal: ' + error.message, 'error');
+                    
+                    let userMessage = 'Sinkronisasi gagal: ';
+                    if (error.name === 'AbortError') {
+                        userMessage += 'Timeout - koneksi terlalu lama. Periksa koneksi internet.';
+                    } else if (error.name === 'TypeError') {
+                        userMessage += 'Gagal terhubung ke server. Periksa koneksi internet dan URL Google Apps Script.';
+                    } else {
+                        userMessage += error.message;
+                    }
+                    
+                    showNotification(userMessage, 'error');
                     updateSyncStatus('error', 'Sync gagal');
                     
                     // Coba restore dari backup jika sync gagal
@@ -3238,63 +3357,25 @@
                 showNotification('Data master berhasil diekspor ke Excel!');
             }
 
-            // Fungsi untuk menguji koneksi Google Sheets
-            async function testGoogleConnection() {
-                if (!googleConfig.scriptUrl) {
+            // Fungsi untuk menyimpan konfigurasi Google Sheets - DIPERBAIKI dengan validasi
+            function saveGoogleConfig() {
+                const scriptUrl = document.getElementById('googleScriptUrl').value.trim();
+                const sheetId = document.getElementById('sheetId').value.trim();
+                
+                if (!scriptUrl) {
                     showNotification('Harap isi Google Apps Script URL!', 'error');
-                    updateGoogleStatus(false, 'Konfigurasi tidak lengkap');
-                    return false;
+                    return;
                 }
                 
-                try {
-                    // Test koneksi dengan mengirim permintaan sederhana
-                    const response = await fetch(googleConfig.scriptUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            action: 'testConnection',
-                            timestamp: new Date().toISOString()
-                        })
-                    });
-                    
-                    if (response.ok) {
-                        const result = await response.json();
-                        if (result.success) {
-                            showNotification('Koneksi Google Sheets berhasil!', 'success');
-                            googleStatusSpan.textContent = 'Terkoneksi';
-                            googleStatusSpan.style.color = '#27ae60';
-                            updateGoogleStatus(true, 'Terkoneksi');
-                            return true;
-                        } else {
-                            showNotification('Gagal terhubung ke Google Sheets: ' + result.message, 'error');
-                            googleStatusSpan.textContent = 'Gagal terkoneksi';
-                            googleStatusSpan.style.color = '#e74c3c';
-                            updateGoogleStatus(false, 'Gagal terkoneksi');
-                            return false;
-                        }
-                    } else {
-                        showNotification('Gagal terhubung ke Google Sheets: HTTP ' + response.status, 'error');
-                        googleStatusSpan.textContent = 'Gagal terkoneksi';
-                        googleStatusSpan.style.color = '#e74c3c';
-                        updateGoogleStatus(false, 'Gagal terkoneksi');
-                        return false;
-                    }
-                } catch (error) {
-                    showNotification('Error testing koneksi Google Sheets: ' + error.message, 'error');
-                    googleStatusSpan.textContent = 'Error';
-                    googleStatusSpan.style.color = '#e74c3c';
-                    updateGoogleStatus(false, 'Error koneksi');
-                    return false;
+                // Validasi URL
+                if (!scriptUrl.startsWith('https://')) {
+                    showNotification('URL harus menggunakan HTTPS!', 'error');
+                    return;
                 }
-            }
-
-            // Fungsi untuk menyimpan konfigurasi Google Sheets
-            function saveGoogleConfig() {
+                
                 googleConfig = {
-                    scriptUrl: document.getElementById('googleScriptUrl').value.trim(),
-                    sheetId: document.getElementById('sheetId').value.trim(),
+                    scriptUrl: scriptUrl,
+                    sheetId: sheetId,
                     autoSync: autoSyncToggle.checked,
                     autoSyncInterval: parseInt(autoSyncInterval.value) || 5
                 };
@@ -4030,6 +4111,54 @@
                 setTimeout(() => {
                     notification.style.display = 'none';
                 }, 3000);
+            }
+
+            // Fungsi untuk generate ID unik untuk setiap data
+            function generateId() {
+                // Menggunakan timestamp + random number + user identifier untuk memastikan unik di semua perangkat
+                const timestamp = Date.now().toString(36);
+                const random = Math.random().toString(36).substr(2, 9);
+                const userPart = currentUser ? currentUser.substr(0, 3).toLowerCase() : 'usr';
+                return `${timestamp}-${random}-${userPart}`;
+            }
+
+            // Fungsi untuk memperbaiki data yang rusak
+            function repairDataIntegrity() {
+                console.log('Memperbaiki integritas data...');
+                
+                // Perbaiki scannedData
+                scannedData = scannedData.filter(item => item && typeof item === 'object');
+                scannedData.forEach(item => {
+                    if (!item.id) item.id = generateId();
+                    if (!item.version) item.version = 1;
+                    if (!item.lastModified) item.lastModified = item.timestamp || new Date().toISOString();
+                    if (!item.customer) item.customer = 'Samsonite';
+                });
+                
+                // Perbaiki masterData
+                masterData = masterData.filter(item => item && typeof item === 'object' && item.ean);
+                
+                // Perbaiki deletedDataIds
+                deletedDataIds = deletedDataIds.filter(id => id && typeof id === 'string');
+                
+                // Hapus duplikat berdasarkan ID
+                const uniqueScannedData = [];
+                const idMap = new Map();
+                
+                scannedData.forEach(item => {
+                    if (!idMap.has(item.id)) {
+                        idMap.set(item.id, true);
+                        uniqueScannedData.push(item);
+                    }
+                });
+                
+                scannedData = uniqueScannedData;
+                
+                // Simpan perubahan
+                saveToIndexDB();
+                
+                console.log('Integritas data berhasil diperbaiki');
+                return true;
             }
 
             // ========== EVENT LISTENERS ==========
