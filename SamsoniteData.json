@@ -1,71 +1,11 @@
 {
-  "scannedData": [
-    {
-      "id": "mgk86f9h-azp8jrofw-adm",
-      "customer": "Samsonite",
-      "pallet": "test",
-      "container": "test",
-      "ean": "0",
-      "sku": "",
-      "description": "",
-      "status": "Finding",
-      "qty": "1",
-      "timestamp": "2025-10-10T02:26:27.653Z",
-      "user": "admin",
-      "date": "2025-10-10",
-      "version": 1,
-      "lastModified": "2025-10-10T02:26:27.653Z"
-    },
-    {
-      "id": "mgk86fop-9anu7tq61-adm",
-      "customer": "Samsonite",
-      "pallet": "test",
-      "container": "test",
-      "ean": "0",
-      "sku": "",
-      "description": "",
-      "status": "Finding",
-      "qty": "1",
-      "timestamp": "2025-10-10T02:26:28.201Z",
-      "user": "admin",
-      "date": "2025-10-10",
-      "version": 1,
-      "lastModified": "2025-10-10T02:26:28.201Z"
-    },
-    {
-      "id": "mgk86g4h-o4yvbrty6-adm",
-      "customer": "Samsonite",
-      "pallet": "test",
-      "container": "test",
-      "ean": "0",
-      "sku": "",
-      "description": "",
-      "status": "Finding",
-      "qty": "1",
-      "timestamp": "2025-10-10T02:26:28.769Z",
-      "user": "admin",
-      "date": "2025-10-10",
-      "version": 1,
-      "lastModified": "2025-10-10T02:26:28.769Z"
-    },
-    {
-      "id": "mgk86grj-5py7slmls-adm",
-      "customer": "Samsonite",
-      "pallet": "test",
-      "container": "test",
-      "ean": "1",
-      "sku": "",
-      "description": "",
-      "status": "Finding",
-      "qty": "1",
-      "timestamp": "2025-10-10T02:26:29.599Z",
-      "user": "admin",
-      "date": "2025-10-10",
-      "version": 1,
-      "lastModified": "2025-10-10T02:26:29.599Z"
-    }
-  ],
+  "scannedData": [],
   "masterData": [],
-  "deletedDataIds": [],
-  "lastUpdated": "2025-10-10T02:28:29.803Z"
+  "deletedDataIds": [
+    "mgk86grj-5py7slmls-adm",
+    "mgk86g4h-o4yvbrty6-adm",
+    "mgk86fop-9anu7tq61-adm",
+    "mgk86f9h-azp8jrofw-adm"
+  ],
+  "lastUpdated": "2025-10-10T02:28:59.590Z"
 }
