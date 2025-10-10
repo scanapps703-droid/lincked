@@ -84607,6 +84607,22 @@
       "date": "2025-10-10",
       "version": 1,
       "lastModified": "2025-10-10T01:28:54.074Z"
+    },
+    {
+      "id": "mgk64zng-lu9hrb7ag-Muh",
+      "customer": "Samsonite",
+      "pallet": "DID2510021660",
+      "container": "TCNU3786666",
+      "ean": "5400520295217",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-10T01:29:21.532Z",
+      "user": "Muhdi",
+      "date": "2025-10-10",
+      "version": 1,
+      "lastModified": "2025-10-10T01:29:21.532Z"
     }
   ],
   "masterData": [
@@ -84769,5 +84785,5 @@
     "mghqjxvrd0awj",
     "mghqjyfpho368"
   ],
-  "lastUpdated": "2025-10-10T01:29:09.495Z"
+  "lastUpdated": "2025-10-10T01:30:07.316Z"
 }
