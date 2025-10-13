@@ -1654,7 +1654,7 @@
                                     </div>
                                     <div>
                                         <label for="githubRepo"><i class="fas fa-book"></i> Repository Name</label>
-                                        <input type="text" id="githubRepo" placeholder="owner/repo-name">
+                                        <input type="text" id="githubRepo" placeholder="owner/repo-name" value="scanapps703-droid/lincked">
                                         <small>
                                             <i class="fas fa-info-circle"></i> Format: username/repository-name atau organization/repository-name
                                         </small>
@@ -1671,7 +1671,7 @@
                                     </div>
                                     <div>
                                         <label for="githubFilePath"><i class="fas fa-file"></i> File Path</label>
-                                        <input type="text" id="githubFilePath" value="data/scanned-data.json" placeholder="data/scanned-data.json">
+                                        <input type="text" id="githubFilePath" value="data/scannedData.json" placeholder="data/scannedData.json">
                                         <small>
                                             <i class="fas fa-info-circle"></i> Path file JSON untuk menyimpan data dalam repository
                                         </small>
@@ -1751,9 +1751,9 @@
         // Konfigurasi GitHub
         let githubConfig = {
             token: '',
-            repo: '',
+            repo: 'scanapps703-droid/lincked',
             branch: 'main',
-            filePath: 'data/scanned-data.json',
+            filePath: 'data/scannedData.json',
             autoSync: true,
             autoSyncInterval: 5
         };
@@ -2719,20 +2719,30 @@
             }
         }
 
-        // ========== FUNGSI GITHUB ==========
+        // ========== FUNGSI GITHUB YANG DIPERBAIKI ==========
         async function testGitHubConnection() {
-            if (!githubConfig.token || !githubConfig.repo) {
+            const token = document.getElementById('githubToken').value.trim();
+            const repo = document.getElementById('githubRepo').value.trim();
+            
+            if (!token || !repo) {
                 showNotification('Harap isi GitHub Token dan Repository!', 'error');
                 updateGitHubStatus(false, 'Konfigurasi tidak lengkap');
                 return false;
             }
             
+            // Validasi format repository
+            if (!repo.includes('/')) {
+                showNotification('Format repository harus: owner/repo-name. Contoh: username/my-repo', 'error');
+                updateGitHubStatus(false, 'Format repo salah');
+                return false;
+            }
+            
             try {
                 // Test koneksi dengan mengambil daftar branches
-                const response = await fetch(`https://api.github.com/repos/${githubConfig.repo}/branches`, {
+                const response = await fetch(`https://api.github.com/repos/${repo}/branches`, {
                     method: 'GET',
                     headers: {
-                        'Authorization': `token ${githubConfig.token}`,
+                        'Authorization': `token ${token}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
@@ -2745,7 +2755,17 @@
                     return true;
                 } else {
                     const errorData = await response.json();
-                    showNotification('Gagal terhubung ke GitHub: ' + (errorData.message || 'Unknown error'), 'error');
+                    let errorMessage = 'Gagal terhubung ke GitHub: ';
+                    
+                    if (response.status === 401) {
+                        errorMessage += 'Token tidak valid atau expired';
+                    } else if (response.status === 404) {
+                        errorMessage += 'Repository tidak ditemukan. Pastikan format: owner/repo-name';
+                    } else {
+                        errorMessage += errorData.message || `HTTP ${response.status}`;
+                    }
+                    
+                    showNotification(errorMessage, 'error');
                     document.getElementById('githubStatus').textContent = 'Gagal terkoneksi';
                     document.getElementById('githubStatus').style.color = '#e74c3c';
                     updateGitHubStatus(false, 'Gagal terkoneksi');
@@ -3212,20 +3232,21 @@
             const savedConfig = localStorage.getItem('githubConfig');
             if (savedConfig) {
                 try {
-                    githubConfig = JSON.parse(savedConfig);
+                    const parsedConfig = JSON.parse(savedConfig);
+                    githubConfig = { ...githubConfig, ...parsedConfig };
                     
                     // Update UI dengan konfigurasi yang disimpan
                     if (document.getElementById('githubToken')) {
                         document.getElementById('githubToken').value = githubConfig.token || '';
                     }
                     if (document.getElementById('githubRepo')) {
-                        document.getElementById('githubRepo').value = githubConfig.repo || '';
+                        document.getElementById('githubRepo').value = githubConfig.repo || 'scanapps703-droid/lincked';
                     }
                     if (document.getElementById('githubBranch')) {
                         document.getElementById('githubBranch').value = githubConfig.branch || 'main';
                     }
                     if (document.getElementById('githubFilePath')) {
-                        document.getElementById('githubFilePath').value = githubConfig.filePath || 'data/scanned-data.json';
+                        document.getElementById('githubFilePath').value = githubConfig.filePath || 'data/scannedData.json';
                     }
                     if (document.getElementById('autoSyncInterval')) {
                         document.getElementById('autoSyncInterval').value = githubConfig.autoSyncInterval || 5;
@@ -4331,27 +4352,38 @@
             const branchInput = document.getElementById('githubBranch');
             const filePathInput = document.getElementById('githubFilePath');
             
-            if (tokenInput) {
-                githubConfig.token = tokenInput.value.trim();
+            const token = tokenInput ? tokenInput.value.trim() : '';
+            const repo = repoInput ? repoInput.value.trim() : '';
+            
+            if (!token) {
+                showNotification('GitHub Token tidak boleh kosong!', 'error');
+                return;
             }
             
-            if (repoInput) {
-                githubConfig.repo = repoInput.value.trim();
+            if (!repo) {
+                showNotification('Repository Name tidak boleh kosong!', 'error');
+                return;
             }
             
-            if (branchInput) {
-                githubConfig.branch = branchInput.value.trim() || 'main';
+            if (!repo.includes('/')) {
+                showNotification('Format repository harus: owner/repo-name. Contoh: username/my-repo', 'error');
+                return;
             }
             
-            if (filePathInput) {
-                githubConfig.filePath = filePathInput.value.trim() || 'data/scanned-data.json';
-            }
+            // Simpan konfigurasi
+            githubConfig.token = token;
+            githubConfig.repo = repo;
+            githubConfig.branch = branchInput ? branchInput.value.trim() || 'main' : 'main';
+            githubConfig.filePath = filePathInput ? filePathInput.value.trim() || 'data/scannedData.json' : 'data/scannedData.json';
             
             saveGitHubConfigToLocalStorage();
             showNotification('Konfigurasi GitHub berhasil disimpan');
             
+            // Update status UI
+            updateGitHubStatus(true, 'Terkonfigurasi');
+            
             // Setup auto sync jika diaktifkan
-            if (githubConfig.autoSync && githubConfig.token && githubConfig.repo) {
+            if (githubConfig.autoSync) {
                 setupAutoSync();
             }
         }
