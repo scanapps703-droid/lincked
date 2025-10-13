@@ -3490,15 +3490,16 @@
             }
         }
 
-        // ========== FUNGSI AUTO-SAVE EAN ==========
+        // ========== FUNGSI AUTO-SAVE EAN YANG DIPERBAIKI ==========
         function setupEanAutoSave() {
             const eanInput = document.getElementById('ean');
             if (!eanInput) return;
             
-            // Event listener untuk Enter key
+            // Event listener untuk Enter key - langsung save tanpa delay
             eanInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
+                    clearTimeout(eanInputTimer);
                     saveScannedData();
                 }
             });
@@ -3511,14 +3512,33 @@
                 }
                 
                 // Set new timer to auto-save after user stops typing (for barcode scanner)
+                // Mengurangi delay dari 1000ms ke 300ms untuk responsivitas yang lebih baik
                 eanInputTimer = setTimeout(() => {
                     // Only auto-save if EAN is not empty and all required fields are set
                     if (this.value.trim() && currentContainer && currentPallet && currentCustomer) {
                         saveScannedData();
                     }
-                }, 100); // 1 second delay for auto-save
+                }, 300);
             });
         }
+
+        // ========== FUNGSI PERBAIKAN UNTUK PERFORMANCE ==========
+        function debounce(func, wait, immediate) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    timeout = null;
+                    if (!immediate) func(...args);
+                };
+                const callNow = immediate && !timeout;
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+                if (callNow) func(...args);
+            };
+        }
+
+        // Optimasi render table untuk dataset besar
+        const optimizedRenderTable = debounce(renderTable, 100);
 
         // ========== INISIALISASI APLIKASI ==========
         async function init() {
@@ -3537,7 +3557,7 @@
                 setupMobileMenu();
                 console.log('Mobile menu setup');
                 
-                // Setup EAN auto-save
+                // Setup EAN auto-save yang diperbaiki
                 setupEanAutoSave();
                 console.log('EAN auto-save setup');
                 
@@ -3602,6 +3622,9 @@
                             document.getElementById('loginContainer').style.display = 'none';
                             document.getElementById('mainContainer').style.display = 'block';
                             showNotification(`Selamat datang, ${currentUser}!`);
+                            
+                            // Update form fields state setelah login
+                            updateFormFieldsState();
                         }
                     }
                 });
