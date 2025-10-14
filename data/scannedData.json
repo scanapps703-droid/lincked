@@ -1,54 +1,5 @@
 {
-  "scannedData": [
-    {
-      "id": "id_1760457855044_6grrzc8lv",
-      "customer": "Samsonite",
-      "container": "TEST",
-      "pallet": "Test",
-      "ean": "1234567890123",
-      "qty": 1,
-      "sku": "",
-      "description": "",
-      "status": "Finding",
-      "user": "Riyan",
-      "timestamp": "2025-10-14T16:04:15.044Z",
-      "date": "2025-10-14",
-      "version": 1,
-      "lastModified": "2025-10-14T16:04:15.044Z"
-    },
-    {
-      "id": "id_1760457857188_nzajp9a1j",
-      "customer": "Samsonite",
-      "container": "TEST",
-      "pallet": "Test",
-      "ean": "11111",
-      "qty": 1,
-      "sku": "",
-      "description": "",
-      "status": "Finding",
-      "user": "Riyan",
-      "timestamp": "2025-10-14T16:04:17.188Z",
-      "date": "2025-10-14",
-      "version": 1,
-      "lastModified": "2025-10-14T16:04:17.188Z"
-    },
-    {
-      "id": "id_1760457859234_jiuwsrna9",
-      "customer": "Samsonite",
-      "container": "TEST",
-      "pallet": "Test",
-      "ean": "22222",
-      "qty": 1,
-      "sku": "",
-      "description": "",
-      "status": "Finding",
-      "user": "Riyan",
-      "timestamp": "2025-10-14T16:04:19.234Z",
-      "date": "2025-10-14",
-      "version": 1,
-      "lastModified": "2025-10-14T16:04:19.234Z"
-    }
-  ],
+  "scannedData": [],
   "masterData": [],
   "deletedDataIds": [
     "id_1760428456903_kx21wbrvn",
@@ -68,8 +19,11 @@
     "id_1760428780846_y7zlpqm8w",
     "id_1760428967135_zahpuoe96",
     "id_1760428968951_mvoi4pw8f",
-    "mgkt3yi4-haqg701wx-adm"
+    "mgkt3yi4-haqg701wx-adm",
+    "id_1760457859234_jiuwsrna9",
+    "id_1760457857188_nzajp9a1j",
+    "id_1760457855044_6grrzc8lv"
   ],
-  "lastUpdated": "2025-10-14T16:06:36.749Z",
-  "user": "Riyan"
+  "lastUpdated": "2025-10-14T16:07:47.778Z",
+  "user": "admin"
 }
