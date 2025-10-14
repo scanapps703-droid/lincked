@@ -1,0 +1,24 @@
+{
+  "scannedData": [
+    {
+      "id": "mgkt3yi4-haqg701wx-adm",
+      "customer": "Samsonite",
+      "pallet": "Test",
+      "container": "TEST",
+      "ean": "1234567890123",
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "qty": "1",
+      "timestamp": "2025-10-10T12:12:24.556Z",
+      "user": "Admin",
+      "date": "2025-10-10",
+      "version": 1,
+      "lastModified": "2025-10-10T12:12:24.556Z"
+    }
+  ],
+  "masterData": [],
+  "deletedDataIds": [],
+  "lastUpdated": "2025-10-14T07:59:07.217Z",
+  "user": "Admin"
+}
