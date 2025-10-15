@@ -34643,49 +34643,9 @@
   ],
   "masterData": [
     {
-      "ean": "5400520281388",
-      "sku": "1518591549",
-      "description": "DASHPOP SPINNER 55/20 EXP TSA MIDN.BLUE"
-    },
-    {
-      "ean": "5400520281395",
-      "sku": "151859A490",
-      "description": "DASHPOP SPINNER 55/20 EXP TSA SUGAR PINK"
-    },
-    {
-      "ean": "5400520282637",
-      "sku": "1518601549",
-      "description": "DASHPOP SPINNER 67/24 EXP TSA MIDN.BLUE"
-    },
-    {
-      "ean": "5400520282644",
-      "sku": "151860A490",
-      "description": "DASHPOP SPINNER 67/24 EXP TSA SUGAR PINK"
-    },
-    {
-      "ean": "5400520282682",
-      "sku": "1518611549",
-      "description": "DASHPOP SPINNER 77/28 EXP TSA MIDN.BLUE"
-    },
-    {
-      "ean": "5400520282699",
-      "sku": "151861A490",
-      "description": "DASHPOP SPINNER 77/28 EXP TSA SUGAR PINK"
-    },
-    {
-      "ean": "5400520282712",
-      "sku": "151861E459",
-      "description": "DASHPOP SPINNER 77/28 EXP TSA VIOL.PURPL"
-    },
-    {
-      "ean": "5400520282729",
-      "sku": "151860E459",
-      "description": "DASHPOP SPINNER 67/24 EXP TSA VIOL.PURPL"
-    },
-    {
-      "ean": "5400520282736",
-      "sku": "151859E459",
-      "description": "DASHPOP SPINNER 55/20 EXP TSA VIOL.PURPL"
+      "ean": "5400520308801",
+      "sku": "151860A580",
+      "description": "DASHPOP SPINNER 67/24 EXP TSA ICEBRG GRN"
     },
     {
       "ean": "5400520308788",
@@ -34693,14 +34653,54 @@
       "description": "DASHPOP SPINNER 55/20 EXP TSA ICEBRG GRN"
     },
     {
-      "ean": "5400520308801",
-      "sku": "151860A580",
-      "description": "DASHPOP SPINNER 67/24 EXP TSA ICEBRG GRN"
-    },
-    {
       "ean": "5400520309129",
       "sku": "151861A580",
       "description": "DASHPOP SPINNER 77/28 EXP TSA ICEBRG GRN"
+    },
+    {
+      "ean": "5400520282736",
+      "sku": "151859E459",
+      "description": "DASHPOP SPINNER 55/20 EXP TSA VIOL.PURPL"
+    },
+    {
+      "ean": "5400520282729",
+      "sku": "151860E459",
+      "description": "DASHPOP SPINNER 67/24 EXP TSA VIOL.PURPL"
+    },
+    {
+      "ean": "5400520282712",
+      "sku": "151861E459",
+      "description": "DASHPOP SPINNER 77/28 EXP TSA VIOL.PURPL"
+    },
+    {
+      "ean": "5400520281395",
+      "sku": "151859A490",
+      "description": "DASHPOP SPINNER 55/20 EXP TSA SUGAR PINK"
+    },
+    {
+      "ean": "5400520282644",
+      "sku": "151860A490",
+      "description": "DASHPOP SPINNER 67/24 EXP TSA SUGAR PINK"
+    },
+    {
+      "ean": "5400520282699",
+      "sku": "151861A490",
+      "description": "DASHPOP SPINNER 77/28 EXP TSA SUGAR PINK"
+    },
+    {
+      "ean": "5400520281388",
+      "sku": "1518591549",
+      "description": "DASHPOP SPINNER 55/20 EXP TSA MIDN.BLUE"
+    },
+    {
+      "ean": "5400520282682",
+      "sku": "1518611549",
+      "description": "DASHPOP SPINNER 77/28 EXP TSA MIDN.BLUE"
+    },
+    {
+      "ean": "5400520282637",
+      "sku": "1518601549",
+      "description": "DASHPOP SPINNER 67/24 EXP TSA MIDN.BLUE"
     }
   ],
   "deletedDataIds": [
@@ -34721,11 +34721,11 @@
     "id_1760428780846_y7zlpqm8w",
     "id_1760428967135_zahpuoe96",
     "id_1760428968951_mvoi4pw8f",
-    "id_1760457855044_6grrzc8lv",
-    "id_1760457857188_nzajp9a1j",
+    "mgkt3yi4-haqg701wx-adm",
     "id_1760457859234_jiuwsrna9",
-    "mgkt3yi4-haqg701wx-adm"
+    "id_1760457857188_nzajp9a1j",
+    "id_1760457855044_6grrzc8lv"
   ],
-  "lastUpdated": "2025-10-15T14:47:00.364Z",
-  "user": "Yogi"
+  "lastUpdated": "2025-10-15T14:46:31.007Z",
+  "user": "admin"
 }
