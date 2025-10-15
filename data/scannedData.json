@@ -24169,12 +24169,60 @@
       "qty": 1,
       "sku": "151861A580",
       "description": "DASHPOP SPINNER 77/28 EXP TSA ICEBRG GRN",
-      "status": "OK",
+      "status": "Double EAN",
       "user": "Yogi",
       "timestamp": "2025-10-15T13:03:38.621Z",
       "date": "2025-10-15",
       "version": 1,
       "lastModified": "2025-10-15T13:03:38.621Z"
+    },
+    {
+      "id": "id_1760533507233_hr0fivv3p",
+      "customer": "Samsonite",
+      "container": "TEMU9166708",
+      "pallet": "DID2510021077",
+      "ean": "5400520309129",
+      "qty": 1,
+      "sku": "151861A580",
+      "description": "DASHPOP SPINNER 77/28 EXP TSA ICEBRG GRN",
+      "status": "OK",
+      "user": "Yogi",
+      "timestamp": "2025-10-15T13:05:07.233Z",
+      "date": "2025-10-15",
+      "version": 1,
+      "lastModified": "2025-10-15T13:05:07.233Z"
+    },
+    {
+      "id": "id_1760533507904_h3kpgc2zf",
+      "customer": "Samsonite",
+      "container": "TEMU9166708",
+      "pallet": "DID2510021077",
+      "ean": "5400520309129",
+      "qty": 1,
+      "sku": "151861A580",
+      "description": "DASHPOP SPINNER 77/28 EXP TSA ICEBRG GRN",
+      "status": "OK",
+      "user": "Yogi",
+      "timestamp": "2025-10-15T13:05:07.904Z",
+      "date": "2025-10-15",
+      "version": 1,
+      "lastModified": "2025-10-15T13:05:07.904Z"
+    },
+    {
+      "id": "id_1760533508599_lm7muw8sx",
+      "customer": "Samsonite",
+      "container": "TEMU9166708",
+      "pallet": "DID2510021077",
+      "ean": "5400520309129",
+      "qty": 1,
+      "sku": "151861A580",
+      "description": "DASHPOP SPINNER 77/28 EXP TSA ICEBRG GRN",
+      "status": "OK",
+      "user": "Yogi",
+      "timestamp": "2025-10-15T13:05:08.599Z",
+      "date": "2025-10-15",
+      "version": 1,
+      "lastModified": "2025-10-15T13:05:08.599Z"
     }
   ],
   "masterData": [
@@ -24262,6 +24310,6 @@
     "id_1760457857188_nzajp9a1j",
     "id_1760457855044_6grrzc8lv"
   ],
-  "lastUpdated": "2025-10-15T13:04:17.648Z",
-  "user": "admin"
+  "lastUpdated": "2025-10-15T13:05:29.579Z",
+  "user": "Yogi"
 }
