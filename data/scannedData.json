@@ -20127,6 +20127,22 @@
       "date": "2025-10-15",
       "version": 1,
       "lastModified": "2025-10-15T12:31:58.004Z"
+    },
+    {
+      "id": "id_1760531636382_d6vxnyw4h",
+      "customer": "Samsonite",
+      "container": "TEMU9166708",
+      "pallet": "DID2510021047",
+      "ean": "5400520309129",
+      "qty": 1,
+      "sku": "151861A580",
+      "description": "DASHPOP SPINNER 77/28 EXP TSA ICEBRG GRN",
+      "status": "OK",
+      "user": "Yogi",
+      "timestamp": "2025-10-15T12:33:56.382Z",
+      "date": "2025-10-15",
+      "version": 1,
+      "lastModified": "2025-10-15T12:33:56.382Z"
     }
   ],
   "masterData": [
@@ -20214,6 +20230,6 @@
     "id_1760457857188_nzajp9a1j",
     "id_1760457855044_6grrzc8lv"
   ],
-  "lastUpdated": "2025-10-15T12:32:56.235Z",
+  "lastUpdated": "2025-10-15T12:33:56.321Z",
   "user": "Yogi"
 }
