@@ -30853,16 +30853,16 @@
       "customer": "Samsonite",
       "container": "FCIU9650780",
       "pallet": "DID2510021164",
-      "ean": "7408180282637",
+      "ean": "5400520282637",
       "qty": 1,
-      "sku": "",
-      "description": "",
-      "status": "Finding",
+      "sku": "1518601549",
+      "description": "DASHPOP SPINNER 67/24 EXP TSA MIDN.BLUE",
+      "status": "OK",
       "user": "Yogi",
       "timestamp": "2025-10-15T14:00:24.158Z",
       "date": "2025-10-15",
-      "version": 1,
-      "lastModified": "2025-10-15T14:00:24.158Z"
+      "version": 2,
+      "lastModified": "2025-10-16T03:38:36.109Z"
     },
     {
       "id": "id_1760536824598_5u4q010i6",
@@ -34726,6 +34726,6 @@
     "id_1760457859234_jiuwsrna9",
     "mgkt3yi4-haqg701wx-adm"
   ],
-  "lastUpdated": "2025-10-16T03:37:29.227Z",
-  "user": "admin"
+  "lastUpdated": "2025-10-16T03:38:40.834Z",
+  "user": "Admin"
 }
