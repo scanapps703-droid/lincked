@@ -34719,6 +34719,22 @@
       "date": "2025-10-16",
       "version": 1,
       "lastModified": "2025-10-16T05:16:03.929Z"
+    },
+    {
+      "id": "id_1760592955432_qi9wpx1nx",
+      "customer": "Samsonite",
+      "container": "TEST",
+      "pallet": "Test",
+      "ean": "1234567890123",
+      "qty": 1,
+      "sku": "",
+      "description": "",
+      "status": "Finding",
+      "user": "Admin",
+      "timestamp": "2025-10-16T05:35:55.432Z",
+      "date": "2025-10-16",
+      "version": 1,
+      "lastModified": "2025-10-16T05:35:55.432Z"
     }
   ],
   "masterData": [
@@ -34806,6 +34822,6 @@
     "id_1760457859234_jiuwsrna9",
     "mgkt3yi4-haqg701wx-adm"
   ],
-  "lastUpdated": "2025-10-16T05:35:46.659Z",
+  "lastUpdated": "2025-10-16T05:36:02.631Z",
   "user": "Admin"
 }
