@@ -2795,100 +2795,123 @@
             }
         }
 
-        async function pushToGitHub() {
-            if (!githubConfig.token || !githubConfig.repo) {
-                throw new Error('Konfigurasi GitHub belum lengkap');
-            }
+async function pushToGitHub() {
+    if (!githubConfig.token || !githubConfig.repo) {
+        throw new Error('Konfigurasi GitHub belum lengkap');
+    }
+    
+    try {
+        // 1. BUAT BACKUP DATA SEBELUM PUSH
+        const backupData = {
+            scannedData: [...scannedData],
+            masterData: [...masterData],
+            deletedDataIds: [...deletedDataIds],
+            backupTime: new Date().toISOString()
+        };
+        localStorage.setItem('appDataBackup', JSON.stringify(backupData));
+        
+        // 2. PULL DATA TERBARU DULU UNTUK MENDAPATKAN SHA YANG AKURAT
+        console.log('Mengambil data terbaru dari GitHub untuk mendapatkan SHA...');
+        let currentSHA = null;
+        try {
+            const getResponse = await fetch(`https://api.github.com/repos/${githubConfig.repo}/contents/${githubConfig.filePath}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `token ${githubConfig.token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
             
-            try {
-                // Buat backup data sebelum push
-                const backupData = {
-                    scannedData: [...scannedData],
-                    masterData: [...masterData],
-                    deletedDataIds: [...deletedDataIds],
-                    backupTime: new Date().toISOString()
-                };
-                localStorage.setItem('appDataBackup', JSON.stringify(backupData));
+            if (getResponse.ok) {
+                const fileData = await getResponse.json();
+                currentSHA = fileData.sha;
+                console.log('SHA terkini:', currentSHA);
                 
-                // Siapkan data untuk dikirim
-                const dataToSend = {
-                    scannedData: scannedData,
-                    masterData: masterData,
-                    deletedDataIds: deletedDataIds,
-                    lastUpdated: new Date().toISOString(),
-                    user: currentUser
-                };
+                // Jika file ada, merge dengan data lokal sebelum push
+                const remoteContent = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
+                const mergedData = mergeData(
+                    { scannedData, masterData, deletedDataIds },
+                    remoteContent
+                );
                 
-                // Cek apakah file sudah ada untuk mendapatkan SHA
-                let sha = null;
-                try {
-                    const getResponse = await fetch(`https://api.github.com/repos/${githubConfig.repo}/contents/${githubConfig.filePath}`, {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `token ${githubConfig.token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    });
-                    
-                    if (getResponse.ok) {
-                        const fileData = await getResponse.json();
-                        sha = fileData.sha;
-                    }
-                } catch (error) {
-                    // File belum ada, sha tetap null
-                    console.log('File belum ada, akan dibuat baru');
-                }
+                scannedData = mergedData.scannedData;
+                masterData = mergedData.masterData;
+                deletedDataIds = mergedData.deletedDataIds;
                 
-                // Konversi data ke base64
-                const content = JSON.stringify(dataToSend, null, 2);
-                const contentBase64 = btoa(unescape(encodeURIComponent(content)));
-                
-                // Kirim data ke GitHub
-                const response = await fetch(`https://api.github.com/repos/${githubConfig.repo}/contents/${githubConfig.filePath}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${githubConfig.token}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: `Update data dari aplikasi Scan Module - ${new Date().toISOString()}`,
-                        content: contentBase64,
-                        branch: githubConfig.branch,
-                        sha: sha
-                    })
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Gagal menyimpan data ke GitHub');
-                }
-                
-                // Hapus backup setelah push berhasil
-                localStorage.removeItem('appDataBackup');
-                return true;
-            } catch (error) {
-                console.error('Error during push:', error);
-                
-                // Coba restore dari backup jika push gagal
-                try {
-                    const backup = localStorage.getItem('appDataBackup');
-                    if (backup) {
-                        const backupData = JSON.parse(backup);
-                        scannedData = backupData.scannedData;
-                        masterData = backupData.masterData;
-                        deletedDataIds = backupData.deletedDataIds;
-                        await saveToIndexDB();
-                        console.log('Data berhasil direstore dari backup setelah push gagal');
-                    }
-                } catch (restoreError) {
-                    console.error('Gagal restore dari backup:', restoreError);
-                }
-                
-                throw error;
+                console.log('Data setelah merge dengan remote:', scannedData.length, 'items');
+            }
+        } catch (getError) {
+            console.log('File belum ada di GitHub atau error saat mengambil:', getError.message);
+            // Lanjutkan dengan data lokal jika file belum ada
+        }
+        
+        // 3. Siapkan data untuk dikirim
+        const dataToSend = {
+            scannedData: scannedData,
+            masterData: masterData,
+            deletedDataIds: deletedDataIds,
+            lastUpdated: new Date().toISOString(),
+            user: currentUser
+        };
+        
+        // Konversi data ke base64
+        const content = JSON.stringify(dataToSend, null, 2);
+        const contentBase64 = btoa(unescape(encodeURIComponent(content)));
+        
+        // 4. Kirim data ke GitHub dengan SHA yang benar
+        const response = await fetch(`https://api.github.com/repos/${githubConfig.repo}/contents/${githubConfig.filePath}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${githubConfig.token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: `Update data dari aplikasi Scan Module - ${new Date().toISOString()} - User: ${currentUser}`,
+                content: contentBase64,
+                branch: githubConfig.branch,
+                sha: currentSHA // Gunakan SHA yang didapat dari pull
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            
+            // Handle specific error cases
+            if (response.status === 409) {
+                throw new Error(`Konflik SHA: ${errorData.message}. Silakan sync ulang.`);
+            } else {
+                throw new Error(errorData.message || `Gagal menyimpan data ke GitHub: HTTP ${response.status}`);
             }
         }
-
+        
+        // 5. Hapus backup setelah push berhasil
+        localStorage.removeItem('appDataBackup');
+        
+        console.log('Push ke GitHub berhasil');
+        return true;
+        
+    } catch (error) {
+        console.error('Error during push:', error);
+        
+        // 6. RESTORE FROM BACKUP JIKA PUSH GAGAL
+        try {
+            const backup = localStorage.getItem('appDataBackup');
+            if (backup) {
+                const backupData = JSON.parse(backup);
+                scannedData = backupData.scannedData;
+                masterData = backupData.masterData;
+                deletedDataIds = backupData.deletedDataIds;
+                await saveToIndexDB();
+                console.log('Data berhasil direstore dari backup setelah push gagal');
+            }
+        } catch (restoreError) {
+            console.error('Gagal restore dari backup:', restoreError);
+        }
+        
+        throw error;
+    }
+}
 async function pullFromGitHub() {
     if (!githubConfig.token || !githubConfig.repo) {
         console.log('GitHub configuration incomplete, returning empty data');
@@ -3106,20 +3129,9 @@ async function performSync() {
         // 2. Pull data dari GitHub
         console.log('Memulai pull data dari GitHub...');
         const remoteData = await pullFromGitHub();
-        console.log('Pull berhasil:', remoteData.scannedData ? remoteData.scannedData.length : 0, 'item data diterima');
+        console.log('Pull berhasil:', remoteData.scannedData.length, 'item data diterima');
         
-        // 3. Validasi structure remoteData
-        if (!remoteData.scannedData || !Array.isArray(remoteData.scannedData)) {
-            remoteData.scannedData = [];
-        }
-        if (!remoteData.masterData || !Array.isArray(remoteData.masterData)) {
-            remoteData.masterData = [];
-        }
-        if (!remoteData.deletedDataIds || !Array.isArray(remoteData.deletedDataIds)) {
-            remoteData.deletedDataIds = [];
-        }
-        
-        // 4. Merge data lokal dan remote
+        // 3. Merge data lokal dan remote
         console.log('Memulai proses merge data...');
         const mergedData = mergeData(
             { scannedData, masterData, deletedDataIds }, 
@@ -3127,19 +3139,19 @@ async function performSync() {
         );
         console.log('Merge berhasil:', mergedData.scannedData.length, 'item data setelah merge');
         
-        // 5. Simpan data yang sudah di-merge
+        // 4. Simpan data yang sudah di-merge
         scannedData = mergedData.scannedData;
         masterData = mergedData.masterData;
         deletedDataIds = mergedData.deletedDataIds;
         await saveToIndexDB();
         console.log('Data berhasil disimpan ke IndexDB');
         
-        // 6. Push data yang sudah di-merge ke GitHub
+        // 5. Push data yang sudah di-merge ke GitHub
         console.log('Memulai push data ke GitHub...');
         await pushToGitHub();
         console.log('Push berhasil');
         
-        // 7. Update status dan UI
+        // 6. Update status dan UI
         await updateDataStatus();
         renderTable();
         renderMasterTable();
@@ -3154,11 +3166,19 @@ async function performSync() {
         updateLastSyncTime();
         
         console.log('Sinkronisasi selesai dengan sukses');
+        
     } catch (error) {
         console.error('Error during sync:', error);
         
         let userMessage = 'Sinkronisasi gagal: ';
-        if (error.name === 'TypeError') {
+        if (error.message.includes('Konflik SHA')) {
+            userMessage = 'Konflik data terdeteksi. Silakan sync ulang untuk menyelesaikan.';
+            // Force re-sync by clearing local data and pulling fresh
+            setTimeout(() => {
+                showNotification('Mencoba sync ulang...', 'error');
+                performSync();
+            }, 3000);
+        } else if (error.name === 'TypeError') {
             userMessage += 'Gagal terhubung ke server. Periksa koneksi internet dan konfigurasi GitHub.';
         } else {
             userMessage += error.message;
@@ -3167,28 +3187,10 @@ async function performSync() {
         showNotification(userMessage, 'error');
         updateSyncStatus('error', 'Sync gagal');
         
-        // Coba restore dari backup jika sync gagal
-        try {
-            const backup = localStorage.getItem('appDataBackup');
-            if (backup) {
-                const backupData = JSON.parse(backup);
-                scannedData = backupData.scannedData;
-                masterData = backupData.masterData;
-                deletedDataIds = backupData.deletedDataIds;
-                await saveToIndexDB();
-                renderTable();
-                renderMasterTable();
-                console.log('Data berhasil direstore dari backup setelah sync gagal');
-                showNotification('Data telah direstore dari backup.', 'error');
-            }
-        } catch (restoreError) {
-            console.error('Gagal restore dari backup:', restoreError);
-        }
     } finally {
         isSyncing = false;
     }
 }
-
         async function syncToGitHub() {
             await performSync();
         }
