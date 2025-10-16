@@ -2889,52 +2889,89 @@
             }
         }
 
-        async function pullFromGitHub() {
-            if (!githubConfig.token || !githubConfig.repo) {
-                // Jika konfigurasi GitHub belum diatur, kembalikan data kosong
+async function pullFromGitHub() {
+    if (!githubConfig.token || !githubConfig.repo) {
+        console.log('GitHub configuration incomplete, returning empty data');
+        return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
+    }
+    
+    try {
+        console.log('Pulling data from GitHub...');
+        
+        // Ambil data dari GitHub
+        const response = await fetch(`https://api.github.com/repos/${githubConfig.repo}/contents/${githubConfig.filePath}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `token ${githubConfig.token}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+        
+        if (response.ok) {
+            const fileData = await response.json();
+            
+            // Pastikan fileData.content ada
+            if (!fileData.content) {
+                console.log('File exists but content is empty, returning empty data');
                 return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
             }
             
             try {
-                // Ambil data dari GitHub
-                const response = await fetch(`https://api.github.com/repos/${githubConfig.repo}/contents/${githubConfig.filePath}`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `token ${githubConfig.token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
+                // Decode content dari base64
+                const decodedContent = decodeURIComponent(escape(atob(fileData.content)));
                 
-                if (response.ok) {
-                    const fileData = await response.json();
-                    // Decode content dari base64
-                    const content = JSON.parse(decodeURIComponent(escape(atob(fileData.content))));
-                    return content;
-                } else if (response.status === 404) {
-                    // File tidak ditemukan, kembalikan data kosong
+                // Validasi bahwa decodedContent adalah JSON yang valid
+                if (!decodedContent || decodedContent.trim() === '') {
+                    console.log('Decoded content is empty, returning empty data');
                     return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
-                } else {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Gagal mengambil data dari GitHub');
-                }
-            } catch (error) {
-                console.error('Error pulling data:', error);
-                
-                // Jika error karena network, gunakan data lokal
-                if (error.name === 'TypeError') {
-                    console.warn('Menggunakan data lokal karena gagal mengambil dari GitHub');
-                    return {
-                        scannedData: [],
-                        masterData: [],
-                        deletedDataIds: [],
-                        lastUpdated: new Date().toISOString()
-                    };
                 }
                 
-                throw error;
+                const content = JSON.parse(decodedContent);
+                console.log('Successfully pulled data from GitHub:', content.scannedData ? content.scannedData.length : 0, 'items');
+                return content;
+                
+            } catch (parseError) {
+                console.error('Error parsing JSON content:', parseError);
+                console.log('Returning empty data due to JSON parse error');
+                return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
             }
+            
+        } else if (response.status === 404) {
+            // File tidak ditemukan, kembalikan data kosong
+            console.log('File not found on GitHub, returning empty data');
+            return { scannedData: [], masterData: [], deletedDataIds: [], lastUpdated: new Date().toISOString() };
+        } else {
+            const errorText = await response.text();
+            console.error('GitHub API error:', response.status, errorText);
+            
+            let errorMessage = 'Gagal mengambil data dari GitHub: ';
+            if (response.status === 401) {
+                errorMessage += 'Token tidak valid atau expired';
+            } else if (response.status === 403) {
+                errorMessage += 'Akses ditolak. Periksa izin token';
+            } else {
+                errorMessage += `HTTP ${response.status}`;
+            }
+            
+            throw new Error(errorMessage);
         }
-
+    } catch (error) {
+        console.error('Error pulling data from GitHub:', error);
+        
+        // Jika error karena network atau file tidak ada, gunakan data lokal
+        if (error.name === 'TypeError' || error.message.includes('404') || error.message.includes('401')) {
+            console.warn('Using local data due to GitHub error:', error.message);
+            return {
+                scannedData: [],
+                masterData: [],
+                deletedDataIds: [],
+                lastUpdated: new Date().toISOString()
+            };
+        }
+        
+        throw error;
+    }
+}
         function mergeData(localData, remoteData) {
             console.log('Memulai proses merge data...');
             console.log('Data lokal:', localData.scannedData.length, 'item');
@@ -3045,101 +3082,112 @@
             };
         }
 
-        async function performSync() {
-            if (isSyncing) {
-                console.log('Sync already in progress');
-                return;
-            }
-            
-            if (!githubConfig.token || !githubConfig.repo) {
-                showNotification('Harap konfigurasi GitHub terlebih dahulu!', 'error');
-                return;
-            }
-            
-            isSyncing = true;
-            updateSyncStatus('active', 'Syncing...');
-            
-            try {
-                // 1. Test koneksi terlebih dahulu
-                const isConnected = await testGitHubConnection();
-                if (!isConnected) {
-                    throw new Error('Tidak dapat terhubung ke GitHub. Periksa konfigurasi.');
-                }
-                
-                // 2. Pull data dari GitHub
-                console.log('Memulai pull data dari GitHub...');
-                const remoteData = await pullFromGitHub();
-                console.log('Pull berhasil:', remoteData.scannedData.length, 'item data diterima');
-                
-                // 3. Merge data lokal dan remote
-                console.log('Memulai proses merge data...');
-                const mergedData = mergeData(
-                    { scannedData, masterData, deletedDataIds }, 
-                    remoteData
-                );
-                console.log('Merge berhasil:', mergedData.scannedData.length, 'item data setelah merge');
-                
-                // 4. Simpan data yang sudah di-merge
-                scannedData = mergedData.scannedData;
-                masterData = mergedData.masterData;
-                deletedDataIds = mergedData.deletedDataIds;
+async function performSync() {
+    if (isSyncing) {
+        console.log('Sync already in progress');
+        return;
+    }
+    
+    if (!githubConfig.token || !githubConfig.repo) {
+        showNotification('Harap konfigurasi GitHub terlebih dahulu!', 'error');
+        return;
+    }
+    
+    isSyncing = true;
+    updateSyncStatus('active', 'Syncing...');
+    
+    try {
+        // 1. Test koneksi terlebih dahulu
+        const isConnected = await testGitHubConnection();
+        if (!isConnected) {
+            throw new Error('Tidak dapat terhubung ke GitHub. Periksa konfigurasi.');
+        }
+        
+        // 2. Pull data dari GitHub
+        console.log('Memulai pull data dari GitHub...');
+        const remoteData = await pullFromGitHub();
+        console.log('Pull berhasil:', remoteData.scannedData ? remoteData.scannedData.length : 0, 'item data diterima');
+        
+        // 3. Validasi structure remoteData
+        if (!remoteData.scannedData || !Array.isArray(remoteData.scannedData)) {
+            remoteData.scannedData = [];
+        }
+        if (!remoteData.masterData || !Array.isArray(remoteData.masterData)) {
+            remoteData.masterData = [];
+        }
+        if (!remoteData.deletedDataIds || !Array.isArray(remoteData.deletedDataIds)) {
+            remoteData.deletedDataIds = [];
+        }
+        
+        // 4. Merge data lokal dan remote
+        console.log('Memulai proses merge data...');
+        const mergedData = mergeData(
+            { scannedData, masterData, deletedDataIds }, 
+            remoteData
+        );
+        console.log('Merge berhasil:', mergedData.scannedData.length, 'item data setelah merge');
+        
+        // 5. Simpan data yang sudah di-merge
+        scannedData = mergedData.scannedData;
+        masterData = mergedData.masterData;
+        deletedDataIds = mergedData.deletedDataIds;
+        await saveToIndexDB();
+        console.log('Data berhasil disimpan ke IndexDB');
+        
+        // 6. Push data yang sudah di-merge ke GitHub
+        console.log('Memulai push data ke GitHub...');
+        await pushToGitHub();
+        console.log('Push berhasil');
+        
+        // 7. Update status dan UI
+        await updateDataStatus();
+        renderTable();
+        renderMasterTable();
+        updateTotalEan();
+        updateTotalContainer();
+        populateFilterDropdowns();
+        updateDashboardSummary();
+        
+        showNotification('Sinkronisasi berhasil! Data dari semua perangkat telah digabungkan.');
+        updateSyncStatus('idle', 'Sync berhasil');
+        lastSyncTimestamp = Date.now();
+        updateLastSyncTime();
+        
+        console.log('Sinkronisasi selesai dengan sukses');
+    } catch (error) {
+        console.error('Error during sync:', error);
+        
+        let userMessage = 'Sinkronisasi gagal: ';
+        if (error.name === 'TypeError') {
+            userMessage += 'Gagal terhubung ke server. Periksa koneksi internet dan konfigurasi GitHub.';
+        } else {
+            userMessage += error.message;
+        }
+        
+        showNotification(userMessage, 'error');
+        updateSyncStatus('error', 'Sync gagal');
+        
+        // Coba restore dari backup jika sync gagal
+        try {
+            const backup = localStorage.getItem('appDataBackup');
+            if (backup) {
+                const backupData = JSON.parse(backup);
+                scannedData = backupData.scannedData;
+                masterData = backupData.masterData;
+                deletedDataIds = backupData.deletedDataIds;
                 await saveToIndexDB();
-                console.log('Data berhasil disimpan ke IndexDB');
-                
-                // 5. Push data yang sudah di-merge ke GitHub
-                console.log('Memulai push data ke GitHub...');
-                await pushToGitHub();
-                console.log('Push berhasil');
-                
-                // 6. Update status dan UI
-                await updateDataStatus();
                 renderTable();
                 renderMasterTable();
-                updateTotalEan();
-                updateTotalContainer();
-                populateFilterDropdowns();
-                updateDashboardSummary();
-                
-                showNotification('Sinkronisasi berhasil! Data dari semua perangkat telah digabungkan.');
-                updateSyncStatus('idle', 'Sync berhasil');
-                lastSyncTimestamp = Date.now();
-                updateLastSyncTime();
-                
-                console.log('Sinkronisasi selesai dengan sukses');
-            } catch (error) {
-                console.error('Error during sync:', error);
-                
-                let userMessage = 'Sinkronisasi gagal: ';
-                if (error.name === 'TypeError') {
-                    userMessage += 'Gagal terhubung ke server. Periksa koneksi internet dan konfigurasi GitHub.';
-                } else {
-                    userMessage += error.message;
-                }
-                
-                showNotification(userMessage, 'error');
-                updateSyncStatus('error', 'Sync gagal');
-                
-                // Coba restore dari backup jika sync gagal
-                try {
-                    const backup = localStorage.getItem('appDataBackup');
-                    if (backup) {
-                        const backupData = JSON.parse(backup);
-                        scannedData = backupData.scannedData;
-                        masterData = backupData.masterData;
-                        deletedDataIds = backupData.deletedDataIds;
-                        await saveToIndexDB();
-                        renderTable();
-                        renderMasterTable();
-                        console.log('Data berhasil direstore dari backup setelah sync gagal');
-                        showNotification('Data telah direstore dari backup.', 'error');
-                    }
-                } catch (restoreError) {
-                    console.error('Gagal restore dari backup:', restoreError);
-                }
-            } finally {
-                isSyncing = false;
+                console.log('Data berhasil direstore dari backup setelah sync gagal');
+                showNotification('Data telah direstore dari backup.', 'error');
             }
+        } catch (restoreError) {
+            console.error('Gagal restore dari backup:', restoreError);
         }
+    } finally {
+        isSyncing = false;
+    }
+}
 
         async function syncToGitHub() {
             await performSync();
