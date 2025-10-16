@@ -39567,6 +39567,70 @@
       "date": "2025-10-16",
       "version": 1,
       "lastModified": "2025-10-16T09:59:23.870Z"
+    },
+    {
+      "id": "id_1760608841933_6ynmr0oyp",
+      "customer": "Samsonite",
+      "container": "OOCU7608143",
+      "pallet": "DID2510020760",
+      "ean": "5400520282729",
+      "qty": 1,
+      "sku": "151860E459",
+      "description": "DASHPOP SPINNER 67/24 EXP TSA VIOL.PURPL",
+      "status": "OK",
+      "user": "Yogi",
+      "timestamp": "2025-10-16T10:00:41.933Z",
+      "date": "2025-10-16",
+      "version": 1,
+      "lastModified": "2025-10-16T10:00:41.934Z"
+    },
+    {
+      "id": "id_1760608842830_8kx8lolj3",
+      "customer": "Samsonite",
+      "container": "OOCU7608143",
+      "pallet": "DID2510020760",
+      "ean": "5400520282729",
+      "qty": 1,
+      "sku": "151860E459",
+      "description": "DASHPOP SPINNER 67/24 EXP TSA VIOL.PURPL",
+      "status": "OK",
+      "user": "Yogi",
+      "timestamp": "2025-10-16T10:00:42.830Z",
+      "date": "2025-10-16",
+      "version": 1,
+      "lastModified": "2025-10-16T10:00:42.830Z"
+    },
+    {
+      "id": "id_1760608843761_fivqlz41a",
+      "customer": "Samsonite",
+      "container": "OOCU7608143",
+      "pallet": "DID2510020760",
+      "ean": "5400520282729",
+      "qty": 1,
+      "sku": "151860E459",
+      "description": "DASHPOP SPINNER 67/24 EXP TSA VIOL.PURPL",
+      "status": "OK",
+      "user": "Yogi",
+      "timestamp": "2025-10-16T10:00:43.762Z",
+      "date": "2025-10-16",
+      "version": 1,
+      "lastModified": "2025-10-16T10:00:43.762Z"
+    },
+    {
+      "id": "id_1760608844938_7a9d10xgc",
+      "customer": "Samsonite",
+      "container": "OOCU7608143",
+      "pallet": "DID2510020760",
+      "ean": "5400520282729",
+      "qty": 1,
+      "sku": "151860E459",
+      "description": "DASHPOP SPINNER 67/24 EXP TSA VIOL.PURPL",
+      "status": "OK",
+      "user": "Yogi",
+      "timestamp": "2025-10-16T10:00:44.938Z",
+      "date": "2025-10-16",
+      "version": 1,
+      "lastModified": "2025-10-16T10:00:44.938Z"
     }
   ],
   "masterData": [
@@ -39668,6 +39732,6 @@
     "id_1760587802219_safam9ure",
     "id_1760587801231_v5vj8ci70"
   ],
-  "lastUpdated": "2025-10-16T09:59:47.432Z",
+  "lastUpdated": "2025-10-16T10:00:48.149Z",
   "user": "Yogi"
 }
