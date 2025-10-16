@@ -41903,6 +41903,22 @@
       "date": "2025-10-16",
       "version": 1,
       "lastModified": "2025-10-16T10:16:45.243Z"
+    },
+    {
+      "id": "id_1760609820574_qe44bcldh",
+      "customer": "Samsonite",
+      "container": "OOCU7608143",
+      "pallet": "DID2510020775",
+      "ean": "5400520282699",
+      "qty": 1,
+      "sku": "151861A490",
+      "description": "DASHPOP SPINNER 77/28 EXP TSA SUGAR PINK",
+      "status": "OK",
+      "user": "Yogi",
+      "timestamp": "2025-10-16T10:17:00.574Z",
+      "date": "2025-10-16",
+      "version": 1,
+      "lastModified": "2025-10-16T10:17:00.575Z"
     }
   ],
   "masterData": [
@@ -42004,6 +42020,6 @@
     "id_1760587802219_safam9ure",
     "id_1760587801231_v5vj8ci70"
   ],
-  "lastUpdated": "2025-10-16T10:16:50.476Z",
+  "lastUpdated": "2025-10-16T10:18:46.056Z",
   "user": "Yogi"
 }
